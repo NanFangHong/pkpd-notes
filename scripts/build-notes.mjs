@@ -419,7 +419,7 @@ function runPdf2htmlEX(note, pdf, outDir, output, page) {
 }
 
 function injectPageBridge(html) {
-  const reset = `<style id="pdf2html-page-reset">html,body{margin:0;padding:0;background:#fff;}body{width:max-content;min-width:0;}.pf{margin:0;overflow:visible;}.pc{overflow:visible;}</style>`;
+  const reset = `<style id="pdf2html-page-reset">html,body{margin:0;padding:0;background:#fff;}body{width:max-content;min-width:0;}.pf{margin:0;overflow:visible;}.pc{overflow:visible;}.pf::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:${seamCover}px;background:#fff;pointer-events:none;z-index:50;}</style>`;
   const bridge = `<style id="pdf2html-iframe-link-cursor">a.l{cursor:pointer;}.l .d{z-index:20;pointer-events:auto;cursor:pointer;}</style>
 <script id="pdf2html-iframe-jump-forwarder">
 (() => {

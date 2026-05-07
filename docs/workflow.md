@@ -8,7 +8,7 @@
 4. HTML 专用 PDF 使用 `preview` + `tightpage`，并把每个非星号 `\section`/`\subsection` 切成一张连续长页。
 5. HTML 切块时会绕开模板中 PDF 专用的 `\section -> \newpage\stdsection`，避免 PDF 分页和 tightpage 切块叠加。
 6. HTML 专用 PDF 会关闭 `fancyhdr` 的 page style/headrule，避免页眉横线被 tightpage 截进 full HTML。
-7. full HTML 会在每个 iframe 的真实页底处覆盖一条很窄的白色 seam，消除 tightpage 位图层偶发的横线残留；单章切片和 PDF 不受影响。
+7. 每个 pdf2htmlEX 页面片段都会在真实页底覆盖一条很窄的白色 seam，消除 tightpage 位图层偶发的横线残留；full HTML 还会在 iframe 拼接处再做一次父层遮罩。
 8. pdf2htmlEX 每次只转换一页，避免 full 版本裁剪累计误差。
 9. 每个 pdf2htmlEX 页面片段都在末尾追加本地覆盖样式，解除 `.pf/.pc` 的右下裁剪，并给外层 HTML 容器保留少量安全余量。
 10. full HTML 用 iframe 逐页拼接，并用 `postMessage` 转发 pdf2htmlEX 的目录跳转。
