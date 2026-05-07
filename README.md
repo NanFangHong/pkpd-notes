@@ -21,11 +21,12 @@ npm run serve
 
 ## 新增笔记
 
-1. 在 `notes/` 新建一篇 `.tex`。
-2. 在 `notes/notes.json` 增加 `slug`、`title`、`category`、`date`、`paper` 和 `tex`。
-3. 引用统一放在 `refs/pharmacology.bib`。
-4. 运行 `npm run build` 检查 PDF 与 HTML。
-5. 把源码和生成后的 `site/` 一起提交并推送到 `main`，GitHub Actions 会直接发布 `site/`。
+1. 在 `notes/` 新建一篇 `.tex`，导言区使用 dec41-style 模板：先定义 `\npart`、`\nterm`、`\nyear`、`\nlecturer`、`\ncourse`、`\ncoursehead`、`\nauthor`，再写 `\input{header}`。
+2. 在正文开头保留 `\maketitle`、一段小号阅读说明和 `\tableofcontents`，这样 PDF/full HTML 都能测试目录跳转。
+3. 在 `notes/notes.json` 增加 `slug`、`title`、`category`、`date`、`paper` 和 `tex`。
+4. 引用统一放在 `refs/pharmacology.bib`。
+5. 运行 `npm run build` 检查 PDF 与 HTML。
+6. 把源码和生成后的 `site/` 一起提交并推送到 `main`，GitHub Actions 会直接发布 `site/`。
 
 ## 工作流标准
 
@@ -42,6 +43,8 @@ committed site/ -> GitHub Pages
 ```
 
 full HTML 使用按页 iframe 拼接，并转发 pdf2htmlEX 内部链接，所以 PDF 里的目录链接会在 full 页面里跳到对应位置。章节页来自一份 HTML 专用 tightpage PDF：脚本在每个非星号 `\section` 和 `\subsection` 前开始新页，再用 pdf2htmlEX 转成对应的连续长页。
+
+LaTeX 模板固定在 `notes/header.tex`。它沿用 dec41 的元信息宏、`fancyhdr` 页眉、section 新页和 theorem 环境风格；HTML 构建时会绕开 PDF 的 section 新页命令，只保留 tightpage 切块。
 
 pdf2htmlEX 的页面盒子有时会比实际可见内容小 1 到几像素；构建脚本默认给 HTML 容器保留 `8px` 右下安全余量，并覆盖 `.pf/.pc` 的内部裁剪。必要时可以用 `PDF2HTMLEX_CROP_PAD=12 npm run build` 调大。
 

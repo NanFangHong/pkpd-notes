@@ -1,40 +1,35 @@
-\documentclass[11pt]{article}
+\documentclass[a4paper]{article}
 
-\usepackage[a4paper,margin=1in]{geometry}
-\usepackage{amsmath}
-\usepackage{booktabs}
-\usepackage{enumitem}
-\usepackage{fontspec}
-\usepackage{hyperref}
-\usepackage{xeCJK}
+\def\npart {药理学精读}
+\def\nterm {PK/PD}
+\def\nyear {2026}
+\def\nlecturer {Holford and Sheiner; Rowland and Tozer}
+\def\ncourse {华法林 PK/PD 精读笔记样例}
+\def\ncoursehead {华法林 PK/PD}
+\def\nauthor {NanFangHong}
 
-\IfFontExistsTF{Noto Serif CJK SC}{
-  \setCJKmainfont{Noto Serif CJK SC}
-}{
-  \IfFontExistsTF{Songti SC}{
-    \setCJKmainfont{Songti SC}
-  }{
-    \IfFontExistsTF{PingFang SC}{
-      \setCJKmainfont{PingFang SC}
-    }{}
-  }
-}
-
-\hypersetup{
-  colorlinks=true,
-  linkcolor=blue,
-  citecolor=blue,
-  urlcolor=blue
-}
-
-\title{华法林 PK/PD 精读笔记样例}
-\author{你的名字}
-\date{2026-05-07}
+\input{header}
 
 \begin{document}
 \maketitle
+{\small
+  \noindent\textbf{阅读目标}\\
+  用一篇小型华法林笔记测试 dec41-style 的完整发布链路：普通 PDF、带目录的 full HTML、按章节切块的 HTML，以及从目录跳回正文位置的链接。\hspace*{\fill}[pipeline]
+
+  \vspace{5pt}
+  \noindent\textbf{药理学问题}\\
+  这份样例把药动学暴露、药效滞后、效应室模型和浓度--效应曲线放在同一个文档里，方便之后替换成真实文献精读。\hspace*{\fill}[PK/PD]
+
+  \vspace{5pt}
+  \noindent\textbf{渲染检查}\\
+  目录页用于检查 PDF 内部链接和 pdf2htmlEX full 页面跳转；每个非星号 section 和 subsection 会被切成独立 HTML 页面。\hspace*{\fill}[HTML]
+}
+
+\tableofcontents
 
 \section{文献信息}
+
+\subsection{阅读对象}
 
 \begin{tabular}{ll}
 \toprule
@@ -46,28 +41,65 @@
 \bottomrule
 \end{tabular}
 
+\subsection{精读目的}
+
+这不是对华法林临床用药的完整综述，而是一份工作流样例。真正使用时，我会把文献的研究设计、模型假设、参数估计方法和自己的批注统一放在同一份 \LaTeX{} 源码里。
+
+\begin{remark}
+  首页和 PDF 入口服务于浏览；full HTML 服务于快速全文阅读；切块 HTML 服务于像 dec41 那样按章节跳转和引用。
+\end{remark}
+
 \section{核心问题}
 
+\subsection{建模问题}
+
+\begin{question}
+  作者想解释的是暴露变化、受体/效应系统延迟，还是两者的组合？
+\end{question}
+
+\begin{question}
+  模型中的状态变量哪些可观测，哪些只能由模型间接推断？
+\end{question}
+
+\begin{question}
+  参数估计是否足以支持机制解释，还是只支持经验预测？
+\end{question}
+
+\subsection{阅读顺序}
+
 \begin{enumerate}[leftmargin=2em]
-  \item 作者想解释的是暴露变化、受体/效应系统延迟，还是两者的组合？
-  \item 模型中的状态变量哪些可观测，哪些只能由模型间接推断？
-  \item 参数估计是否足以支持机制解释，还是只支持经验预测？
+  \item 先抽取研究问题和给药--采样设计。
+  \item 再画出浓度、效应、效应室之间的变量关系。
+  \item 最后判断参数是否能由数据识别，还是依赖固定假设。
 \end{enumerate}
 
 \section{模型骨架}
 
-一个最小浓度--效应关系可以写成：
+\subsection{直接效应模型}
+
+一个最小浓度--效应关系可以写成
 \[
-  E(C) = \frac{E_{\max} C}{EC_{50} + C}.
+  E(C) = \frac{\Emax C}{\ECfifty + C}.
 \]
+这里 $C$ 是浓度，$E(C)$ 是可观测或可建模的药效，$\Emax$ 是最大效应，$\ECfifty$ 是达到半最大效应所需的浓度。
+
+\begin{assumption}
+  如果浓度和效应之间没有明显滞后，直接效应模型可以作为第一层基线模型。
+\end{assumption}
+
+\subsection{效应室模型}
 
 如果需要描述药效滞后，可以引入效应室：
 \[
-  \frac{dC_e}{dt} = k_{e0}(C_p - C_e),
+  \frac{\dd C_e}{\dd t} = k_{e0}(C_p - C_e),
 \]
 其中 $C_p$ 是血浆浓度，$C_e$ 是效应室浓度，$k_{e0}$ 控制效应室与血浆之间的平衡速度。
 
+这个模型的阅读重点不是公式本身，而是公式背后的可识别性：如果只有稀疏采样或只有终点效应，$k_{e0}$ 的估计可能会非常依赖先验结构。
+
 \section{精读批注模板}
+
+\subsection{正文批注}
 
 \begin{itemize}[leftmargin=2em]
   \item \textbf{实验设计：}记录给药方式、采样时间、终点指标和受试群体。
@@ -76,10 +108,13 @@
   \item \textbf{我的判断：}说明这篇文献对自己的模型、实验或综述有什么直接帮助。
 \end{itemize}
 
+\subsection{复现记录}
+
+每次复现模型时，都应保留输入数据单位、时间单位、初始条件和参数约束。以后同步到个人主页时，这一节可以自然扩展成代码仓库、图表和补充材料的入口。
+
 \section{下一步}
 
-把这一页复制成新的 `.tex` 文件，更换标题、引用键和批注内容；同时在
-\texttt{notes/notes.json} 里新增一条主页摘要。
+把这份文件复制成新的 \texttt{.tex} 文件，更换标题、引用键和批注内容；同时在 \texttt{notes/notes.json} 里新增一条主页摘要。模板本身由 \texttt{notes/header.tex} 固定，普通 PDF 和 HTML 切块都沿用同一套 dec41-style 入口。
 
 \bibliographystyle{plain}
 \bibliography{../refs/pharmacology}

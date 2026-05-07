@@ -112,6 +112,10 @@ function stripComments(tex) {
     .join("\n");
 }
 
+function stripInlineVerbatim(tex) {
+  return tex.replace(/\\verb\*?(.)([\s\S]*?)\1/g, "");
+}
+
 function findMatchingBrace(source, open) {
   let depth = 0;
   for (let i = open; i < source.length; i += 1) {
@@ -224,7 +228,7 @@ function accentLetter(accent, letter) {
 }
 
 function extractSections(tex) {
-  const source = stripComments(tex).replace(/\\ifx\s*\\nhtml\s*\\undefined[\s\S]*?\\fi/g, "");
+  const source = stripInlineVerbatim(stripComments(tex)).replace(/\\ifx\s*\\nhtml\s*\\undefined[\s\S]*?\\fi/g, "");
   const re = /\\setcounter\s*\{\s*section\s*\}\s*\{\s*(-?\d+)\s*\}|\\(section|subsection)(\*)?(?![A-Za-z])/g;
   const sections = [];
   let section = 0;
@@ -290,7 +294,7 @@ function injectHtmlMode(tex) {
 \\AtBeginDocument{\\begin{pkpdstretchpage}}
 \\AtEndDocument{\\end{pkpdstretchpage}}
 \\newcommand{\\pkpdnewhtmlpage}{\\end{pkpdstretchpage}\\begin{pkpdstretchpage}}
-\\let\\pkpdrealsection\\section
+\\@ifundefined{stdsection}{\\let\\pkpdrealsection\\section}{\\let\\pkpdrealsection\\stdsection}
 \\renewcommand{\\section}{\\@ifstar{\\pkpdrealsection*}{\\pkpdnewhtmlpage\\pkpdrealsection}}
 \\let\\pkpdrealsubsection\\subsection
 \\renewcommand{\\subsection}{\\@ifstar{\\pkpdrealsubsection*}{\\pkpdnewhtmlpage\\pkpdrealsubsection}}
