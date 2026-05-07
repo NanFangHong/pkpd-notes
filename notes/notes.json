@@ -1,0 +1,26 @@
+[
+  {
+    "slug": "warfarin-pkpd-reading-note",
+    "date": "2026-05-07",
+    "title": "华法林 PK/PD 精读笔记样例",
+    "category": "药理学精读",
+    "year": "2026",
+    "paper": "Holford and Sheiner, Kinetics of Pharmacologic Response",
+    "citationKey": "holford1982kinetics",
+    "tex": "2026-05-07-warfarin-pkpd-reading-note.tex",
+    "pdf": "2026-05-07-warfarin-pkpd-reading-note.pdf",
+    "tags": ["PK/PD", "效应室", "Emax", "药效延迟"],
+    "summary": "这是一篇用于演示工作流的精读笔记模板：把药物浓度、效应延迟、Emax 模型和文献批注放在同一个可编译、可发布的知识单元中。",
+    "questions": [
+      "作者试图解释哪一种药效随时间变化的现象？",
+      "浓度-效应关系是否需要效应室或间接反应模型？",
+      "哪些参数真正由数据识别，哪些只是模型假设？"
+    ],
+    "model": "E(C)=\\frac{E_{\\max}C}{EC_{50}+C}",
+    "takeaways": [
+      "先分清暴露变化和药效系统滞后，避免把时间延迟全部归咎于清除率。",
+      "记录模型结构时同时写下可观测量、隐变量和参数单位，后续复现会轻松很多。",
+      "主页摘要服务于快速检索，PDF 服务于完整推导和可引用归档。"
+    ]
+  }
+]

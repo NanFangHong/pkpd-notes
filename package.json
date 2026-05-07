@@ -1,0 +1,11 @@
+{
+  "name": "pkpd-notes",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build-notes.mjs --clean",
+    "build:one": "node scripts/build-notes.mjs --only",
+    "serve": "python3 -m http.server 8765 --directory site"
+  }
+}

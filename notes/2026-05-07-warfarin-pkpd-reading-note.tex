@@ -1,0 +1,87 @@
+\documentclass[11pt]{article}
+
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{fontspec}
+\usepackage{hyperref}
+\usepackage{xeCJK}
+
+\IfFontExistsTF{Noto Serif CJK SC}{
+  \setCJKmainfont{Noto Serif CJK SC}
+}{
+  \IfFontExistsTF{Songti SC}{
+    \setCJKmainfont{Songti SC}
+  }{
+    \IfFontExistsTF{PingFang SC}{
+      \setCJKmainfont{PingFang SC}
+    }{}
+  }
+}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue,
+  citecolor=blue,
+  urlcolor=blue
+}
+
+\title{华法林 PK/PD 精读笔记样例}
+\author{你的名字}
+\date{2026-05-07}
+
+\begin{document}
+\maketitle
+
+\section{文献信息}
+
+\begin{tabular}{ll}
+\toprule
+字段 & 内容 \\
+\midrule
+主题 & 药动学--药效学关系、效应延迟、浓度--效应建模 \\
+样例引用 & Holford and Sheiner, \emph{Kinetics of Pharmacologic Response} \cite{holford1982kinetics} \\
+关联教材 & Rowland and Tozer 的 PK/PD 概念框架 \cite{rowland2011clinical} \\
+\bottomrule
+\end{tabular}
+
+\section{核心问题}
+
+\begin{enumerate}[leftmargin=2em]
+  \item 作者想解释的是暴露变化、受体/效应系统延迟，还是两者的组合？
+  \item 模型中的状态变量哪些可观测，哪些只能由模型间接推断？
+  \item 参数估计是否足以支持机制解释，还是只支持经验预测？
+\end{enumerate}
+
+\section{模型骨架}
+
+一个最小浓度--效应关系可以写成：
+\[
+  E(C) = \frac{E_{\max} C}{EC_{50} + C}.
+\]
+
+如果需要描述药效滞后，可以引入效应室：
+\[
+  \frac{dC_e}{dt} = k_{e0}(C_p - C_e),
+\]
+其中 $C_p$ 是血浆浓度，$C_e$ 是效应室浓度，$k_{e0}$ 控制效应室与血浆之间的平衡速度。
+
+\section{精读批注模板}
+
+\begin{itemize}[leftmargin=2em]
+  \item \textbf{实验设计：}记录给药方式、采样时间、终点指标和受试群体。
+  \item \textbf{关键图表：}标出浓度--时间、效应--时间、浓度--效应滞后环。
+  \item \textbf{可识别性：}区分由数据支撑的参数和由先验/结构假设固定的参数。
+  \item \textbf{我的判断：}说明这篇文献对自己的模型、实验或综述有什么直接帮助。
+\end{itemize}
+
+\section{下一步}
+
+把这一页复制成新的 `.tex` 文件，更换标题、引用键和批注内容；同时在
+\texttt{notes/notes.json} 里新增一条主页摘要。
+
+\bibliographystyle{plain}
+\bibliography{../refs/pharmacology}
+
+\end{document}
