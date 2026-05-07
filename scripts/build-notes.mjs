@@ -19,6 +19,9 @@ const buildDir = path.join(root, "build");
 const dataDir = path.join(root, "pdf2htmlex");
 const zoom = process.env.PDF2HTMLEX_ZOOM || "1.860433";
 const zoomNumber = Number.isFinite(Number(zoom)) ? Number(zoom) : 1.860433;
+const cropPad = Number.isFinite(Number(process.env.PDF2HTMLEX_CROP_PAD))
+  ? Number(process.env.PDF2HTMLEX_CROP_PAD)
+  : 8;
 const dockerImage =
   process.env.PDF2HTMLEX_DOCKER_IMAGE ||
   "pdf2htmlex/pdf2htmlex:0.18.8.rc2-master-20200820-ubuntu-20.04-x86_64";
@@ -405,7 +408,7 @@ function runPdf2htmlEX(note, pdf, outDir, output, page) {
 }
 
 function injectPageBridge(html) {
-  const reset = `<style id="pdf2html-page-reset">html,body{margin:0;padding:0;background:#fff;}body{width:max-content;min-width:0;}.pf{margin:0;}</style>`;
+  const reset = `<style id="pdf2html-page-reset">html,body{margin:0;padding:0;background:#fff;}body{width:max-content;min-width:0;}.pf{margin:0;overflow:visible;}.pc{overflow:visible;}</style>`;
   const bridge = `<style id="pdf2html-iframe-link-cursor">a.l{cursor:pointer;}.l .d{z-index:20;pointer-events:auto;cursor:pointer;}</style>
 <script id="pdf2html-iframe-jump-forwarder">
 (() => {
@@ -413,7 +416,8 @@ function injectPageBridge(html) {
   document.addEventListener('click',(event)=>{const link=event.target.closest&&event.target.closest('a[href^="#pf"]');if(!link||window.parent===window)return;event.preventDefault();window.parent.postMessage({type:'pdf2htmlEX:jump',href:link.getAttribute('href'),detail:link.getAttribute('data-dest-detail'),scale:currentScale()},'*');},true);
 })();
 </script>`;
-  return html.replace("</body>", `${reset}\n${bridge}\n</body>`);
+  const patch = `${reset}\n${bridge}`;
+  return html.includes("</body>") ? html.replace("</body>", `${patch}\n</body>`) : `${html}\n${patch}\n`;
 }
 
 function readPageSize(html) {
@@ -443,16 +447,16 @@ function pageId(page) {
 }
 
 function fullHtml(note, pages) {
-  const width = Math.max(...pages.map((page) => page.width));
+  const width = Math.ceil(Math.max(...pages.map((page) => page.width)) + cropPad);
   const bodies = pages
     .map((page) => {
-      const w = Math.ceil(page.width);
-      const h = Math.ceil(page.height);
-      return `<section id="${pageId(page.page)}" class="pdf-page" style="width:${page.width}px;height:${page.height}px"><iframe title="Page ${page.page}" src="pages/page-${page.page}.html" width="${w}" height="${h}" loading="lazy" scrolling="no"></iframe></section>`;
+      const w = Math.ceil(page.width + cropPad);
+      const h = Math.ceil(page.height + cropPad);
+      return `<section id="${pageId(page.page)}" class="pdf-page" data-page-height="${page.height}" style="width:${w}px;height:${h}px"><iframe title="Page ${page.page}" src="pages/page-${page.page}.html" width="${w}" height="${h}" loading="lazy" scrolling="no"></iframe></section>`;
     })
     .join("\n");
   return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${escapeHtml(note.title)}</title><style>html,body{margin:0;padding:0;background:#fff;color:#111}body{min-width:${Math.ceil(width)}px}#page-container{width:${width}px;margin:0 auto;background:#fff}.pdf-page{position:relative;margin:0 auto;padding:0;overflow:hidden;background:#fff}.pdf-page iframe{display:block;border:0;margin:0;padding:0;width:100%;height:100%;background:#fff}@media print{.pdf-page{break-after:page}}</style></head>
+<title>${escapeHtml(note.title)}</title><style>html,body{margin:0;padding:0;background:#fff;color:#111}body{min-width:${width}px}#page-container{width:${width}px;margin:0 auto;background:#fff}.pdf-page{position:relative;margin:0 auto;padding:0;overflow:hidden;background:#fff}.pdf-page iframe{display:block;border:0;margin:0;padding:0;width:100%;height:100%;background:#fff}@media print{.pdf-page{break-after:page}}</style></head>
 <body><div id="page-container">${bodies}</div>
 <script id="pdf2html-iframe-jump-bridge">
 (() => {
@@ -460,7 +464,7 @@ function fullHtml(note, pages) {
   function pageId(n){return 'pf'+Number(n).toString(16);}
   function detail(v){try{return v?JSON.parse(v):null;}catch{return null;}}
   function target(href){if(!href||!href.startsWith('#pf'))return null;const direct=href.slice(1);if(document.getElementById(direct))return direct;const n=Number.parseInt(direct.slice(2),16);const id=Number.isFinite(n)?pageId(n):null;return id&&document.getElementById(id)?id:null;}
-  function jump(href,detailText,scaleValue){const d=detail(detailText);const id=d&&Number.isFinite(Number(d[0]))?pageId(d[0]):target(href);const el=id&&document.getElementById(id);if(!el)return;const r=el.getBoundingClientRect();let top=window.scrollY+r.top;const pdfY=d&&typeof d[3]==='number'?d[3]:null;const scale=Number.isFinite(Number(scaleValue))?Number(scaleValue):DEFAULT_SCALE;if(pdfY!==null)top+=Math.max(0,Math.min(r.height-1,r.height-pdfY*scale));window.scrollTo({top,left:0,behavior:'auto'});history.replaceState(null,'','#'+id);}
+  function jump(href,detailText,scaleValue){const d=detail(detailText);const id=d&&Number.isFinite(Number(d[0]))?pageId(d[0]):target(href);const el=id&&document.getElementById(id);if(!el)return;const r=el.getBoundingClientRect();let top=window.scrollY+r.top;const pdfY=d&&typeof d[3]==='number'?d[3]:null;const scale=Number.isFinite(Number(scaleValue))?Number(scaleValue):DEFAULT_SCALE;const sourceHeight=Number(el.dataset.pageHeight)||r.height;if(pdfY!==null)top+=Math.max(0,Math.min(r.height-1,sourceHeight-pdfY*scale));window.scrollTo({top,left:0,behavior:'auto'});history.replaceState(null,'','#'+id);}
   window.addEventListener('message',(event)=>{const data=event.data||{};if(data.type==='pdf2htmlEX:jump')jump(data.href,data.detail,data.scale);});
   window.addEventListener('hashchange',()=>jump(window.location.hash,null,DEFAULT_SCALE));
   if(window.location.hash)requestAnimationFrame(()=>jump(window.location.hash,null,DEFAULT_SCALE));
@@ -483,13 +487,13 @@ function nav(section, rel, dir) {
 function sectionHtml(note, sections, index, pageHtml, pageSize) {
   const section = sections[index];
   const parent = parentSection(sections, index);
-  const width = Math.ceil(pageSize.width);
+  const width = Math.ceil(pageSize.width + cropPad);
   const heading = `${escapeHtml(parent.number)}<span style="padding-left:10pt;"></span>${parent.titleHtml}`;
   return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${escapeHtml(`${note.title} - ${section.number} ${section.title}`)}</title>
 <style>html,body{margin:0;padding:0;background:#fff;color:#111}body{font-family:Arial,Helvetica,sans-serif}#main{width:${width}px;margin:26px auto 28px;background:#fff}.disp-header{display:flex;justify-content:space-between;align-items:flex-end;gap:1rem;font-size:16px;font-weight:600;font-style:italic}.disp-header p{margin:0}.disp-header-right{text-align:right}hr{border:0;border-top:1px solid #999;margin:.55rem 0 1rem}.disp-nav{display:flex;justify-content:space-between;align-items:center;gap:1rem;margin:1.35rem 0 0;font-size:15px}.disp-nav p{margin:0}.disp-nav-left,.disp-nav-right{width:30%}.disp-nav-center{flex:1;text-align:center}.disp-nav-right{text-align:right}a{color:#064f83;text-decoration:none}a:hover{text-decoration:underline}</style></head>
 <body><div id="main"><div class="disp-header"><p>${heading}</p><p class="disp-header-right">${escapeHtml(note.title)}</p></div><hr><br>${pageHtml}
-<style id="pdf2html-section-reset-override">body{width:auto;min-width:0}.pf{margin:0}</style>
+<style id="pdf2html-section-reset-override">body{width:auto;min-width:0}.pf{margin:0;overflow:visible}.pc{overflow:visible}</style>
 <nav class="disp-nav"><p class="disp-nav-left">${nav(sections[index - 1], "prev", "prev")}</p><p class="disp-nav-center"><a href="index.html">Table of Contents</a></p><p class="disp-nav-right">${nav(sections[index + 1], "next", "next")}</p></nav></div></body></html>`;
 }
 

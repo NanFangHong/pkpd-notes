@@ -43,4 +43,6 @@ committed site/ -> GitHub Pages
 
 full HTML 使用按页 iframe 拼接，并转发 pdf2htmlEX 内部链接，所以 PDF 里的目录链接会在 full 页面里跳到对应位置。章节页来自一份 HTML 专用 tightpage PDF：脚本在每个非星号 `\section` 和 `\subsection` 前开始新页，再用 pdf2htmlEX 转成对应的连续长页。
 
+pdf2htmlEX 的页面盒子有时会比实际可见内容小 1 到几像素；构建脚本默认给 HTML 容器保留 `8px` 右下安全余量，并覆盖 `.pf/.pc` 的内部裁剪。必要时可以用 `PDF2HTMLEX_CROP_PAD=12 npm run build` 调大。
+
 不要把出版社原文 PDF 放进仓库。这里适合发布你自己的笔记 PDF、复现图、BibTeX 和 DOI/PubMed/出版社链接。

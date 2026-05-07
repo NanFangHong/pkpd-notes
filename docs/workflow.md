@@ -6,10 +6,11 @@
 2. `site/notes/<slug>.pdf` 永远放正常 A4 PDF。
 3. HTML 专用 PDF 使用 `preview` + `tightpage`，并把每个非星号 `\section`/`\subsection` 切成一张连续长页。
 4. pdf2htmlEX 每次只转换一页，避免 full 版本裁剪累计误差。
-5. full HTML 用 iframe 逐页拼接，并用 `postMessage` 转发 pdf2htmlEX 的目录跳转。
-6. 首页层级仿 dec41：笔记名对应两个入口，`HTML` 和 `PDF`；HTML 入口内部再放 full 和章节切片。
-7. 目录标题中的轻量 LaTeX 在构建时渲染，避免依赖运行时 CDN。
-8. GitHub Pages 发布已提交的 `site/`，不在远端重新编译 LaTeX/pdf2htmlEX。
+5. 每个 pdf2htmlEX 页面片段都在末尾追加本地覆盖样式，解除 `.pf/.pc` 的右下裁剪，并给外层 HTML 容器保留少量安全余量。
+6. full HTML 用 iframe 逐页拼接，并用 `postMessage` 转发 pdf2htmlEX 的目录跳转。
+7. 首页层级仿 dec41：笔记名对应两个入口，`HTML` 和 `PDF`；HTML 入口内部再放 full 和章节切片。
+8. 目录标题中的轻量 LaTeX 在构建时渲染，避免依赖运行时 CDN。
+9. GitHub Pages 发布已提交的 `site/`，不在远端重新编译 LaTeX/pdf2htmlEX。
 
 关键命令：
 
@@ -17,6 +18,12 @@
 npm run build
 node scripts/build-notes.mjs --clean --only warfarin-pkpd-reading-note
 python3 -m http.server 8765 --directory site
+```
+
+右下裁剪保护默认是 `8px`。如果某篇笔记含有特别贴边的图形，可以临时调大再构建：
+
+```bash
+PDF2HTMLEX_CROP_PAD=12 node scripts/build-notes.mjs --clean --only warfarin-pkpd-reading-note
 ```
 
 发布步骤：
