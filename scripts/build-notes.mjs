@@ -335,6 +335,8 @@ function compile(note, work, out, label) {
   writeFileSync(path.join(logDir, `${label}.stderr.log`), result.stderr || "");
   const pdf = path.join(out, `${note.slug}.pdf`);
   if (result.status !== 0 || !existsSync(pdf)) {
+    if (result.stdout) console.error(result.stdout.trim());
+    if (result.stderr) console.error(result.stderr.trim());
     throw new Error(`Tectonic failed for ${note.slug}; see ${path.relative(root, logDir)}`);
   }
   return pdf;
@@ -609,3 +611,4 @@ for (const [index, note] of notes.entries()) {
 
 writeFileSync(path.join(siteDir, ".nojekyll"), "");
 console.log(`Built ${results.filter((result) => result.ok).length}/${results.length} notes into site`);
+if (results.some((result) => !result.ok)) process.exitCode = 1;
