@@ -1,0 +1,20 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>华法林 PK/PD 精读笔记样例</title><style>html,body{margin:0;padding:0;background:#fff;color:#111}body{min-width:851px}#page-container{width:850.124859px;margin:0 auto;background:#fff}.pdf-page{position:relative;margin:0 auto;padding:0;overflow:hidden;background:#fff}.pdf-page iframe{display:block;border:0;margin:0;padding:0;width:100%;height:100%;background:#fff}@media print{.pdf-page{break-after:page}}</style></head>
+<body><div id="page-container"><section id="pf1" class="pdf-page" style="width:850.124859px;height:227.828625px"><iframe title="Page 1" src="pages/page-1.html" width="851" height="228" loading="lazy" scrolling="no"></iframe></section>
+<section id="pf2" class="pdf-page" style="width:850.124859px;height:181.931743px"><iframe title="Page 2" src="pages/page-2.html" width="851" height="182" loading="lazy" scrolling="no"></iframe></section>
+<section id="pf3" class="pdf-page" style="width:850.124859px;height:163.755313px"><iframe title="Page 3" src="pages/page-3.html" width="851" height="164" loading="lazy" scrolling="no"></iframe></section>
+<section id="pf4" class="pdf-page" style="width:850.124859px;height:296.776272px"><iframe title="Page 4" src="pages/page-4.html" width="851" height="297" loading="lazy" scrolling="no"></iframe></section>
+<section id="pf5" class="pdf-page" style="width:850.124859px;height:205.577846px"><iframe title="Page 5" src="pages/page-5.html" width="851" height="206" loading="lazy" scrolling="no"></iframe></section>
+<section id="pf6" class="pdf-page" style="width:850.124859px;height:307.027258px"><iframe title="Page 6" src="pages/page-6.html" width="851" height="308" loading="lazy" scrolling="no"></iframe></section></div>
+<script id="pdf2html-iframe-jump-bridge">
+(() => {
+  const DEFAULT_SCALE=1.860433;
+  function pageId(n){return 'pf'+Number(n).toString(16);}
+  function detail(v){try{return v?JSON.parse(v):null;}catch{return null;}}
+  function target(href){if(!href||!href.startsWith('#pf'))return null;const direct=href.slice(1);if(document.getElementById(direct))return direct;const n=Number.parseInt(direct.slice(2),16);const id=Number.isFinite(n)?pageId(n):null;return id&&document.getElementById(id)?id:null;}
+  function jump(href,detailText,scaleValue){const d=detail(detailText);const id=d&&Number.isFinite(Number(d[0]))?pageId(d[0]):target(href);const el=id&&document.getElementById(id);if(!el)return;const r=el.getBoundingClientRect();let top=window.scrollY+r.top;const pdfY=d&&typeof d[3]==='number'?d[3]:null;const scale=Number.isFinite(Number(scaleValue))?Number(scaleValue):DEFAULT_SCALE;if(pdfY!==null)top+=Math.max(0,Math.min(r.height-1,r.height-pdfY*scale));window.scrollTo({top,left:0,behavior:'auto'});history.replaceState(null,'','#'+id);}
+  window.addEventListener('message',(event)=>{const data=event.data||{};if(data.type==='pdf2htmlEX:jump')jump(data.href,data.detail,data.scale);});
+  window.addEventListener('hashchange',()=>jump(window.location.hash,null,DEFAULT_SCALE));
+  if(window.location.hash)requestAnimationFrame(()=>jump(window.location.hash,null,DEFAULT_SCALE));
+})();
+</script></body></html>

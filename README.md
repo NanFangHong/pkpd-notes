@@ -1,6 +1,8 @@
 # PK/PD Notes
 
-这是一个 dec41-style 的 LaTeX 笔记发布仓库：你只维护 `notes/*.tex`、`notes/notes.json` 和 `refs/pharmacology.bib`，构建脚本会生成普通 PDF、pdf2htmlEX HTML、full 版本和按章节切块的页面。
+这是一个 dec41-style 的 LaTeX 笔记发布仓库：你在本地维护 `notes/*.tex`、`notes/notes.json` 和 `refs/pharmacology.bib`，构建脚本会生成普通 PDF、pdf2htmlEX HTML、full 版本和按章节切块的页面。
+
+当前发布策略是“本地生成、GitHub 同步”：GitHub Pages 只发布已经提交到仓库的 `site/`，不在远端重新编译 LaTeX，也不在远端运行 pdf2htmlEX。这样网页和你本地验收的效果一致。
 
 ## 本地构建
 
@@ -23,7 +25,7 @@ npm run serve
 2. 在 `notes/notes.json` 增加 `slug`、`title`、`category`、`date`、`paper` 和 `tex`。
 3. 引用统一放在 `refs/pharmacology.bib`。
 4. 运行 `npm run build` 检查 PDF 与 HTML。
-5. 推送到 `main` 后，GitHub Actions 会发布到 GitHub Pages。
+5. 把源码和生成后的 `site/` 一起提交并推送到 `main`，GitHub Actions 会直接发布 `site/`。
 
 ## 工作流标准
 
@@ -31,6 +33,12 @@ HTML 不重新排版 LaTeX。它走完整的 PDF-faithful 路线：
 
 ```text
 LaTeX -> Tectonic PDF -> pdf2htmlEX HTML -> dec41-style static site
+```
+
+这条链路在本地完成。远端 workflow 只做：
+
+```text
+committed site/ -> GitHub Pages
 ```
 
 full HTML 使用按页 iframe 拼接，并转发 pdf2htmlEX 内部链接，所以 PDF 里的目录链接会在 full 页面里跳到对应位置。章节页来自一份 HTML 专用 tightpage PDF：脚本在每个非星号 `\section` 和 `\subsection` 前开始新页，再用 pdf2htmlEX 转成对应的连续长页。
