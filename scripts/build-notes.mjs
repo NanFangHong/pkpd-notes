@@ -22,6 +22,10 @@ const zoomNumber = Number.isFinite(Number(zoom)) ? Number(zoom) : 1.860433;
 const cropPad = Number.isFinite(Number(process.env.PDF2HTMLEX_CROP_PAD))
   ? Number(process.env.PDF2HTMLEX_CROP_PAD)
   : 8;
+const seamCover = Number.isFinite(Number(process.env.PDF2HTMLEX_SEAM_COVER))
+  ? Number(process.env.PDF2HTMLEX_SEAM_COVER)
+  : 3;
+const seamOffset = Math.max(0, Math.round(cropPad - 1));
 const dockerImage =
   process.env.PDF2HTMLEX_DOCKER_IMAGE ||
   "pdf2htmlex/pdf2htmlex:0.18.8.rc2-master-20200820-ubuntu-20.04-x86_64";
@@ -285,13 +289,16 @@ function injectHtmlMode(tex) {
 \\makeatletter
 \\usepackage[active,tightpage]{preview}
 \\renewcommand{\\PreviewBorder}{0.1cm}
+\\pagestyle{empty}
+\\@ifundefined{headrulewidth}{}{\\renewcommand{\\headrulewidth}{0pt}}
+\\@ifundefined{footrulewidth}{}{\\renewcommand{\\footrulewidth}{0pt}}
 \\newlength\\pkpdcurrentparindent
 \\setlength\\pkpdcurrentparindent\\parindent
 \\newcommand\\@minipagerestore{\\setlength{\\parindent}{\\pkpdcurrentparindent}}
 \\newenvironment{pkpdstretchpage}%
   {\\begin{preview}\\begin{minipage}{\\textwidth}}%
   {\\end{minipage}\\end{preview}}
-\\AtBeginDocument{\\begin{pkpdstretchpage}}
+\\AtBeginDocument{\\pagestyle{empty}\\thispagestyle{empty}\\begin{pkpdstretchpage}}
 \\AtEndDocument{\\end{pkpdstretchpage}}
 \\newcommand{\\pkpdnewhtmlpage}{\\end{pkpdstretchpage}\\begin{pkpdstretchpage}}
 \\@ifundefined{stdsection}{\\let\\pkpdrealsection\\section}{\\let\\pkpdrealsection\\stdsection}
@@ -460,7 +467,7 @@ function fullHtml(note, pages) {
     })
     .join("\n");
   return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${escapeHtml(note.title)}</title><style>html,body{margin:0;padding:0;background:#fff;color:#111}body{min-width:${width}px}#page-container{width:${width}px;margin:0 auto;background:#fff}.pdf-page{position:relative;margin:0 auto;padding:0;overflow:hidden;background:#fff}.pdf-page iframe{display:block;border:0;margin:0;padding:0;width:100%;height:100%;background:#fff}@media print{.pdf-page{break-after:page}}</style></head>
+<title>${escapeHtml(note.title)}</title><style>html,body{margin:0;padding:0;background:#fff;color:#111}body{min-width:${width}px}#page-container{width:${width}px;margin:0 auto;background:#fff}.pdf-page{position:relative;margin:0 auto;padding:0;overflow:hidden;background:#fff}.pdf-page iframe{display:block;position:relative;z-index:0;border:0;margin:0;padding:0;width:100%;height:100%;background:#fff}.pdf-page::after{content:"";position:absolute;left:0;right:0;bottom:${seamOffset}px;height:${seamCover}px;background:#fff;pointer-events:none;z-index:1}@media print{.pdf-page{break-after:page}}</style></head>
 <body><div id="page-container">${bodies}</div>
 <script id="pdf2html-iframe-jump-bridge">
 (() => {
