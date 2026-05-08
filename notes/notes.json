@@ -1,5 +1,29 @@
 [
   {
+    "slug": "levy-direct-effect-insight",
+    "date": "2026-05-08",
+    "title": "Gerhard Levy: direct effect model 的第一性洞察",
+    "category": "PK/PD Foundations",
+    "year": "2026",
+    "paper": "Mager and Straubinger, Contributions of William Jusko to Development of PK-PD Models",
+    "citationKey": "mager2024jusko",
+    "tex": "2026-05-08-levy-direct-effect-insight.tex",
+    "pdf": "2026-05-08-levy-direct-effect-insight.pdf",
+    "tags": ["Gerhard Levy", "direct effect model", "PK/PD", "chain rule", "duration of effect"],
+    "summary": "第一篇正式 PK/PD foundation note：把 Levy 关于 direct effect model 的洞察整理成可读的中英混排笔记，并用 TikZ 图说明 response decline rate 如何来自 PD slope 与 PK decline rate 的乘积。",
+    "questions": [
+      "什么时候可以把 plasma concentration 直接映射到 immediate response？",
+      "为什么一阶药物消除可以产生近似零级的药效消失？",
+      "dose、elimination rate 和 minimum effective concentration 如何共同决定 effect duration？"
+    ],
+    "model": "-dE/dt \\approx m k",
+    "takeaways": [
+      "PK 给出 concentration 在时间轴上的速度，PD 给出 concentration-effect curve 的局部斜率。",
+      "Levy 的 m*k 关系可以看成 chain rule 在药效动力学中的一个极简应用。",
+      "Wagner 的 Hill/Emax 函数把局部线性洞察推广成完整的 direct effect PK-PD profile。"
+    ]
+  },
+  {
     "slug": "warfarin-pkpd-reading-note",
     "date": "2026-05-07",
     "title": "华法林 PK/PD 精读笔记样例",

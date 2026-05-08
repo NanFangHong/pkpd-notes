@@ -57,12 +57,16 @@ function executableWorks(file) {
 function findTectonic() {
   if (executableWorks(process.env.TECTONIC)) return process.env.TECTONIC;
   if (sh("command -v tectonic")) return "tectonic";
-  const bundled = path.join(
-    process.env.HOME || "",
-    ".codex/plugins/cache/openai-bundled/latex-tectonic/0.1.0/bin",
-    process.platform === "win32" ? "tectonic.exe" : "tectonic",
-  );
-  if (existsSync(bundled)) return bundled;
+  const bundledRoot = path.join(process.env.HOME || "", ".codex/plugins/cache/openai-bundled/latex-tectonic");
+  const exe = process.platform === "win32" ? "tectonic.exe" : "tectonic";
+  if (existsSync(bundledRoot)) {
+    const bundled = readdirSync(bundledRoot)
+      .sort()
+      .reverse()
+      .map((version) => path.join(bundledRoot, version, "bin", exe))
+      .find(executableWorks);
+    if (bundled) return bundled;
+  }
   throw new Error("Could not find Tectonic. Install it or set TECTONIC=/path/to/tectonic.");
 }
 
