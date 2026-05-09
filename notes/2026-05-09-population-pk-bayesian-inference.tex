@@ -1,0 +1,1510 @@
+\documentclass[a4paper]{article}
+
+\def\npart {Bayesian Population PK}
+\def\nterm {Inference reading notes}
+\def\nyear {2026}
+\def\nlecturer {MIT 6.008/6.437 and Marc Lavielle}
+\def\ncourse {Population PK as Bayesian Inference}
+\def\ncoursehead {Bayesian PopPK}
+\def\nauthor {NanFangHong}
+
+\input{header}
+\usetikzlibrary{fit,positioning}
+\emergencystretch=2em
+\title{Bayesian Population PK - Population PK as Bayesian Inference}
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\logit}{logit}
+\newcommand{\rv}[1]{\mathsf{#1}}
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\given}{\,|\,}
+\newcommand{\Prob}{\mathsf{P}}
+\newcommand{\E}{\mathsf{E}}
+\newcommand{\Var}{\mathsf{Var}}
+\newcommand{\Cov}{\mathsf{Cov}}
+\newcommand{\Normal}{\mathcal{N}}
+\newcommand{\lik}{\mathcal{L}}
+\newcommand{\data}{\mathcal{D}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\iid}{\overset{\mathrm{iid}}{\sim}}
+\newcommand{\indep}{\perp\!\!\!\perp}
+\newcommand{\pop}{\mathrm{pop}}
+\newcommand{\obs}{\mathrm{obs}}
+\newcommand{\pred}{\mathrm{pred}}
+\newcommand{\post}{\mathrm{post}}
+
+\begin{document}
+\maketitle
+{\small
+  \noindent\textbf{Reading motive}\\
+  These notes connect the inference language of MIT 6.008/6.437 with Marc Lavielle's mixed effects population approach. The guiding claim is that Population PK is not a collection of software tricks; it is a pharmacological instance of hierarchical Bayesian inference.\hspace*{\fill}[inference]
+
+  \vspace{5pt}
+  \noindent\textbf{Audience}\\
+  The intended reader has not taken 6.008/6.437 and has not used NONMEM. We begin with probability laws, conditioning, Bayes rule, and latent variables, then move gradually into \(PK\) ODEs, individual parameters, population distributions, marginal likelihood, SAEM, and NONMEM.\hspace*{\fill}[from zero]
+
+  \vspace{5pt}
+  \noindent\textbf{Style}\\
+  This is a reconstruction rather than an excerpt. The notation borrows the 6.437 random-variable convention: random quantities use sans-serif symbols, while realizations and parameters use ordinary type. The Population PK structure follows Lavielle's \(y_i,\psi_i,\theta\) language.\hspace*{\fill}[notation]
+}
+
+\tableofcontents
+
+\section{Source map and thesis}
+
+\subsection{Three source streams}
+
+我这里同时读三条线：
+
+\begin{itemize}[leftmargin=2em]
+  \item \textbf{MIT 6.008}: probability law、conditional probability、random variables、decision making、graphical models、model selection、asymptotics、Markov chains、sampling methods、continuous inference。它是 6.437 的地基，给出 ``how to think probabilistically'' 的起点 \cite{mit6008notes}。
+  \item \textbf{MIT 6.437}: Bayesian hypothesis testing、Bayesian parameter estimation、non-Bayesian decision theory、exponential families、sufficient statistics、EM、information geometry、modeling as inference、MCMC、typicality、method of types、asymptotics 和 model selection。它不是另起炉灶，而是在 6.008 的 probability/inference grammar 上继续加深 \cite{mit6437notes}。
+  \item \textbf{Lavielle}: mixed effects models for the population approach。它把这个 grammar 落到 pharmacometrics: observations \(y_i\)、individual parameters \(\psi_i\)、population parameters \(\theta\)、covariates \(c_i\)、and the joint model \cite{lavielle2015mixed}。
+\end{itemize}
+
+\begin{remark}
+  读 Lavielle 最舒服的地方是，他很少把模型当成 ``software syntax''。他反复区分 description, mathematical representation, implementation。这个区分对 Population PK 特别重要：一个 one-compartment model 可以是 ODE，可以是 closed-form equation，也可以是 NONMEM 或 Mlxtran 代码；这些不是三种模型，而是同一个模型的不同表述。
+\end{remark}
+
+\subsection{The learning order}
+
+这篇笔记必须按下面的顺序走：
+\[
+  \text{6.008}
+  \longrightarrow
+  \text{6.437}
+  \longrightarrow
+  \text{Lavielle}
+  \longrightarrow
+  \text{NONMEM/Monolix/SAEM}.
+\]
+
+\begin{warning}
+  如果跳过 6.008，6.437 里的 posterior、risk、EM、typicality、model selection 会变成一串公式；如果跳过 6.437，Population PK 里的 likelihood、EBE、SAEM、posterior predictive check 又会像软件黑话。6.008 是语感，6.437 是深度，Lavielle 是落地。
+\end{warning}
+
+\subsection{The main thesis}
+
+Population PK 的核心对象不是一条 concentration--time curve，而是一个条件概率系统：
+\[
+  p_\theta(y_i,\psi_i\given c_i,u_i)
+  =
+  p_\theta(y_i\given \psi_i,u_i)\,
+  p_\theta(\psi_i\given c_i).
+\]
+这里
+\begin{itemize}[leftmargin=2em]
+  \item \(y_i\) 是第 \(i\) 个个体的观测数据，比如浓度、PCA、biomarker 或 categorical outcome；
+  \item \(\psi_i\) 是这个个体自己的 PK/PD 参数，比如 \(CL_i,V_i,k_{a,i},EC_{50,i}\)；
+  \item \(c_i\) 是 covariates，比如 weight、sex、genotype、renal function；
+  \item \(u_i\) 是 design/dosing regimen，比如 dose、infusion、sampling times；
+  \item \(\theta\) 是 population-level unknowns，比如 typical values、covariate effects、\(\Omega\)、residual error parameters。
+\end{itemize}
+
+The population approach says: we do not observe \(\psi_i\), but we can infer them by combining each individual's sparse data with the population distribution. 这句话已经是 Bayesian inference。
+
+\subsection{Why this matters}
+
+经典 individual PK 是：
+\[
+  \text{fit each subject separately} \quad \longrightarrow \quad
+  \text{summarize the fitted parameters}.
+\]
+Population PK 是：
+\[
+  \text{learn the population distribution and individual posteriors together}.
+\]
+这两句话的差异非常大。前者在 sparse sampling 时会崩，因为每个人的数据不足以识别自己的参数。后者允许 borrowing strength: 一个个体的数据很少，但 population prior-like distribution 提供了约束。
+
+\begin{question}
+  Population PK 为什么不是 ``平均曲线拟合''？
+\end{question}
+
+因为 population curve 只是一个 summary。真正的对象是 variability: 谁偏离 typical subject，偏离多少，偏离能否由 covariates 解释，剩下的不确定性应该如何传播到 prediction 和 decision。
+
+\section{6.008 first: probability as modeling}
+
+\subsection{A probability law is a modeling choice}
+
+6.008 的第一层不是 Bayes rule，而是更朴素的一句话：
+\[
+  \text{a probabilistic model is a sample space plus a probability law}.
+\]
+一个模型先定义哪些 outcomes 可能发生，再定义每个 event 的 probability。这个视角对 Population PK 很重要，因为 pharmacometric model 不是先从 ``拟合曲线'' 开始，而是先定义：如果这个模型是真的，什么样的数据会被生成？
+
+For a single subject, the sample outcome is not just one number. It may be the whole longitudinal record:
+\[
+  y_i=(y_{i1},\ldots,y_{in_i}).
+\]
+If we also include unobserved individual parameters, a fuller outcome is
+\[
+  (y_i,\psi_i).
+\]
+Population modeling says that the sample space should be large enough to include both observed data and latent biological variability.
+
+\begin{remark}
+  6.008 喜欢问 sample space 的 granularity。PopPK 里同样如此：如果我们只关心 concentration，\(y_i\) 是 concentration vector；如果我们关心 PK/PD，\(y_i\) 可能有 concentration 和 response 两个 observation streams；如果 dropout is informative，event time 也必须成为 sample outcome 的一部分。
+\end{remark}
+
+\subsection{The right level of detail}
+
+6.008 的 dice/image examples 都在强调同一件事：sample space 可以极大，关键是选对 granularity。Population PK 的 granularity 也有层级：
+
+\begin{center}
+\begin{tabularx}{0.96\textwidth}{p{0.24\textwidth}X}
+\toprule
+Granularity & PopPK version \\
+\midrule
+One observation & \(\rv{y}_{ij}\), a concentration at one time. \\
+One individual & \(\rv{y}_i=(\rv{y}_{i1},\ldots,\rv{y}_{in_i})\), the longitudinal record. \\
+One latent individual & \((\rv{y}_i,\rv{\psi}_i)\), observations plus the subject's hidden PK parameters. \\
+The population sample & \((\rv{y}_{1:N},\rv{\psi}_{1:N})\), all individuals and all latent heterogeneity. \\
+Future trial or clinic & \((\tilde{\rv{y}},\tilde{\rv{\psi}})\), prediction for new individuals. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+The modeler must choose the sample space to match the scientific question. 如果目标是 estimating clearance variability，\(\psi_i\) 必须进入模型；如果目标是 deciding dose adjustment，future exposure \(\tilde y\) 必须进入 prediction。
+
+\subsection{Events in PopPK}
+
+6.008 讲 event 是 sample space 的 subset。药理学里的 event 往往就是临床问题：
+\[
+  A=\{\tilde C_{\min}<C_{\mathrm{target}}\},
+\]
+\[
+  B=\{AUC_{0-24} > AUC_{\mathrm{tox}}\},
+\]
+\[
+  G=\{CL_i \text{ is below the 10th population percentile}\}.
+\]
+一旦我们有 posterior predictive distribution，就可以计算
+\[
+  \Prob(A\given y_i)
+  =
+  \int 1\{\tilde C_{\min}<C_{\mathrm{target}}\}
+  p(\tilde C_{\min}\given y_i)\,\dd \tilde C_{\min}.
+\]
+这就是从 probability law 到 clinical decision 的最短路径。
+
+\section{6.008 conditioning: the first Bayes move}
+
+\subsection{Conditional probability}
+
+6.008 的 conditional probability 定义是
+\[
+  \Prob(A\given B)=\frac{\Prob(A\cap B)}{\Prob(B)}.
+\]
+它的直觉是：知道 \(B\) 发生后，我们把 sample space 缩到 \(B\)，再重新归一化。
+
+PopPK 里 \(B\) 通常是 ``we observed this individual's data'':
+\[
+  B=\{\rv{y}_i=y_i\}.
+\]
+而 \(A\) 可能是 ``this individual has low clearance'':
+\[
+  A=\{\rv{CL}_i < 0.6\,CL_{\pop}\}.
+\]
+于是
+\[
+  \Prob(\rv{CL}_i < 0.6\,CL_{\pop}\given \rv{y}_i=y_i)
+\]
+就是一个 individual-level posterior probability。
+
+\subsection{Law of total probability}
+
+Bayes rule 之前还有一个更 foundational 的式子：law of total probability。若 \(\psi_i\) 是 latent parameter，
+\[
+  p_\theta(y_i)
+  =
+  \int
+  p_\theta(y_i\given \psi_i)
+  p_\theta(\psi_i)
+  \dd\psi_i.
+\]
+这就是 observed-data likelihood for one individual。看起来像 Population PK 的高级公式，其实只是 6.008 的 total probability applied to a latent continuous variable。
+
+\begin{remark}
+  所以 Population PK 的核心积分不是从 pharmacometrics 天上掉下来的。它就是 ``把没有观察到的 individual parameters 加总/积分掉''。
+\end{remark}
+
+\subsection{Bayes rule as reweighting}
+
+Bayes rule:
+\[
+  p_\theta(\psi_i\given y_i)
+  =
+  \frac{
+    p_\theta(y_i\given \psi_i)p_\theta(\psi_i)
+  }{
+    \int p_\theta(y_i\given \psi_i)p_\theta(\psi_i)\,\dd\psi_i
+  }.
+\]
+It says: start with population plausibility \(p_\theta(\psi_i)\), reweight each \(\psi_i\) by how well it predicts the observed data \(p_\theta(y_i\given\psi_i)\), then normalize.
+
+这个 reweighting image 比 ``Bayes theorem'' 这个词更重要：
+\[
+  \text{posterior}
+  \propto
+  \text{likelihood}
+  \times
+  \text{population distribution}.
+\]
+
+\section{6.008 random variables}
+
+\subsection{Random variables are functions of outcomes}
+
+6.008 里的 random variable 不是玄学对象，而是 outcome 的函数。对 PopPK 来说，一个 complete outcome 可能包含 whole concentration curve and latent physiology。Random variables are summaries of that outcome:
+\[
+  \rv{CL}_i,\quad \rv{V}_i,\quad \rv{AUC}_i,\quad
+  \rv{C}_{\max,i},\quad \rv{T}_{>MIC,i}.
+\]
+Once a probability law is assigned, these summaries inherit distributions.
+
+例如若 \(CL_i\) 是 log-normal:
+\[
+  \log \rv{CL}_i\sim \Normal(\log CL_{\pop},\omega_{CL}^2),
+\]
+那么 \(AUC_i=D/\rv{CL}_i\) 也有 induced distribution。This is why parameter uncertainty automatically becomes exposure uncertainty.
+
+\subsection{Expectation}
+
+Expectation in 6.008 is a weighted average:
+\[
+  \E[g(\rv{x})]=\sum_x g(x)p(x)
+  \quad \text{or} \quad
+  \E[g(\rv{x})]=\int g(x)p(x)\,\dd x.
+\]
+In PopPK:
+\[
+  \E[\rv{CL}_i\given y_i]
+  =
+  \int CL_i\,p(CL_i\given y_i)\,\dd CL_i.
+\]
+This posterior mean is an estimator under squared-error loss. It is not necessarily the same as MAP/EBE:
+\[
+  \widehat{CL}^{MAP}_i
+  =
+  \argmax_{CL_i}p(CL_i\given y_i).
+\]
+
+\subsection{Independence and conditional independence}
+
+6.008 distinguishes independence:
+\[
+  \rv{x}\indep \rv{z}
+\]
+from conditional independence:
+\[
+  \rv{x}\indep \rv{z}\given \rv{w}.
+\]
+Population PK lives on conditional independence. Given individual parameters, observations are often assumed independent:
+\[
+  \rv{y}_{ij}\indep \rv{y}_{ik}\given \rv{\psi}_i
+  \quad (j\ne k).
+\]
+Given population parameters, individuals are often assumed independent:
+\[
+  (\rv{y}_i,\rv{\psi}_i)
+  \indep
+  (\rv{y}_l,\rv{\psi}_l)
+  \given \theta
+  \quad (i\ne l).
+\]
+These assumptions are not automatic truth. They are modeling commitments. Carryover, adherence, informative dropout, shared batch effects, or site effects can break them.
+
+\section{6.008 decision making: estimates are decisions}
+
+\subsection{Loss functions}
+
+6.008 的 decision-making framework 很适合纠正一个常见误解：estimate is not truth; estimate is a decision. To choose an estimate, we first choose a loss.
+
+For a posterior \(p(\psi_i\given y_i)\):
+\[
+  \widehat{\psi}(y_i)
+  =
+  \argmin_a
+  \E\{C(\rv{\psi}_i,a)\given y_i\}.
+\]
+Different losses give different summaries:
+
+\begin{center}
+\begin{tabularx}{0.96\textwidth}{p{0.25\textwidth}X}
+\toprule
+Loss & Estimator \\
+\midrule
+0--1 or small-ball loss & MAP / posterior mode. \\
+Squared error & Posterior mean. \\
+Absolute error & Posterior median. \\
+Asymmetric clinical loss & A threshold-aware decision, not a standard summary. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\subsection{Why this matters for dosing}
+
+Suppose we estimate exposure and choose dose. Under-dosing and over-dosing are not symmetric. A loss might be
+\[
+  C(AUC,\widehat{AUC})
+  =
+  c_1\,1\{AUC<AUC_{\mathrm{eff}}\}
+  +
+  c_2\,1\{AUC>AUC_{\mathrm{tox}}\},
+\]
+where \(c_2\) may be much larger than \(c_1\) for a toxic drug. Then the optimal decision is not simply posterior mean exposure; it is a risk-minimizing action under the clinical loss.
+
+\begin{remark}
+  This is the hidden bridge from Bayesian inference to therapeutic drug monitoring: posterior predictive distributions matter because clinical action is a decision under asymmetric risk.
+\end{remark}
+
+\subsection{Soft versus hard}
+
+6.008 calls probabilities soft information and decisions hard. A PopPK report often gives hard numbers:
+\[
+  \widehat{CL}_i=4.1\,\mathrm{L/h}.
+\]
+But what we actually know is softer:
+\[
+  p(CL_i\given y_i).
+\]
+If the posterior is wide or skewed, reporting only \(\widehat{CL}_i\) hides information that may matter more than the point estimate.
+
+\section{6.008 graphical models: structure makes inference possible}
+
+\subsection{Factorization}
+
+6.008 uses graphical models to turn independence assumptions into factorization. For a tree model:
+\[
+  p(x_{1:n})=p(x_r)\prod_{(i,j)}p(x_j\given x_i).
+\]
+For PopPK:
+\[
+  p_\theta(y_{1:N},\psi_{1:N})
+  =
+  \prod_{i=1}^N
+  p_\theta(\psi_i)
+  p_\theta(y_i\given \psi_i).
+\]
+This factorization is why inference scales by individual. Without it, a joint distribution over all observations would be impossible to manipulate.
+
+\subsection{The plate idea}
+
+The ``plate'' around individuals means repeat this structure \(N\) times:
+\[
+  \theta
+  \rightarrow
+  \rv{\psi}_i
+  \rightarrow
+  \rv{y}_{ij}.
+\]
+The population parameters \(\theta\) are shared; individual parameters \(\psi_i\) are local; observations \(y_{ij}\) are even more local.
+
+\begin{center}
+\begin{tikzpicture}[>=stealth, node distance=1.55cm, every node/.style={align=center}]
+  \node[draw, rounded corners, minimum width=1.4cm, minimum height=0.7cm] (theta) {\(\theta\)};
+  \node[draw, rounded corners, below=of theta, minimum width=1.4cm, minimum height=0.7cm] (psi) {\(\rv{\psi}_i\)};
+  \node[draw, rounded corners, below=of psi, minimum width=1.4cm, minimum height=0.7cm] (y) {\(\rv{y}_{ij}\)};
+  \node[draw, rounded corners, left=of psi, minimum width=1.2cm, minimum height=0.7cm] (c) {\(c_i\)};
+  \node[draw, rounded corners, right=of y, minimum width=1.2cm, minimum height=0.7cm] (t) {\(t_{ij},u_i\)};
+  \draw[->] (theta) -- (psi);
+  \draw[->] (psi) -- (y);
+  \draw[->] (c) -- (psi);
+  \draw[->] (t) -- (y);
+  \draw[->] (theta) to[bend left=22] (y);
+  \node[draw, dashed, rounded corners, fit=(psi)(y)(c)(t), inner sep=0.34cm, label=below:{repeat over individuals and observations}] {};
+\end{tikzpicture}
+\captionof{figure}{The 6.008 graphical model idea applied to Population PK.}
+\end{center}
+
+\subsection{When the graph is wrong}
+
+The graph encodes assumptions. If two subjects are from the same clinical site, they may share site-level effects. If samples are processed in the same assay batch, residual errors may be correlated. If dropout depends on unobserved disease state, missingness is informative. Then the graph needs more nodes:
+\[
+  \text{site},\quad \text{batch},\quad \text{dropout process},\quad \text{adherence}.
+\]
+Good model criticism often means asking which missing node would explain the residual pattern.
+
+\section{6.008 sampling and asymptotics}
+
+\subsection{Monte Carlo expectations}
+
+6.008's Monte Carlo chapter begins with
+\[
+  \mu = \E[g(\rv{x})],
+  \qquad
+  \widehat\mu_K=\frac{1}{K}\sum_{k=1}^K g(x^{(k)}),
+\]
+where \(x^{(k)}\sim p(x)\). PopPK needs this constantly:
+\[
+  \E[g(\rv{\psi}_i)\given y_i]
+  \approx
+  \frac{1}{K}\sum_{k=1}^K g(\psi_i^{(k)}),
+  \qquad
+  \psi_i^{(k)}\sim p(\psi_i\given y_i).
+\]
+This is the conceptual ancestor of posterior simulation, importance sampling, MCMC, and predictive checks.
+
+\subsection{Sampling future subjects}
+
+A population model can simulate future individuals:
+\[
+  \tilde\psi \sim p_{\widehat\theta}(\psi\given \tilde c),
+  \qquad
+  \tilde y\sim p_{\widehat\theta}(y\given \tilde\psi,\tilde u).
+\]
+This two-step simulation is exactly what VPC-like thinking requires. It is also the cleanest way to teach what \(\Omega\) means: not a nuisance variance, but a generator of plausible biological diversity.
+
+\subsection{Asymptotics as comfort, not a crutch}
+
+6.008 introduces law of large numbers and asymptotic thinking. Population ML relies on similar comfort: as \(N\) grows, \(\widehat\theta\) may become consistent and approximately normal under regularity conditions. But pharmacometric datasets are often small, unbalanced, censored, and nonlinear. Therefore asymptotics should guide intuition, not replace diagnostics.
+
+\section{6.008 model selection as an entry point}
+
+\subsection{Models are approximations}
+
+6.008 already makes model selection a practical issue: multiple probability laws can explain data at different levels of granularity. PopPK model selection asks:
+\[
+  \mathcal{M}_1:\ \text{one compartment}
+  \quad \text{versus} \quad
+  \mathcal{M}_2:\ \text{two compartments},
+\]
+\[
+  \mathcal{M}_3:\ CL_i \text{ has weight effect}
+  \quad \text{versus} \quad
+  \mathcal{M}_4:\ CL_i \text{ has weight and renal effect}.
+\]
+
+Each model is a candidate probability law:
+\[
+  p_{\theta_m}^{(m)}(y).
+\]
+The goal is not to find ``the true model'' in a metaphysical sense. The goal is to find a model useful enough for explanation, prediction, and decision.
+
+\subsection{Why this sets up 6.437}
+
+6.008 gives the question:
+\[
+  \text{Which probability law should we use?}
+\]
+6.437 deepens it:
+\[
+  \text{What is the information loss if we use } q(y) \text{ instead of } p(y)?
+\]
+This is why the learning order matters. 6.008 teaches the objects; 6.437 teaches the geometry and decision theory of those objects.
+
+\section{6.437 on top of 6.008}
+
+\subsection{What gets added}
+
+Once 6.008 gives us probability, conditioning, decision, graph, and sampling, 6.437 adds several layers:
+
+\begin{itemize}[leftmargin=2em]
+  \item Bayesian hypothesis testing: posterior odds, likelihood ratios, Bayes risk.
+  \item Bayesian estimation: posterior mean, median, MAP, and loss-dependent estimators.
+  \item Non-Bayesian decision theory: minimax, Neyman--Pearson, error exponents.
+  \item Exponential families: sufficient statistics and data compression.
+  \item EM: how to estimate parameters with latent complete data.
+  \item Information geometry and modeling as inference: models as approximations measured by divergence.
+  \item MCMC and typicality: why sampling can make high-dimensional inference practical.
+\end{itemize}
+
+Population PK borrows from all of these, but the most immediate bridges are Bayesian estimation, EM/SAEM, information-based model comparison, and posterior predictive thinking.
+
+\subsection{How to read the rest}
+
+From here onward, every PopPK concept should be read through a two-layer lens:
+\[
+  \text{6.008 asks: what probability law did we define?}
+\]
+\[
+  \text{6.437 asks: what inference or decision are we performing with it?}
+\]
+
+\section{6.437 Bayesian hypothesis testing}
+
+\subsection{Hypotheses as random variables}
+
+6.437 begins Bayesian hypothesis testing by turning the unknown hypothesis into a random variable:
+\[
+  \rv{H}\in\{H_0,H_1,\ldots,H_{M-1}\}.
+\]
+The model is
+\[
+  p_{\rv{H}}(H_m),\qquad
+  p_{\rv{y}\given \rv{H}}(y\given H_m).
+\]
+After observing \(y\), belief updates to
+\[
+  p_{\rv{H}\given \rv{y}}(H_m\given y)
+  =
+  \frac{
+    p_{\rv{y}\given \rv{H}}(y\given H_m)
+    p_{\rv{H}}(H_m)
+  }{
+    \sum_{\ell}
+    p_{\rv{y}\given \rv{H}}(y\given H_\ell)
+    p_{\rv{H}}(H_\ell)
+  }.
+\]
+
+PopPK translation:
+\[
+  H_0:\ \text{one-compartment PK},
+  \qquad
+  H_1:\ \text{two-compartment PK}.
+\]
+or
+\[
+  H_0:\ \text{no renal covariate effect on }CL,
+  \qquad
+  H_1:\ \text{renal function modifies }CL.
+\]
+In classical pharmacometrics, these are often compared by likelihood ratio, AIC/BIC, or OFV drop. In Bayesian workflows, we can compare posterior model probabilities or predictive performance.
+
+\subsection{Likelihood ratio as evidence}
+
+For two hypotheses, the posterior odds are
+\[
+  \frac{p(H_1\given y)}{p(H_0\given y)}
+  =
+  \frac{p(y\given H_1)}{p(y\given H_0)}
+  \frac{p(H_1)}{p(H_0)}.
+\]
+The first ratio is the likelihood ratio, or Bayes factor if both \(p(y\given H_m)\) are fully integrated over parameters:
+\[
+  BF_{10}
+  =
+  \frac{p(y\given H_1)}{p(y\given H_0)}.
+\]
+This gives a clean reading of model comparison:
+\[
+  \text{posterior odds}
+  =
+  \text{data evidence}
+  \times
+  \text{prior odds}.
+\]
+
+\begin{remark}
+  NONMEM's objective-function difference is not automatically a Bayes factor. It usually compares maximized or approximated likelihoods, not fully integrated model evidence.
+
+  The inferential intuition is still related: how much better does one model explain the observed data after accounting for its structure?
+\end{remark}
+
+\subsection{Decision costs}
+
+6.437 emphasizes costs \(C_{ij}\): the cost of deciding \(H_i\) when \(H_j\) is true. In PopPK model selection, costs are not symmetric:
+
+\begin{itemize}[leftmargin=2em]
+  \item choosing an over-complicated model may harm interpretability and extrapolation;
+  \item choosing an under-complicated model may miss clinically important covariate effects;
+  \item choosing a mechanistically wrong model may give bad trial simulations even if fit is acceptable.
+\end{itemize}
+
+Therefore model choice is not just maximizing likelihood. It is a decision under scientific and clinical loss.
+
+\section{6.437 Bayesian parameter estimation}
+
+\subsection{Posterior as the sufficient belief}
+
+6.437's Bayesian parameter estimation says:
+\[
+  p(x\given y)
+  =
+  \frac{p(y\given x)p(x)}
+  {\int p(y\given x')p(x')\,\dd x'}.
+\]
+The key theorem-like idea is not a theorem but a discipline:
+
+\begin{quote}
+  Once the posterior is known, every Bayesian estimator for every loss can be computed from it.
+\end{quote}
+
+For PopPK:
+\[
+  p(\psi_i\given y_i,\widehat\theta)
+\]
+is the belief about an individual parameter; different summaries are different decisions.
+
+\subsection{MAP, mean, median}
+
+Under posterior \(p(\psi_i\given y_i)\):
+\[
+  \widehat{\psi}^{MAP}_i
+  =
+  \argmax_{\psi_i}p(\psi_i\given y_i),
+\]
+\[
+  \widehat{\psi}^{mean}_i
+  =
+  \int \psi_i p(\psi_i\given y_i)\,\dd \psi_i,
+\]
+\[
+  \widehat{\psi}^{median}_i
+  \text{ solves }
+  \Prob(\rv{\psi}_i\le \widehat{\psi}^{median}_i\given y_i)=\frac{1}{2}.
+\]
+For skewed log-normal-like posteriors, these can differ substantially.
+
+\begin{warning}
+  When software prints one individual estimate, ask which estimator it is. A conditional mode, a conditional mean, and a post hoc fit are not the same inferential object.
+\end{warning}
+
+\subsection{Posterior predictive distribution}
+
+The posterior for \(\psi_i\) is still not the final clinical object. Often we want future concentration:
+\[
+  p(\tilde y_i\given y_i)
+  =
+  \int
+  p(\tilde y_i\given \psi_i)
+  p(\psi_i\given y_i)
+  \dd\psi_i.
+\]
+If the future question is dose adjustment, the design \(u_i\) changes:
+\[
+  p(\tilde y_i\given y_i,u_i^{new})
+  =
+  \int
+  p(\tilde y_i\given \psi_i,u_i^{new})
+  p(\psi_i\given y_i,u_i^{old})
+  \dd\psi_i.
+\]
+This is the exact conceptual form behind individualized Bayesian forecasting.
+
+\section{6.437 exponential families}
+
+\subsection{Why exponential families matter}
+
+6.437 spends time on exponential families because they clarify when data can be compressed without losing information about parameters. A canonical form is
+\[
+  p(z;\theta)
+  =
+  \exp\{\theta^T T(z)-A(\theta)+B(z)\}.
+\]
+Here \(T(z)\) is the sufficient statistic.
+
+If complete data \(z\) were observed, estimation can often be driven by \(T(z)\). In PopPK, complete data would include latent individual parameters:
+\[
+  z=(y,\psi).
+\]
+For Gaussian random effects, sufficient-statistic-like objects include
+\[
+  \sum_i \eta_i,\qquad
+  \sum_i \eta_i\eta_i^T.
+\]
+For residual errors, they include sums of squared residuals. This is precisely why EM/SAEM can work: it tries to replace missing sufficient statistics by conditional expectations or stochastic approximations.
+
+\subsection{A Gaussian random-effects example}
+
+Suppose
+\[
+  \rv{\eta}_i\sim \Normal(0,\Omega),
+  \qquad
+  h(\rv{\psi}_i)=\mu+B c_i+\rv{\eta}_i.
+\]
+If \(\eta_i\) were observed, \(\Omega\) would be estimated from empirical covariance:
+\[
+  \widehat\Omega
+  =
+  \frac{1}{N}\sum_{i=1}^N \eta_i\eta_i^T.
+\]
+But \(\eta_i\) is hidden. EM-style algorithms replace this by
+\[
+  \frac{1}{N}\sum_i
+  \E_{\theta^{(k)}}[
+    \rv{\eta}_i\rv{\eta}_i^T
+    \given y_i
+  ].
+\]
+SAEM approximates this expectation by simulated conditional random effects and stochastic averaging.
+
+\section{6.437 EM as a lower-bound idea}
+
+\subsection{Observed likelihood is hard because of marginalization}
+
+For incomplete data,
+\[
+  p_\theta(y)=\int p_\theta(y,z)\,\dd z.
+\]
+The log-likelihood
+\[
+  \log p_\theta(y)=\log\int p_\theta(y,z)\,\dd z
+\]
+is difficult because log and integral do not separate. EM avoids direct attack by using a current conditional distribution over missing data.
+
+\subsection{The \(Q\)-function}
+
+Define
+\[
+  Q(\theta\given\theta^{(k)})
+  =
+  \E_{\theta^{(k)}}[
+    \log p_\theta(y,\rv{z})
+    \given y
+  ].
+\]
+Then EM maximizes \(Q\) repeatedly. Intuitively:
+
+\begin{quote}
+  Guess the hidden complete data distribution using the current model.
+  Then fit the complete data model under that guess.
+\end{quote}
+
+In PopPK, \(z\) is \(\psi_{1:N}\), the collection of individual parameters.
+
+\subsection{Why EM increases likelihood}
+
+6.437 derives EM using a decomposition based on conditional distributions and Gibbs' inequality. A compact way to remember it:
+\[
+  \log p_\theta(y)
+  =
+  \mathcal{F}(q,\theta)
+  +
+  D\!\left(q(z)\,\|\,p_\theta(z\given y)\right),
+\]
+where \(\mathcal{F}\) is a lower bound. Setting
+\[
+  q(z)=p_{\theta^{(k)}}(z\given y)
+\]
+makes the bound tight at \(\theta^{(k)}\). Increasing the bound increases the observed likelihood, at least locally.
+
+\begin{remark}
+  This lower-bound view is the conceptual bridge to variational inference. SAEM is a different bridge: instead of deterministic lower-bound optimization, it simulates from the conditional latent distribution and uses stochastic approximation.
+\end{remark}
+
+\section{6.437 MCMC, typicality, and high dimension}
+
+\subsection{Why high dimension is strange}
+
+6.437's typicality material warns that high-dimensional probability does not behave like low-dimensional geometry. Most posterior mass may live in a shell rather than at the mode. This matters for PopPK because the latent vector
+\[
+  \psi_{1:N}=(\psi_1,\ldots,\psi_N)
+\]
+can be high-dimensional. A joint MAP may not represent a typical posterior draw.
+
+\subsection{MCMC as dependent Monte Carlo}
+
+When direct sampling is hard, MCMC builds a Markov chain
+\[
+  \psi^{(1)},\psi^{(2)},\ldots
+\]
+whose stationary distribution is the target posterior:
+\[
+  \pi(\psi)=p(\psi\given y).
+\]
+Then expectations are approximated by chain averages:
+\[
+  \E[g(\rv{\psi})\given y]
+  \approx
+  \frac{1}{K}\sum_{k=1}^K g(\psi^{(k)}).
+\]
+SAEM often uses MCMC-like simulation steps for individual parameters. Full Bayesian PopPK uses MCMC to sample both \(\theta\) and \(\psi_{1:N}\).
+
+\subsection{Typicality and model checking}
+
+A posterior predictive check asks whether observed data look typical under the fitted model:
+\[
+  \tilde y^{(k)}\sim p(\tilde y\given y),
+  \qquad
+  T(\tilde y^{(k)}) \text{ compared with } T(y).
+\]
+The statistic \(T\) might be peak concentration, trough, quantile over time, residual pattern, or dropout rate. This is typicality thinking translated into pharmacometrics.
+
+\section{The 6.437 notation discipline}
+
+\subsection{Random variable versus realization}
+
+6.437 的一个很美的符号习惯是：random variables 用 sans-serif，比如 \(\rv{x}\)；具体实现值或 deterministic parameters 用 serif，比如 \(x\)。我在这篇笔记里采用这个区分：
+\[
+  \begin{aligned}
+    \rv{y}_i &\quad \text{is random data},\\
+    y_i &\quad \text{is the observed dataset}.
+  \end{aligned}
+\]
+同理，
+\[
+  \begin{aligned}
+    \rv{\psi}_i &\quad \text{is the latent individual parameter},\\
+    \psi_i &\quad \text{is a candidate value of that parameter}.
+  \end{aligned}
+\]
+
+\begin{notation}
+  我会把 random quantities 写成 \(\rv{y},\rv{\psi},\rv{\eta}\)，把 realized data 和 deterministic parameters 写成 \(y,\psi,\eta,\theta\)。Population parameters \(\theta\) 在 maximum likelihood 或 empirical Bayes 语境下是 deterministic-but-unknown；在 full Bayesian 语境下也可以进一步建模为 random variable \(\rv{\theta}\)。
+\end{notation}
+
+\subsection{Probability laws}
+
+6.008 从 sample space \(\Omega\) 和 probability law \(\Prob\) 开始。对 Population PK 来说，我们可以不用显式列出 \(\Omega\)，但必须知道每个模型声明都在定义一个 probability law。
+
+例如一个观察模型
+\[
+  \rv{y}_{ij}\given \rv{\psi}_i=\psi_i
+  \sim
+  \Normal\!\left(f(t_{ij};\psi_i,u_i),\,\sigma^2\right)
+\]
+不是一句拟合口号，而是在定义 conditional density:
+\[
+  p_\theta(y_{ij}\given \psi_i,u_i)
+  =
+  \frac{1}{\sqrt{2\pi\sigma^2}}
+  \exp\left\{
+    -\frac{\{y_{ij}-f(t_{ij};\psi_i,u_i)\}^2}{2\sigma^2}
+  \right\}.
+\]
+
+\subsection{Conditioning is information update}
+
+Bayesian inference 的基本句式是：
+\[
+  p(x\given y)
+  =
+  \frac{p(y\given x)p(x)}{p(y)}.
+\]
+Population PK 里它变成：
+\[
+  p_\theta(\psi_i\given y_i,c_i,u_i)
+  =
+  \frac{
+    p_\theta(y_i\given \psi_i,u_i)p_\theta(\psi_i\given c_i)
+  }{
+    \int p_\theta(y_i\given \psi_i,u_i)p_\theta(\psi_i\given c_i)\,\dd\psi_i
+  }.
+\]
+这就是 individual posterior。NONMEM 里常说的 EBE 或 empirical Bayes estimate，就是这个 posterior 的某个 point summary，通常接近 posterior mode。
+
+\begin{remark}
+  这里的 ``prior'' 不是主观信念意义上的 prior，而是 population distribution。对第 \(i\) 个 individual 来说，它在数学上扮演 prior 的角色：还没有看见 \(y_i\) 之前，\(\psi_i\) 的 plausible range 由 \(p_\theta(\psi_i\given c_i)\) 决定。
+\end{remark}
+
+\section{Decision theory before software}
+
+\subsection{Soft information and hard decisions}
+
+6.008/6.437 反复提醒：posterior distribution 是 soft information，而 estimate 是 hard decision。Population PK 里也一样。
+
+给定 posterior \(p_\theta(\psi_i\given y_i)\)，我们可以有不同 hard summaries:
+\[
+  \widehat{\psi}^{\mathrm{MAP}}_i
+  =
+  \argmax_{\psi_i}
+  p_\theta(\psi_i\given y_i),
+\]
+\[
+  \widehat{\psi}^{\mathrm{MMSE}}_i
+  =
+  \E_\theta[\rv{\psi}_i\given y_i],
+\]
+或者 posterior median、credible interval、posterior predictive distribution。不同 summary 对应不同 loss function。
+
+\begin{warning}
+  一个 EBE 不是 ``真实 individual parameter''。它是 posterior belief 在某个 loss function 下压成一个点的结果。Data sparse 时，posterior 会被 population distribution 拉回 typical value，这就是 shrinkage。
+\end{warning}
+
+\subsection{Risk, utility, and pharmacology}
+
+6.008 的 decision-making 语言可以直接翻译成 pharmacometrics:
+
+\begin{center}
+\begin{tabularx}{0.96\textwidth}{p{0.28\textwidth}X}
+\toprule
+Inference object & Pharmacometric decision \\
+\midrule
+Posterior over \(\psi_i\) & 这个病人的 \(CL_i,V_i\) 可能是多少？\\
+Posterior predictive \(p(\tilde y_i\given y_i)\) & 下一次 trough concentration 会不会低于目标？\\
+Loss function \(C(a,\widehat a)\) & 低估 exposure 与高估 exposure 的临床代价是否对称？\\
+Decision rule \(\delta(y)\) & 是否调剂量、是否加采样点、是否换模型？\\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+这解释了为什么 Bayesian view 对 pharmacology 很自然：临床建模最终不是为了得到漂亮参数，而是为了在 uncertainty 下做 decision。
+
+\section{From PK equations to random variables}
+
+\subsection{A one-compartment structural model}
+
+先忘掉 population。一个最小 oral one-compartment PK model 可以写成
+\[
+  \frac{\dd A_g(t)}{\dd t} = -k_a A_g(t),
+\]
+\[
+  \frac{\dd A_c(t)}{\dd t}
+  =
+  F k_a A_g(t) - \frac{CL}{V}A_c(t),
+  \qquad
+  C(t)=\frac{A_c(t)}{V}.
+\]
+这里 \(A_g\) 是 gut/depot amount，\(A_c\) 是 central amount，\(C(t)\) 是 plasma concentration。The structural model \(f\) maps design and parameters to a prediction:
+\[
+  C(t;\psi,u)=f(t;\psi,u), \qquad
+  \psi=(CL,V,k_a,F).
+\]
+
+\begin{remark}
+  Lavielle 的 Appendix C 强调：PK compartment model 是 ADME 的简化。它不是身体的真实地图，而是一个 quantitative approximation: enough structure to predict concentrations and enough simplicity to estimate parameters.
+\end{remark}
+
+\subsection{Observation model}
+
+真实实验里我们不直接观察 \(f(t;\psi,u)\)，而是观察带误差的浓度：
+\[
+  \rv{y}_{ij}
+  =
+  f(t_{ij};\psi_i,u_i)
+  +
+  g(t_{ij};\psi_i,\xi)\rv{\epsilon}_{ij},
+  \qquad
+  \rv{\epsilon}_{ij}\iid \Normal(0,1).
+\]
+常见 residual error choices:
+\[
+  g = a \quad \text{constant error},
+\]
+\[
+  g = b f(t_{ij};\psi_i,u_i) \quad \text{proportional error},
+\]
+\[
+  g = a + b f(t_{ij};\psi_i,u_i) \quad \text{combined error}.
+\]
+
+这些不是 purely technical choices。它们表达测量误差如何随浓度变化。低浓度 assay noise 可能接近 constant；高浓度时 coefficient of variation 可能更稳定，proportional error 更自然。
+
+\subsection{Why nonlinear matters}
+
+如果 \(f\) 是 linear in parameters，mixed effects theory 会比较舒服。但 PK model 通常 nonlinear: \(CL/V\) 在指数里，\(k_a\) 和 \(CL/V\) 可能接近，\(F\) 与 \(V\) 可能缠在一起。于是
+\[
+  \int p_\theta(y_i\given \psi_i)p_\theta(\psi_i)\,\dd\psi_i
+\]
+通常没有 closed form。Population PK 的算法困难几乎都从这里开始。
+
+\section{Individual parameters as latent variables}
+
+\subsection{The Lavielle layer}
+
+Lavielle 的 population approach 可以读成：
+\[
+  \rv{\psi}_i \sim p_\theta(\psi\given c_i),
+  \qquad
+  \rv{y}_i\given \rv{\psi}_i=\psi_i \sim p_\theta(y\given \psi_i,u_i).
+\]
+第一层描述 inter-individual variability；第二层描述 observation variability。
+
+对正值参数，常用 log-normal model:
+\[
+  \log \rv{CL}_i
+  =
+  \log CL_{\pop} + \beta_{CL}^{WT}\log\!\left(\frac{WT_i}{70}\right)
+  +
+  \rv{\eta}_{CL,i},
+\]
+\[
+  \rv{\eta}_{CL,i}\sim \Normal(0,\omega_{CL}^2).
+\]
+更紧凑地写：
+\[
+  h(\rv{\psi}_i)
+  =
+  \mu + B c_i + \rv{\eta}_i,
+  \qquad
+  \rv{\eta}_i\sim \Normal(0,\Omega).
+\]
+其中 \(h\) 可以是 log, logit, probit, identity 等 transformation。
+
+\subsection{Typical value and variability}
+
+一个 population parameter model 同时做两件事：
+
+\begin{itemize}[leftmargin=2em]
+  \item 给定 covariates \(c_i\)，定义 typical individual:
+  \[
+    \widetilde\psi_i = h^{-1}(\mu+Bc_i).
+  \]
+  \item 定义围绕 typical individual 的 unexplained variability:
+  \[
+    h(\rv{\psi}_i)-h(\widetilde\psi_i)=\rv{\eta}_i.
+  \]
+\end{itemize}
+
+这就是 covariate modeling 的 inference meaning。Covariates 不是为了让表格好看，而是为了把一部分 variability 从 random unexplained bucket 移到 explainable structure。
+
+\begin{question}
+  如果加入 weight effect 后 \(\omega_{CL}\) 下降，这是否说明 weight ``causes'' clearance variability？
+\end{question}
+
+统计上更谨慎的说法是：weight explains part of the observed between-subject variation under this model class。因果解释还需要设计、机制、外部知识和 counterfactual reasoning。
+
+\subsection{Shrinkage from sparse data}
+
+假设某个 subject 只有两个 concentration samples。单独拟合 \(CL_i,V_i,k_{a,i}\) 几乎不可能。但在 population model 下，我们可以把信息分成两部分：
+\[
+  \log p_\theta(\psi_i\given y_i)
+  =
+  \log p_\theta(y_i\given \psi_i)
+  +
+  \log p_\theta(\psi_i\given c_i)
+  -
+  \log p_\theta(y_i).
+\]
+第一项是 individual data support；第二项是 population support。数据少时，第二项更强，EBE 会向 typical value 收缩。这不是算法缺陷，而是 Bayesian updating 的必然结果。
+
+\section{The graphical model}
+
+\subsection{A picture of conditional independence}
+
+6.008 的 graphical model 语言在这里非常有用。Population PK 的核心 conditional independence 可以画成：
+
+\begin{center}
+\begin{tikzpicture}[>=stealth, node distance=2.2cm, every node/.style={align=center}]
+  \node[draw, rounded corners, minimum width=1.7cm, minimum height=0.75cm] (theta) {\(\theta\)};
+  \node[draw, rounded corners, below left=1.1cm and 1.3cm of theta, minimum width=1.7cm, minimum height=0.75cm] (psi) {\(\rv{\psi}_i\)};
+  \node[draw, rounded corners, left=1.8cm of psi, minimum width=1.5cm, minimum height=0.75cm] (cov) {\(c_i\)};
+  \node[draw, rounded corners, below=1.25cm of psi, minimum width=1.7cm, minimum height=0.75cm] (y) {\(\rv{y}_{ij}\)};
+  \node[draw, rounded corners, right=1.8cm of y, minimum width=1.5cm, minimum height=0.75cm] (des) {\(u_i,t_{ij}\)};
+  \draw[->] (theta) -- (psi);
+  \draw[->] (cov) -- (psi);
+  \draw[->] (psi) -- (y);
+  \draw[->] (des) -- (y);
+  \draw[->] (theta) -- (y);
+  \node[draw, dashed, rounded corners, fit=(psi)(y)(cov)(des), inner sep=0.35cm, label=below:{individual \(i\)}] {};
+\end{tikzpicture}
+\captionof{figure}{A Population PK graphical model. Conditional on \(\theta\), individuals are independent; within an individual, observations depend on the latent individual parameter and the design.}
+\end{center}
+
+\subsection{Factorization}
+
+For \(N\) individuals, the joint distribution factorizes as
+\[
+  p_\theta(y_{1:N},\psi_{1:N}\given c_{1:N},u_{1:N})
+  =
+  \prod_{i=1}^N
+  p_\theta(\psi_i\given c_i)
+  p_\theta(y_i\given \psi_i,u_i).
+\]
+这个 factorization 是 Population PK 所有计算的地基。
+
+Observed data likelihood 是把 latent individual parameters 积掉：
+\[
+  \lik(\theta;y)
+  =
+  p_\theta(y_{1:N}\given c_{1:N},u_{1:N})
+  =
+  \prod_{i=1}^N
+  \int
+  p_\theta(y_i\given \psi_i,u_i)
+  p_\theta(\psi_i\given c_i)
+  \dd\psi_i.
+\]
+
+\begin{remark}
+  这条积分就是 NONMEM、Monolix、SAEM、Laplace、FOCE、importance sampling、MCMC 都绕不开的核心。软件不同，本质都是在处理这个 marginalization。
+\end{remark}
+
+\section{What is being estimated?}
+
+\subsection{Population parameters}
+
+Population-level unknowns 可以写成
+\[
+  \theta=(\mu,B,\Omega,\xi),
+\]
+其中 \(\mu\) 是 typical fixed effects，\(B\) 是 covariate effects，\(\Omega\) 是 inter-individual variability matrix，\(\xi\) 是 residual error parameters。
+
+Frequentist/maximum-likelihood population modeling asks:
+\[
+  \widehat\theta_{\mathrm{ML}}
+  =
+  \argmax_\theta \log p_\theta(y).
+\]
+Full Bayesian modeling asks:
+\[
+  p(\theta,\psi_{1:N}\given y)
+  \propto
+  p(\theta)
+  \prod_{i=1}^N
+  p_\theta(\psi_i\given c_i)
+  p_\theta(y_i\given \psi_i,u_i).
+\]
+
+\subsection{Individual parameters}
+
+Once \(\widehat\theta\) is estimated, individual parameters are inferred through
+\[
+  p_{\widehat\theta}(\psi_i\given y_i)
+  \propto
+  p_{\widehat\theta}(y_i\given \psi_i)
+  p_{\widehat\theta}(\psi_i\given c_i).
+\]
+This is empirical Bayes: the prior-like population distribution is learned from the data, then plugged in.
+
+\begin{center}
+\begin{tabularx}{0.96\textwidth}{p{0.22\textwidth}X}
+\toprule
+Quantity & Meaning \\
+\midrule
+\(\widehat\theta\) & Estimated population-level model: typical values, variability, covariate effects, residual error. \\
+\(\widehat\psi_i^{MAP}\) & Conditional mode for individual \(i\), often called an EBE. \\
+\(p(\psi_i\given y_i,\widehat\theta)\) & Full conditional uncertainty for individual \(i\) after seeing his/her data. \\
+\(p(\tilde y_i\given y_i,\widehat\theta)\) & Predictive distribution for future observations or dosing scenarios. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\section{The incomplete-data problem}
+
+\subsection{Complete data would be easy}
+
+If we observed both \(y_i\) and \(\psi_i\), estimation of \(\theta\) would be easier because we could maximize
+\[
+  \log p_\theta(y,\psi)
+  =
+  \sum_{i=1}^N
+  \left[
+    \log p_\theta(y_i\given \psi_i)
+    +
+    \log p_\theta(\psi_i\given c_i)
+  \right].
+\]
+For Gaussian random effects, the second term has familiar sufficient statistics:
+\[
+  \sum_i h(\psi_i), \qquad
+  \sum_i h(\psi_i)h(\psi_i)^T.
+\]
+But \(\psi_i\) is not observed. We only observe \(y_i\). Therefore Population PK is an incomplete-data model.
+
+\subsection{EM in one line}
+
+6.437 presents EM as a way to maximize observed likelihood by repeatedly replacing missing complete data with its conditional distribution under the current parameter.
+
+Define
+\[
+  Q(\theta\given \theta^{(k)})
+  =
+  \E_{\theta^{(k)}}
+  \left[
+    \log p_\theta(\rv{y},\rv{\psi})
+    \given \rv{y}=y
+  \right].
+\]
+Then EM alternates:
+\[
+  \text{E-step: compute } Q(\theta\given\theta^{(k)}),
+\]
+\[
+  \text{M-step: } \theta^{(k+1)}=\argmax_\theta Q(\theta\given\theta^{(k)}).
+\]
+In simple exponential-family models this can be analytic. In nonlinear mixed effects models, the conditional distribution \(p_{\theta^{(k)}}(\psi_i\given y_i)\) is rarely analytic.
+
+\section{SAEM: Lavielle's computational bridge}
+
+\subsection{Why stochastic approximation}
+
+SAEM, associated with Lavielle's school and implemented in Monolix, modifies EM for hard incomplete-data problems \cite{kuhn2005saem,lavielle2015mixed}. Instead of exactly computing
+\[
+  \E_{\theta^{(k)}}[S(\rv{\psi})\given y],
+\]
+it simulates \(\psi^{(k)}\) from the conditional distribution and updates sufficient statistics through stochastic approximation:
+\[
+  S_k
+  =
+  S_{k-1}
+  +
+  \gamma_k\{S(\psi^{(k)})-S_{k-1}\}.
+\]
+Then it maximizes the approximate complete-data log-likelihood.
+
+\subsection{The Bayesian heart inside ML}
+
+This is a beautiful point: SAEM is used to find a maximum likelihood estimate of \(\theta\), but each iteration requires sampling from something Bayesian-looking:
+\[
+  p_{\theta^{(k)}}(\psi_i\given y_i).
+\]
+So the algorithm lives between worlds:
+
+\begin{itemize}[leftmargin=2em]
+  \item population parameter estimation is ML;
+  \item individual latent variable update is posterior simulation;
+  \item model evaluation uses predictive distributions.
+\end{itemize}
+
+This is why learning Bayesian inference first makes Population PK feel much less mysterious.
+
+\subsection{SAEM versus exact EM}
+
+Exact EM can be imagined as:
+\begin{quote}
+  Replace missing parameters by their exact conditional expectations.
+\end{quote}
+SAEM is:
+\begin{quote}
+  Simulate plausible missing parameters and average them carefully over iterations.
+\end{quote}
+Monte Carlo gives access to complex nonlinear posteriors; stochastic approximation controls noise across iterations.
+
+\section{NONMEM in the same language}
+
+\subsection{Theta, eta, epsilon}
+
+Classical NONMEM notation is usually:
+\[
+  \begin{aligned}
+    \theta &\quad \text{fixed effects},\\
+    \eta_i &\sim \Normal(0,\Omega)
+      \quad \text{inter-individual random effects},\\
+    \epsilon_{ij} &\sim \Normal(0,\Sigma)
+      \quad \text{residual errors}.
+  \end{aligned}
+\]
+A typical model:
+\[
+  CL_i = \theta_{CL}\exp(\eta_{CL,i}),
+  \qquad
+  V_i = \theta_V\exp(\eta_{V,i}),
+\]
+\[
+  y_{ij}
+  =
+  f(t_{ij};CL_i,V_i,k_{a,i})
+  +
+  \epsilon_{ij}.
+\]
+This is exactly the same hierarchy, written through random effects instead of directly through \(p(\psi_i\given c_i;\theta)\).
+
+\subsection{The objective function}
+
+NONMEM's objective function is tied to the marginal likelihood:
+\[
+  -2\log p_\theta(y)
+  =
+  -2\sum_i
+  \log
+  \int
+  p_\theta(y_i\given \eta_i)
+  p(\eta_i)\,\dd\eta_i.
+\]
+The hard part is still the integral over \(\eta_i\). Historically, NONMEM made this practical through approximations such as first-order methods and FOCE; later versions also include more simulation-based methods. The algorithmic vocabulary differs, but the inferential object is the same \cite{beal1980nonmem,lindstrom1990nlme}.
+
+\subsection{FO, FOCE, Laplace as approximations}
+
+For intuition:
+\begin{itemize}[leftmargin=2em]
+  \item \textbf{FO} linearizes the nonlinear model around \(\eta_i=0\). It is fast but can be crude when nonlinearity or variability is large.
+  \item \textbf{FOCE} linearizes around each individual's conditional estimate \(\widehat\eta_i\). This respects individual information better.
+  \item \textbf{Laplace} approximates the individual integral near the conditional mode, using local curvature.
+  \item \textbf{SAEM} uses simulation and stochastic approximation rather than only local linearization.
+\end{itemize}
+
+\begin{remark}
+  My translation: NONMEM classical methods are local approximations to the same Bayesian-looking integral; SAEM is a stochastic route through the same landscape.
+\end{remark}
+
+\section{Full Bayesian Population PK}
+
+\subsection{Adding a prior on population parameters}
+
+Empirical Bayes PopPK estimates \(\theta\), then conditions on \(\widehat\theta\). Full Bayesian PopPK gives \(\theta\) its own prior:
+\[
+  p(\theta,\psi_{1:N}\given y)
+  \propto
+  p(\theta)
+  \prod_i
+  p_\theta(\psi_i\given c_i)
+  p_\theta(y_i\given \psi_i,u_i).
+\]
+Then posterior uncertainty in \(\theta\) is propagated into individual parameters and predictions:
+\[
+  p(\tilde y\given y)
+  =
+  \int
+  p(\tilde y\given \psi,\theta)
+  p(\psi,\theta\given y)
+  \dd\psi\,\dd\theta.
+\]
+
+\subsection{What changes conceptually}
+
+\begin{center}
+\begin{tabularx}{0.96\textwidth}{p{0.24\textwidth}X}
+\toprule
+Approach & What uncertainty is retained? \\
+\midrule
+Population ML & \(\widehat\theta\) is a point estimate; uncertainty can be approximated by Fisher information, bootstrap, profile likelihood. \\
+Empirical Bayes individual estimation & \(\psi_i\) is inferred conditionally on \(\widehat\theta\); population uncertainty is often ignored in the individual posterior. \\
+Full Bayesian & \(\theta\) and \(\psi_i\) are jointly uncertain; posterior and posterior predictive intervals naturally include both levels. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+Full Bayesian is not automatically better. It asks for priors, computation, convergence diagnostics, and careful posterior checking. But conceptually it is the cleanest expression of the hierarchy.
+
+\subsection{Bayesian but not mystical}
+
+The useful Bayesian move is not ``believe harder.'' It is:
+\[
+  \text{state all uncertainty explicitly, then condition on data}.
+\]
+Population PK already does this for individual parameters. Full Bayesian simply extends the same discipline to population parameters.
+
+\section{Warfarin as a running example}
+
+\subsection{Immediate response fails}
+
+Lavielle's warfarin example is a good teaching case because immediate response is tempting but wrong. Suppose concentration \(C(t)\) is predicted by a PK model and effect is
+\[
+  E(t)
+  =
+  1-
+  \frac{I_{\max}C(t)}{IC_{50}+C(t)}.
+\]
+An immediate response model sets
+\[
+  R(t)=S_0E(t).
+\]
+If observed PCA reaches its maximum delay long after peak concentration, the concentration-effect scatter shows hysteresis. Then \(C(t)\to R(t)\) is not instantaneous.
+
+\subsection{Effect compartment}
+
+One repair is to introduce a latent effect-site concentration:
+\[
+  \frac{\dd C_e(t)}{\dd t}
+  =
+  k_{e0}\{C(t)-C_e(t)\}.
+\]
+Then effect depends on \(C_e(t)\), not directly on \(C(t)\):
+\[
+  E_e(t)
+  =
+  1-
+  \frac{I_{\max}C_e(t)}{IC_{50}+C_e(t)}.
+\]
+This is a perfect example of Bayesian modeling logic: when data show systematic structure not explained by current latent variables, introduce a better latent state.
+
+\subsection{Indirect response}
+
+Warfarin also has a biological mechanism: inhibition of prothrombin synthesis. An indirect response model can write
+\[
+  \frac{\dd R(t)}{\dd t}
+  =
+  k_{\mathrm{in}}
+  \left(
+    1-\frac{I_{\max}C(t)}{IC_{50}+C(t)}
+  \right)
+  -
+  k_{\mathrm{out}}R(t).
+\]
+This model no longer says drug directly changes measured response. It says drug changes the production process; the measured response follows through turnover. That is more mechanistic and often more interpretable.
+
+\section{Model evaluation as posterior criticism}
+
+\subsection{Prediction before p-values}
+
+Lavielle emphasizes model diagnostics and visual predictive checks. In Bayesian language, this is posterior predictive criticism:
+\[
+  \tilde y \sim p(\tilde y\given y),
+\]
+then compare simulated \(\tilde y\) with observed \(y\).
+
+VPC asks: if my model were the data-generating mechanism, would data like mine look ordinary? If not, where does it fail: absorption phase, terminal phase, variability, covariate groups, below quantification limit, dropout?
+
+\subsection{Residuals need context}
+
+Common residuals such as IWRES, CWRES, NPDE are not just software outputs. They are attempts to transform model misfit into a scale where remaining noise should look simple. If residuals still show time trend, concentration dependence, covariate dependence, or heavy tails, the probability model is misspecified.
+
+\subsection{Model selection}
+
+6.437's ``modeling as inference'' view is helpful: a model is an approximation to the true data distribution. Selection should not be reduced to one number.
+
+\begin{itemize}[leftmargin=2em]
+  \item Likelihood/AIC/BIC answer an approximation-complexity tradeoff.
+  \item Likelihood ratio tests compare nested models under regularity assumptions.
+  \item VPC/PPC ask whether predictive behavior is credible.
+  \item Clinical utility asks whether the model is good enough for the decision.
+\end{itemize}
+
+\begin{remark}
+  The most PopPK-specific danger is choosing a model because OFV improves while ignoring whether the resulting random effects, shrinkage, covariate effects, and predictions make pharmacological sense.
+\end{remark}
+
+\section{How to read a PopPK paper}
+
+\subsection{The inference checklist}
+
+When I read a Population PK paper, I want to reconstruct the graphical model:
+
+\begin{enumerate}[leftmargin=2em]
+  \item What are the observations \(\rv{y}_{ij}\)? Concentration only, PK/PD joint, categorical, time-to-event?
+  \item What is the structural model \(f(t;\psi_i,u_i)\)?
+  \item Which parameters are individual-specific \(\psi_i\), and which are population-level \(\theta\)?
+  \item What transformations ensure parameter constraints? log for positive, logit for fractions?
+  \item What covariates enter \(h(\psi_i)\)?
+  \item What residual error model defines \(p(y_i\given\psi_i)\)?
+  \item What algorithm approximates the likelihood or posterior?
+  \item How are individual estimates summarized, and is shrinkage reported?
+  \item What diagnostics check predictive adequacy?
+  \item What decision does the model support?
+\end{enumerate}
+
+\subsection{Reading NONMEM output}
+
+A NONMEM run can be read as a probabilistic story:
+
+\begin{itemize}[leftmargin=2em]
+  \item \(\theta\): learned typical physiology and covariate effects.
+  \item \(\Omega\): learned unexplained between-subject variability.
+  \item \(\Sigma\): learned observation noise.
+  \item \(\eta_i\): posterior-ish individual deviation from the typical subject.
+  \item OFV: approximation to marginal log-likelihood.
+  \item CWRES/IWRES: checks on conditional observation model.
+  \item VPC: check on population predictive distribution.
+\end{itemize}
+
+Once read this way, NONMEM stops being an opaque command-line tradition and becomes an inference engine with a particular notation and approximation culture.
+
+\input{population-pk-bayesian-inference-expanded}
+
+\input{population-pk-bayesian-inference-worked}
+
+\input{population-pk-bayesian-inference-source-guided}
+
+\section{A minimal self-study path}
+
+\subsection{Conceptual order}
+
+For someone starting from zero, I would learn in this order:
+
+\begin{enumerate}[leftmargin=2em]
+  \item Probability law and conditional probability.
+  \item Bayes rule as belief update.
+  \item Latent variables and posterior distributions.
+  \item Decision rules: MAP, posterior mean, loss functions.
+  \item Graphical models and factorization.
+  \item Monte Carlo approximation.
+  \item EM for incomplete data.
+  \item PK structural ODEs.
+  \item Mixed effects model: \(\psi_i\) as latent individual parameter.
+  \item NONMEM/Monolix algorithms as approximations to the same integral.
+\end{enumerate}
+
+\subsection{The one-sentence memory hook}
+
+\begin{quote}
+  Population PK is Bayesian inference with a pharmacokinetic forward model: the population distribution supplies a prior-like structure for individual parameters, individual observations update that structure, and the resulting posterior predictive distribution supports pharmacological decisions.
+\end{quote}
+
+\subsection{My working conclusion}
+
+Lavielle's book feels powerful because it does not treat population modeling as a bag of tricks. It says: define the observation model, define the individual-parameter distribution, distinguish representation from implementation, and then choose algorithms according to the task.
+
+6.008/6.437 make that even cleaner. They give the meta-language: probability law, conditional independence, posterior, risk, marginalization, Monte Carlo, EM, model selection. Once that language is internalized, Population PK becomes a special case of a much larger idea:
+\begin{quote}
+  Model biological variability as latent structure, then infer it from noisy observations.
+\end{quote}
+
+\bibliographystyle{plain}
+\bibliography{../refs/pharmacology}
+
+\end{document}

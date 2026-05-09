@@ -1,0 +1,278 @@
+\section{Source-guided route through 6.008}
+
+\subsection{Preliminaries}
+
+The 6.008 preliminary notes begin before probability feels glamorous.  They set up notation, sets, functions, and the idea that mathematical objects must be named before they can be manipulated.  For this PopPK project, that humility is valuable.  We cannot talk about a posterior for clearance until we have decided what clearance means, what data are observed, and what probability law connects them.
+
+The practical translation is:
+\[
+  \text{write down the object before estimating it.}
+\]
+If \(y_i\) is the observed longitudinal record, define it.  If \(u_i\) is the dose and sampling design, define it.  If \(c_i\) is covariate information, define which covariates are included and whether they are baseline or time-varying.  If \(\psi_i\) is the individual parameter vector, list its components and constraints.  This sounds slow, but it prevents the most expensive confusion later.
+
+\subsection{Probability of events}
+
+The probability-of-events unit is the first piece of PopPK decision language.  Events are not only mathematical subsets; they are clinical statements:
+\[
+  \{\mathrm{AUC}>U\},
+  \qquad
+  \{C_{\min}<L\},
+  \qquad
+  \{\mathrm{bleeding\ event\ before\ day\ 30}\}.
+\]
+Once the event is named, the model can be judged by whether it estimates that probability well.  A model can fit average concentration and still be poor for a tail event.  This is why event language is foundational.
+
+\subsection{Discrete random variables}
+
+The discrete random variable notes are useful even for continuous PK because they teach the habit of mapping outcomes to summaries.  A genotype, responder status, toxicity grade, dropout indicator, mixture-class label, or hidden disease state may be discrete.  Even continuous models often contain discrete decisions:
+\[
+  d_i=
+  \begin{cases}
+  1, & \text{increase dose},\\
+  0, & \text{do not increase dose}.
+  \end{cases}
+\]
+The random-variable language says that \(d_i\) is not arbitrary; it is a function of data, posterior summaries, and loss.
+
+\subsection{Decision making}
+
+The 6.008 decision-making notes introduce the central habit that 6.437 later deepens: inference is not finished when we compute a probability.  We often must choose an action.  In PopPK the action may be a dose, a sampling time, a covariate-screening decision, a model-selection decision, or a trial-design decision.
+
+A dose rule is a function:
+\[
+  \delta: y_i \mapsto a_i.
+\]
+The quality of \(\delta\) depends on the distribution of future outcomes under the action.  This is why posterior predictive distributions are more decision-relevant than parameter estimates alone.
+
+\subsection{Graphical models}
+
+The 6.008 graphical model notes are almost tailor-made for hierarchical pharmacometrics.  The repeated-subject structure, conditional independence assumptions, and latent variables all become visible in a graph.  A graph also tells us what can be computed locally and what must be marginalized.
+
+For PopPK, the basic graph is repeated:
+\[
+  c_i\to\psi_i\to y_i,
+  \qquad
+  u_i\to y_i,
+  \qquad
+  \theta\to\psi_i.
+\]
+More complex graphs add disease states, adherence, dropout, PD response, mixture classes, or inter-occasion effects.  Each addition should correspond to a scientific reason, not a desire to make the graph impressive.
+
+\subsection{Model selection}
+
+The 6.008 model-selection unit prepares the reader for the PopPK reality that no model is true.  A structural PK model is an approximation.  A residual model is an approximation.  A covariate model is an approximation.  The question is not whether a model is perfect, but whether it is useful, calibrated, and interpretable for the task.
+
+This view reduces anxiety about model comparison.  OFV, AIC, BIC, cross-validation, VPC, and clinical utility are not enemies.  They are different summaries of how an approximating family behaves.
+
+\subsection{Asymptotics}
+
+The 6.008 asymptotics notes teach concentration, laws of large numbers, central limit behavior, and bounds.  In PopPK, asymptotics help explain why large studies stabilize population parameter estimates.  They do not rescue weak individual information.  A large \(N\) can estimate \(\theta\) well while a particular sparse individual still has a broad conditional posterior for \(\psi_i\).
+
+This distinction is central:
+\[
+  \text{many subjects improve population learning;}
+  \qquad
+  \text{many samples per subject improve individual learning.}
+\]
+Both matter, but they are not interchangeable.
+
+\subsection{Markov chains and sampling}
+
+The Markov-chain and sampling units prepare the reader for MCMC and stochastic algorithms.  The key conceptual move is that dependent samples can still approximate a target distribution if the chain has the right stationary behavior and mixes well.  In PopPK this matters for full Bayesian models, SAEM conditional simulation, and simulation-based diagnostics.
+
+The practical question is always:
+\[
+  \text{Are my simulated latent variables representative of the conditional law I claim to use?}
+\]
+
+\subsection{Continuous inference}
+
+Continuous random variables complete the bridge to PK parameters.  Clearance, volume, rate constants, exposure, concentration, and response are continuous or treated as continuous.  Densities replace probability masses, and integrals replace sums:
+\[
+  P(A)=\int_A p(x)\,\dd x.
+\]
+Every marginal likelihood in PopPK is this idea repeated at scale.
+
+\section{Source-guided route through 6.437}
+
+\subsection{Bayesian hypothesis testing}
+
+6.437's Bayesian hypothesis testing begins with hypotheses as random variables.  In pharmacometrics, hypotheses may be model structures, mixture classes, responder states, or covariate-inclusion decisions.  The likelihood ratio becomes a disciplined way to compare evidence under competing probability laws.
+
+For example, a covariate question can be idealized as
+\[
+  H=0:\beta=0,
+  \qquad
+  H=1:\beta\neq 0.
+\]
+In practice we often use likelihood ratio tests, information criteria, or posterior model probabilities rather than this exact binary setup.  But the conceptual frame is useful: evidence is always evidence under specified models.
+
+\subsection{Bayesian parameter estimation}
+
+The Bayesian estimation notes formalize posterior summaries under loss.  In PopPK, this is the clean language for individual parameters.  Given \(\theta\), the conditional distribution
+\[
+  p_\theta(\psi_i\mid y_i)
+\]
+is the complete belief about \(\psi_i\).  MAP, mean, median, credible interval, and prediction are summaries or transformations of that belief.  They are not interchangeable unless the distribution is simple and the loss is clear.
+
+\subsection{Linear estimation}
+
+The linear estimation unit is not directly PopPK, because PK models are usually nonlinear.  But it teaches projection geometry.  Linear least squares finds the best linear summary under squared error.  In nonlinear mixed effects, local linearization methods borrow the same geometry.  FO and FOCE can be read as local linear estimation inside a nonlinear likelihood.
+
+\subsection{Non-Bayesian decision theory}
+
+The non-Bayesian decision theory notes help interpret classical operating characteristics: false alarm, detection probability, minimax risk, and constraints.  This matters for pharmacometrics when Bayesian posterior logic is not the only criterion.  Regulatory decision-making, trial design, safety monitoring, and model qualification often ask for frequentist performance properties.
+
+The mature reader can hold both views:
+\[
+  \text{Bayesian: condition on observed data;}
+  \qquad
+  \text{frequentist: study repeated-use behavior.}
+\]
+
+\subsection{Exponential families and sufficient statistics}
+
+Exponential families matter because they make inference compact.  In EM and SAEM, sufficient statistics are especially important.  If the complete-data model belongs to a convenient family, the M-step may be tractable once the missing sufficient statistics are averaged or stochastically approximated.
+
+The PopPK lesson is that algorithmic convenience often depends on representation.  Two mathematically equivalent descriptions of a model may lead to different computational paths.
+
+\subsection{The EM algorithm}
+
+The EM unit is one of the most important bridges to Lavielle.  It shows how to maximize an observed likelihood when some variables are hidden.  In PopPK, the hidden variables are individual parameters.  The observed likelihood requires integrating them out; the complete-data likelihood would be easier if they were known.
+
+The EM slogan for this note is:
+\[
+  \text{alternate between imagining latent individuals and updating population parameters.}
+\]
+SAEM modifies the imagining step by simulation and stochastic approximation.
+
+\subsection{Information geometry}
+
+Information geometry teaches that probability distributions form a curved space and that likelihood estimation can be read as projection.  This is a powerful antidote to literalism.  A fitted PopPK model is a point in an approximating family.  Diagnostics ask whether the projection is close enough in the directions that matter.
+
+This also explains why different diagnostics can disagree.  One model may be close in average likelihood but poor in tail exposure.  Another may have slightly worse likelihood but better clinical calibration.  They are close or far in different directions.
+
+\subsection{Modeling as inference}
+
+The modeling-as-inference unit is perhaps the philosophical heart of the bridge.  Choosing a model is itself an inferential act.  A model family encodes what kinds of regularities we are willing to see.  In PopPK, this includes the compartment structure, covariates, variability layers, residual distributions, and response mechanisms.
+
+The reader should ask:
+\[
+  \text{What regularities can this model express, and what failures is it blind to?}
+\]
+
+\subsection{MCMC and approximate inference}
+
+The MCMC and approximate inference notes prepare the reader for modern computation.  Exact posterior distributions and exact likelihoods are rare in nonlinear hierarchical models.  Approximation is not a shameful practical detail; it is part of the model's usable meaning.
+
+For PopPK, one should report not only the model but the approximation:
+\[
+  \text{FOCE? Laplace? SAEM? importance sampling? full Bayesian MCMC?}
+\]
+Different approximations can lead to different estimates in hard models, so the algorithm is part of the inferential statement.
+
+\subsection{Typicality and asymptotic inference}
+
+Typicality and asymptotics teach what large samples look like under a probability law.  In PopPK, predictive checks are a finite-sample cousin of this idea: if the fitted model were true, what datasets would be ordinary?  VPCs are visual typicality checks for pharmacometric summaries.
+
+\section{Source-guided route through Lavielle}
+
+\subsection{Part I: preliminary concepts}
+
+Lavielle begins by explaining the population approach, mixed-effects models, hierarchical models, and the idea that a model is a joint probability distribution.  This is exactly where the MIT inference language should be attached.  The population approach is not merely a way to pool data; it is a probability law that links individuals through shared population parameters.
+
+The most important conceptual sentence to carry forward is:
+\[
+  \text{a model is a joint probability distribution.}
+\]
+Everything else follows from that.
+
+\subsection{Part II: defining models}
+
+Part II separates observation models, individual-parameter models, covariates, additional variability layers, mixtures, hidden Markov models, and stochastic differential equations.  This is the construction kit.  Each chapter changes a factor in the joint distribution.
+
+Observation models define \(p(y_i\mid\psi_i)\).  Individual-parameter models define \(p(\psi_i\mid c_i)\).  Extensions add latent classes, hidden states, or stochastic dynamics.  The reader should not memorize these as isolated model types.  They are ways to enrich the joint law.
+
+\subsection{Part III: using models}
+
+Part III turns models into tasks: estimation, individual prediction, model evaluation, model selection, model building, examples, and algorithms.  This is where 6.437 becomes essential.  Estimation requires objectives and approximations.  Evaluation requires predictive distributions.  Selection requires criteria.  Algorithms require understanding missing data and conditional simulation.
+
+The PopPK workflow is therefore:
+\[
+  \text{define the law}
+  \longrightarrow
+  \text{choose the task}
+  \longrightarrow
+  \text{choose the method}
+  \longrightarrow
+  \text{diagnose the result}.
+\]
+
+\subsection{The warfarin example}
+
+Lavielle's warfarin example is not only a PK/PD case study.  It is a lesson in model revision.  Direct effect is too simple when the response is delayed.  Effect-compartment and indirect-response models add latent dynamics.  Sequential and simultaneous modeling strategies reflect different factorizations and computational compromises.
+
+The inference question is:
+\[
+  \text{Which latent structure makes the observed concentration-response relation ordinary?}
+\]
+That is a more precise version of ``which model fits better.''
+
+\subsection{The algorithms chapter}
+
+Lavielle's algorithms chapter is where EM, SAEM, Metropolis-Hastings, Fisher information, log-likelihood estimation, and VPC construction come together.  It is the computational spine of the book.  A reader trained on 6.437 should recognize the recurring pattern:
+\[
+  \text{hard integral}
+  \longrightarrow
+  \text{latent-variable representation}
+  \longrightarrow
+  \text{approximation or simulation}.
+\]
+
+\subsection{The PK appendix}
+
+The PK appendix reminds us that the statistical hierarchy needs a pharmacological forward model.  ADME, dosing input, compartments, transfers, and dynamical systems determine \(f(t;\psi,u)\).  Without this forward model, the hierarchy is just an abstract mixed-effects shell.
+
+The final synthesis is:
+\[
+  \text{PK supplies the mechanistic map;}
+  \qquad
+  \text{Bayesian inference supplies the uncertainty map.}
+\]
+
+\section{A full reading loop}
+
+\subsection{Step 1: rewrite the variables}
+
+For any new paper, start by writing:
+\[
+  y_i,\quad \psi_i,\quad \theta,\quad c_i,\quad u_i.
+\]
+If the paper has response data, add \(r_i\).  If it has event times, add \(T_i\).  If it has latent classes, add \(z_i\).  If it has disease progression, add the disease state.  The act of naming variables is the start of understanding.
+
+\subsection{Step 2: write the factorization}
+
+Next write the factorization.  A simple model may be
+\[
+  p_\theta(y,\psi\mid c,u)
+  =
+  \prod_i p_\theta(\psi_i\mid c_i)p_\theta(y_i\mid\psi_i,u_i).
+\]
+A richer model may add
+\[
+  p_\theta(y_i,r_i,T_i,\psi_i,z_i\mid c_i,u_i).
+\]
+The factorization reveals conditional independence assumptions and missing-data structure.
+
+\subsection{Step 3: identify the inferential target}
+
+The target might be \(\theta\), \(\psi_i\), a covariate effect, a model comparison, a future exposure, a dose, or a clinical event probability.  Different targets require different summaries.  Do not let the software's default output decide the scientific target.
+
+\subsection{Step 4: identify the approximation}
+
+Ask how the hard integral or posterior is approximated.  If the answer is FOCE, think local approximation.  If SAEM, think stochastic EM.  If MCMC, think posterior simulation.  If bootstrap, think repeated resampling.  The approximation determines what errors or diagnostics matter.
+
+\subsection{Step 5: check prediction}
+
+Finally, ask what the model predicts and whether the prediction has been checked.  A model without predictive criticism is unfinished.  Prediction is where the joint probability law meets reality again.
+

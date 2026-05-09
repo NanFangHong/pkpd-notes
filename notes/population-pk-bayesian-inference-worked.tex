@@ -1,0 +1,434 @@
+\section{Worked notebook: a two-level normal model}
+
+\subsection{Why start with a toy model}
+
+Before nonlinear ODEs, residual error models, and SAEM, it is worth solving a model where every conditional distribution is available in closed form.  A toy model is not a toy because it is trivial; it is a toy because it exposes the mechanism without numerical smoke.  The mechanism we want to see is borrowing strength.
+
+Let
+\[
+  \psi_i\mid \mu,\omega^2 \sim \Normal(\mu,\omega^2),
+  \qquad
+  y_{ij}\mid \psi_i,\sigma^2\sim\Normal(\psi_i,\sigma^2),
+  \qquad
+  j=1,\ldots,n_i.
+\]
+Think of \(\psi_i\) as an individual log-clearance and \(y_{ij}\) as noisy repeated observations of that log-clearance after some simplification.  This is not a realistic PK model, but it contains the same hierarchy:
+\[
+  \text{population} \longrightarrow \text{individual parameter} \longrightarrow \text{observations}.
+\]
+
+\subsection{The individual posterior}
+
+Let \(\bar y_i=n_i^{-1}\sum_j y_{ij}\).  Conditional on \(\mu,\omega^2,\sigma^2\), the posterior for \(\psi_i\) is normal:
+\[
+  \psi_i\mid y_i
+  \sim
+  \Normal(m_i,s_i^2),
+\]
+where
+\[
+  s_i^2
+  =
+  \left(
+    \frac{1}{\omega^2}
+    +
+    \frac{n_i}{\sigma^2}
+  \right)^{-1},
+  \qquad
+  m_i
+  =
+  s_i^2
+  \left(
+    \frac{\mu}{\omega^2}
+    +
+    \frac{n_i\bar y_i}{\sigma^2}
+  \right).
+\]
+Equivalently,
+\[
+  m_i
+  =
+  w_i\bar y_i+(1-w_i)\mu,
+  \qquad
+  w_i=
+  \frac{n_i/\sigma^2}{n_i/\sigma^2+1/\omega^2}.
+\]
+This one line is shrinkage in its cleanest form.  If \(n_i\) is large or \(\sigma^2\) is small, \(w_i\) is near one and the subject's data dominate.  If \(n_i\) is small or noisy, \(w_i\) is near zero and the posterior mean stays near the population mean.
+
+\subsection{What this teaches about EBEs}
+
+In this normal model, the posterior mean and posterior mode coincide.  In nonlinear PopPK they generally do not.  But the lesson survives: an EBE is pulled between individual evidence and population structure.  The amount of pull is not moral weakness in the software.  It is the consequence of conditional probability.
+
+The formula also explains why sparse sampling can create misleading post hoc plots.  Suppose many subjects have one noisy sample.  Their EBEs will be strongly shrunk toward \(\mu\).  A plot of EBE versus covariate may then understate real heterogeneity or create artifacts depending on how the covariate was already included in the model.  A mature analysis treats EBEs as conditional summaries, not raw measurements.
+
+\subsection{Predictive distribution for a future observation}
+
+For a future replicate \(y_{i,new}\),
+\[
+  p(y_{i,new}\mid y_i)
+  =
+  \int p(y_{i,new}\mid \psi_i)p(\psi_i\mid y_i)\,\dd\psi_i.
+\]
+In the toy model,
+\[
+  y_{i,new}\mid y_i
+  \sim
+  \Normal(m_i,\sigma^2+s_i^2).
+\]
+The predictive variance has two parts: observation noise \(\sigma^2\) and individual-parameter uncertainty \(s_i^2\).  This decomposition is essential in therapeutic prediction.  If we ignore \(s_i^2\), we pretend the individual parameter is known after estimation.
+
+\section{Worked notebook: lognormal random effects}
+
+\subsection{Why log transforms are common}
+
+Many PK parameters are positive: clearance, volume, rate constants, bioavailability fractions after suitable transformations.  A normal model directly on \(CL_i\) can assign probability to negative clearance.  A lognormal model avoids this:
+\[
+  \log CL_i=\log CL_{\pop}+\eta_{CL,i},
+  \qquad
+  \eta_{CL,i}\sim\Normal(0,\omega_{CL}^2).
+\]
+Then \(CL_i>0\) automatically.  More importantly, variability becomes multiplicative:
+\[
+  CL_i=CL_{\pop}\exp(\eta_{CL,i}).
+\]
+If \(\eta_{CL,i}=0.2\), clearance is multiplied by \(\exp(0.2)\).  If \(\eta_{CL,i}=-0.2\), it is multiplied by \(\exp(-0.2)\).  The model is symmetric on the log scale, not the original scale.
+
+\subsection{Typical value versus mean}
+
+For a lognormal parameter,
+\[
+  \E(CL_i)=CL_{\pop}\exp(\omega_{CL}^2/2).
+\]
+Thus \(CL_{\pop}\) is the median and typical value on the original scale, not the arithmetic mean.  This distinction matters when interpreting fixed effects.  A report that calls \(CL_{\pop}\) the mean clearance is using language loosely unless \(\omega^2\) is small.
+
+The same issue appears with covariates:
+\[
+  CL_i=CL_{\pop}\left(\frac{WT_i}{70}\right)^\beta\exp(\eta_i).
+\]
+The covariate function gives the typical clearance for weight \(WT_i\).  The population mean at that weight is larger by the lognormal factor if the random effect variance is nonzero.
+
+\subsection{Correlation between random effects}
+
+If clearance and volume random effects are correlated,
+\[
+  \begin{pmatrix}\eta_{CL,i}\\ \eta_{V,i}\end{pmatrix}
+  \sim
+  \Normal\left(
+    \begin{pmatrix}0\\0\end{pmatrix},
+    \begin{pmatrix}
+      \omega_{CL}^2 & \rho\omega_{CL}\omega_V\\
+      \rho\omega_{CL}\omega_V & \omega_V^2
+    \end{pmatrix}
+  \right).
+\]
+The correlation \(\rho\) is not a decorative matrix entry.  It says whether individuals with high clearance tend also to have high volume.  This can affect predictions of half-life:
+\[
+  t_{1/2,i}=\frac{\log 2\,V_i}{CL_i}.
+\]
+If \(V_i\) and \(CL_i\) rise together, half-life may be less variable than either parameter alone.  A diagonal \(\Omega\) can therefore distort derived quantities even when marginal variability looks plausible.
+
+\section{Worked notebook: covariate models}
+
+\subsection{Centering}
+
+Covariate models should be centered so fixed effects remain interpretable.  Weight effects often use
+\[
+  CL_i=CL_{\pop}\left(\frac{WT_i}{70}\right)^\beta\exp(\eta_i).
+\]
+Then \(CL_{\pop}\) is the typical clearance at \(70\,\mathrm{kg}\).  Without centering, the intercept may refer to an impossible subject, making interpretation and numerical estimation worse.
+
+Centering also helps separate baseline physiology from covariate slope.  If age is centered at \(50\) years,
+\[
+  \log CL_i=\log CL_{\pop}+\beta_{age}(AGE_i-50)+\eta_i,
+\]
+then \(CL_{\pop}\) is typical clearance at age 50.  The slope describes multiplicative change per year on the log scale.
+
+\subsection{Allometry as prior biological structure}
+
+Allometric scaling often uses exponents near \(0.75\) for clearance and \(1\) for volume:
+\[
+  CL_i=CL_{\pop}\left(\frac{WT_i}{70}\right)^{0.75}\exp(\eta_{CL,i}),
+  \qquad
+  V_i=V_{\pop}\left(\frac{WT_i}{70}\right)\exp(\eta_{V,i}).
+\]
+From a Bayesian perspective, a fixed allometric exponent acts like strong prior biological structure.  Estimating the exponent from data relaxes that structure but requires enough weight range and information.  The mature question is not whether fixed or estimated is universally better.  It is whether the dataset can support learning the exponent and whether external biology justifies constraining it.
+
+\subsection{Categorical covariates}
+
+For a binary covariate \(z_i\), one common form is
+\[
+  CL_i=CL_{\pop}\exp(\beta z_i)\exp(\eta_i).
+\]
+If \(z_i=1\), typical clearance is multiplied by \(\exp(\beta)\).  This makes categorical effects easy to interpret.  But statistical visibility is not causal certainty.  If the category is treatment group in a randomized trial, interpretation is stronger.  If it is comedication in observational data, confounding may remain.
+
+\subsection{Covariate selection as model comparison}
+
+Adding a covariate changes the population distribution \(p_\theta(\psi_i\mid c_i)\).  It may improve likelihood by explaining variability.  But a covariate model should also be judged by plausibility, stability, predictive value, and clinical relevance.  A tiny OFV improvement on a poorly measured covariate may not be worth interpretive complexity.  A modest improvement on renal function may be clinically crucial if dose adjustment depends on it.
+
+\section{Worked notebook: residual error}
+
+\subsection{Additive, proportional, combined}
+
+Three common residual models are:
+\[
+  y_{ij}=f_{ij}+\sigma\varepsilon_{ij},
+\]
+\[
+  y_{ij}=f_{ij}(1+\sigma\varepsilon_{ij}),
+\]
+\[
+  y_{ij}=f_{ij}+(a+b f_{ij})\varepsilon_{ij}.
+\]
+They imply different conditional variances:
+\[
+  \Var(y_{ij}\mid\psi_i)=\sigma^2,
+  \qquad
+  \Var(y_{ij}\mid\psi_i)=\sigma^2 f_{ij}^2,
+  \qquad
+  \Var(y_{ij}\mid\psi_i)=(a+b f_{ij})^2.
+\]
+Thus the residual model decides whether a one-unit error at low concentration is as surprising as a one-unit error at high concentration.
+
+\subsection{Lognormal residual error}
+
+A lognormal observation model is often written as
+\[
+  \log y_{ij}=\log f_{ij}+\sigma\varepsilon_{ij}.
+\]
+Then
+\[
+  y_{ij}=f_{ij}\exp(\sigma\varepsilon_{ij}).
+\]
+This guarantees positive observations and creates multiplicative noise.  However, it can be awkward near zero and must be handled carefully with BLQ data.  A log transform is not only a numerical trick; it changes the observation law.
+
+\subsection{BLQ as censoring}
+
+If the lower limit of quantification is \(L\), a BLQ observation is not the number \(L/2\).  It is the event
+\[
+  y_{ij}<L.
+\]
+A likelihood contribution for a censored observation is therefore
+\[
+  P_\theta(y_{ij}<L\mid\psi_i)
+  =
+  \int_{-\infty}^{L}p_\theta(y\mid\psi_i)\,\dd y.
+\]
+Replacing BLQ values by a constant can bias estimation, especially when many late-time concentrations are BLQ.  The probability-language view makes the right object obvious: the observation is an event, not an imputed concentration.
+
+\section{Worked notebook: linearization and Laplace}
+
+\subsection{The hard integral again}
+
+The individual likelihood contribution is
+\[
+  \ell_i(\theta)=\int \exp\{r_i(\eta_i;\theta)\}\,\dd\eta_i,
+\]
+where
+\[
+  r_i(\eta_i;\theta)
+  =
+  \log p_\theta(y_i\mid \eta_i)
+  +
+  \log p_\theta(\eta_i).
+\]
+The integral is hard because \(p(y_i\mid\eta_i)\) contains a nonlinear forward model.  Local approximation methods replace \(r_i\) by a quadratic approximation near a point.
+
+\subsection{Laplace approximation}
+
+Let \(\widehat\eta_i\) be the maximizer of \(r_i\).  A second-order Taylor expansion gives
+\[
+  r_i(\eta_i)
+  \approx
+  r_i(\widehat\eta_i)
+  -
+  \frac{1}{2}
+  (\eta_i-\widehat\eta_i)^\top H_i
+  (\eta_i-\widehat\eta_i),
+\]
+where \(H_i\) is the negative Hessian at the mode.  Then
+\[
+  \ell_i(\theta)
+  \approx
+  \exp\{r_i(\widehat\eta_i)\}
+  (2\pi)^{q/2}|H_i|^{-1/2}.
+\]
+This approximation is accurate when the conditional distribution is close to Gaussian near a well-determined mode.  It can struggle with skewness, multimodality, boundary behavior, or weak information.
+
+\subsection{FO and FOCE intuition}
+
+FO approximates the model near \(\eta_i=0\).  FOCE approximates near the individual's conditional estimate.  The difference is important.  If the subject's data strongly suggest \(\eta_i\neq 0\), expanding around zero can misrepresent the local curvature and bias the approximation.  FOCE adapts the expansion point to the subject.
+
+The 6.437 reading is that these methods approximate an integral by local geometry.  The pharmacometric reading is that they approximate how each subject contributes to the population likelihood.
+
+\section{Worked notebook: SAEM in slow motion}
+
+\subsection{Missing data view}
+
+Write the complete-data sufficient statistics as \(S(y,\psi)\).  If we could observe \(\psi\), estimation might be straightforward.  Since we cannot, EM wants
+\[
+  \E_{\theta^{(k)}}\{S(y,\psi)\mid y\}.
+\]
+SAEM estimates this expectation by simulation and stochastic approximation:
+\[
+  S_k=S_{k-1}+\gamma_k\{S(y,\psi^{(k)})-S_{k-1}\},
+\]
+where \(\psi^{(k)}\) is sampled from a conditional distribution under the current parameter.
+
+\subsection{Why the step size matters}
+
+The step size \(\gamma_k\) controls memory.  Early iterations may use larger steps to move quickly.  Later iterations use smaller steps to stabilize.  If \(\gamma_k\) stays too large, the algorithm remains noisy.  If it becomes too small too early, the algorithm may freeze before reaching a good region.
+
+This is not merely numerical bookkeeping.  It is the mechanism by which Monte Carlo noise is averaged while the parameter estimate moves.
+
+\subsection{The Bayesian-looking part}
+
+The simulation step often samples individual parameters from
+\[
+  p_{\theta^{(k)}}(\psi_i\mid y_i).
+\]
+That is a posterior distribution conditional on the current population parameter.  Therefore SAEM repeatedly asks a Bayesian question about individuals while pursuing an ML objective for the population.  This hybrid identity is central to understanding modern PopPK.
+
+\subsection{Comparison with MCMC full Bayes}
+
+Full Bayesian MCMC would sample \((\theta,\psi_{1:N})\) from their joint posterior.  SAEM samples or approximates \(\psi_{1:N}\) as part of an optimization procedure for \(\theta\).  The output is different: one gives a posterior distribution over population parameters; the other gives an ML estimate plus uncertainty approximations.  But both rely on conditional simulation in a hierarchical model.
+
+\section{Worked notebook: Metropolis-Hastings for one subject}
+
+\subsection{Target distribution}
+
+Suppose \(\theta\) is fixed and we want to sample
+\[
+  \pi(\psi_i)
+  =
+  p_\theta(\psi_i\mid y_i)
+  \propto
+  p_\theta(y_i\mid\psi_i)p_\theta(\psi_i).
+\]
+Metropolis-Hastings proposes \(\psi_i^\star\sim q(\psi_i^\star\mid\psi_i)\) and accepts it with probability
+\[
+  \alpha
+  =
+  \min\left\{
+    1,
+    \frac{\pi(\psi_i^\star)q(\psi_i\mid\psi_i^\star)}
+         {\pi(\psi_i)q(\psi_i^\star\mid\psi_i)}
+  \right\}.
+\]
+If \(q\) is symmetric, the proposal terms cancel.
+
+\subsection{Why tuning is inferential}
+
+A proposal that is too small moves slowly.  A proposal that is too large is rejected often.  Tuning is not a cosmetic computational detail because poor mixing means the empirical sample does not represent the posterior well.  If the posterior has strong correlation between clearance and volume, independent proposals for each parameter may be inefficient.  A covariance-aware proposal can move along the posterior geometry.
+
+\subsection{Diagnostics}
+
+For individual-parameter simulation inside SAEM or full Bayesian inference, trace plots, acceptance rates, effective sample size, and repeated chains are not rituals.  They ask whether simulated latent physiologies are exploring the conditional distribution.  If they are not, downstream estimates and predictive checks become unreliable.
+
+\section{Worked notebook: posterior predictive checks and VPC}
+
+\subsection{The simulation recipe}
+
+A basic population predictive simulation proceeds:
+\[
+  \tilde\psi_i\sim p_{\widehat\theta}(\psi_i\mid c_i),
+  \qquad
+  \tilde y_i\sim p_{\widehat\theta}(y_i\mid\tilde\psi_i,u_i).
+\]
+Repeat this many times.  Compute summaries of each simulated dataset.  Compare the observed summary to the simulated distribution.
+
+For a VPC, the summaries may be quantiles over time bins.  For a target-attainment analysis, the summary may be the fraction of subjects with \(C_{\min}\) above a threshold.  For model diagnostics, the summary may be residual spread, maximum response, dropout time, or a subgroup contrast.
+
+\subsection{Prediction intervals are conditional on design}
+
+The predictive simulation should respect the design \(u_i\).  If observed subjects have different dose histories and sampling times, simulations should match those histories when checking the model against the observed study.  If the goal is a future dosing regimen, simulations should instead use the future regimen.
+
+This is a common source of confusion.  A VPC for model checking and a simulation for clinical decision support may use the same fitted model but different designs.
+
+\subsection{Tail checks}
+
+Means and medians can look good while tails fail.  For narrow therapeutic index drugs, tail behavior may be the point.  The relevant predictive checks might be:
+\[
+  P(\tilde C_{\max}>C_{\mathrm{tox}}),
+  \qquad
+  P(\tilde C_{\min}<C_{\mathrm{eff}}),
+  \qquad
+  P(\widetilde{\mathrm{AUC}}>U).
+\]
+If a model is intended for dosing, it should be checked where dosing can harm.
+
+\section{Worked notebook: information geometry intuition}
+
+\subsection{Models as approximating families}
+
+6.437's information-geometry view treats a model family as a set of distributions.  The true data-generating distribution may not be inside the family.  Estimation then finds the closest member under a criterion related to likelihood and KL divergence.  This is useful humility for PopPK:
+\[
+  \text{a fitted model is an approximation, not the biological truth.}
+\]
+
+\subsection{Why misspecification matters}
+
+If the residual model is wrong, the closest distribution in the chosen family may distort structural parameters to compensate.  If a covariate is missing, random-effect variance may inflate.  If a latent delay is missing, residuals may show time trend and PD parameters may become uninterpretable.  The model can still converge and produce precise estimates.  Precision under the wrong family is not truth.
+
+\subsection{Projection language for model building}
+
+Model building can be read as changing the approximating family.  Adding a covariate expands the family.  Adding inter-occasion variability expands the family.  Changing residual error geometry rotates the family.  Adding a mechanistic PD state changes the forward map.  Diagnostics tell us where the current family is failing to approximate the observed distribution.
+
+\section{Worked notebook: from individual to population}
+
+\subsection{The individual approach}
+
+The individual approach estimates \(\psi_i\) separately for each subject.  It works when each subject has rich data.  In sparse clinical data, it can fail because each subject's likelihood is broad or unstable.  It also does not naturally estimate population variability and covariate effects in one coherent hierarchy.
+
+\subsection{The population approach}
+
+The population approach models all subjects jointly:
+\[
+  y_i\mid\psi_i,
+  \qquad
+  \psi_i\mid\theta,
+  \qquad
+  i=1,\ldots,N.
+\]
+It learns the population distribution from all subjects while using that distribution to regularize individual inference.  This is the borrow-strength loop:
+\[
+  \text{individual data inform population, population informs individuals.}
+\]
+
+\subsection{When the individual approach is still useful}
+
+The individual approach remains useful for intuition, exploratory plots, and rich single-subject studies.  It can reveal structural dynamics before building a population model.  But when individual profiles are sparse, when covariates matter, or when prediction for new subjects is needed, the population approach is the natural probability model.
+
+\section{Worked notebook: model reports}
+
+\subsection{What I want from a report}
+
+A strong PopPK report should make the probability law recoverable.  It should state:
+\begin{enumerate}[leftmargin=2em]
+  \item the structural model;
+  \item the observation model;
+  \item the individual parameter distribution;
+  \item the covariate model;
+  \item the algorithm and approximation;
+  \item the diagnostics and predictive checks;
+  \item the decision or scientific claim.
+\end{enumerate}
+If any item is missing, the reader must infer it, and inference can go wrong.
+
+\subsection{Parameter table reading}
+
+For each fixed effect, ask what typical subject it describes.  For each random effect, ask whether it is variance, covariance, or correlation, and whether shrinkage makes post hoc interpretation fragile.  For each residual parameter, ask on which scale noise is modeled.  For each covariate effect, ask whether it is explanatory, predictive, or causal.
+
+\subsection{Diagnostics reading}
+
+Diagnostic plots should be read as questions:
+\[
+  \begin{array}{ll}
+  \text{Observed vs predicted} & \text{Is the conditional mean structure plausible?}\\
+  \text{Residual vs time} & \text{Is there missing dynamics?}\\
+  \text{Residual vs prediction} & \text{Is the residual scale right?}\\
+  \text{VPC} & \text{Is the population predictive distribution credible?}\\
+  \text{Bootstrap} & \text{How stable are parameter estimates?}
+  \end{array}
+\]
+The plots are not decorations after the model.  They are evidence about the model's probability law.
+

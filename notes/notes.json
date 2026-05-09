@@ -1,5 +1,29 @@
 [
   {
+    "slug": "population-pk-bayesian-inference",
+    "date": "2026-05-09",
+    "title": "Population PK as Bayesian Inference",
+    "category": "Bayesian Population PK",
+    "year": "2026",
+    "paper": "Lavielle, Mixed Effects Models for the Population Approach; MIT 6.008/6.437 notes",
+    "citationKey": "lavielle2015mixed",
+    "tex": "2026-05-09-population-pk-bayesian-inference.tex",
+    "pdf": "2026-05-09-population-pk-bayesian-inference.pdf",
+    "tags": ["Population PK", "Bayesian inference", "NONMEM", "SAEM", "hierarchical models"],
+    "summary": "一篇从 6.008/6.437 的 Bayesian inference 语言出发、沿着 Lavielle mixed effects population approach 解释 Population PK 的自学型长笔记。",
+    "questions": [
+      "Population PK 为什么天然是 latent-variable Bayesian inference 问题？",
+      "NONMEM 的经典 theta/eta/epsilon 语言和 Lavielle 的 hierarchical model 语言如何互译？",
+      "经验贝叶斯、population maximum likelihood、SAEM 和 full Bayesian posterior 的区别在哪里？"
+    ],
+    "model": "p_\\theta(y,\\psi)=\\prod_i p_\\theta(y_i\\mid\\psi_i)p_\\theta(\\psi_i\\mid c_i)",
+    "takeaways": [
+      "Population PK 的核心不是把每个人单独拟合好，而是在 population distribution 和 individual posterior 之间交换信息。",
+      "NONMEM 和 Lavielle/Monolix 都在处理同一个 marginal likelihood 积分，只是近似与算法语言不同。",
+      "Bayesian inference 视角能把 covariate modeling、EBE shrinkage、VPC/PPC 和 model selection 放进同一个逻辑系统。"
+    ]
+  },
+  {
     "slug": "levy-direct-effect-insight",
     "date": "2026-05-08",
     "title": "Gerhard Levy: direct effect model 的第一性洞察",
