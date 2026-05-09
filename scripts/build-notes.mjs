@@ -643,21 +643,42 @@ if (args.clean) {
 mkdirSync(buildDir, { recursive: true });
 mkdirSync(siteDir, { recursive: true });
 
-let notes = JSON.parse(readFileSync(path.join(notesDir, "notes.json"), "utf8")).map(normalizeNote);
-if (args.only.size) notes = notes.filter((note) => args.only.has(note.slug) || args.only.has(note.tex));
+const allNotes = JSON.parse(readFileSync(path.join(notesDir, "notes.json"), "utf8")).map(normalizeNote);
+let notes = allNotes;
+if (args.only.size) notes = allNotes.filter((note) => args.only.has(note.slug) || args.only.has(note.tex));
 if (args.limit > 0) notes = notes.slice(0, args.limit);
 
 const results = [];
+const resultBySlug = new Map();
+function existingResult(note) {
+  const hasHtml = existsSync(path.join(siteDir, "h", note.slug, "index.html"));
+  const hasPdf = existsSync(path.join(siteDir, "notes", `${note.slug}.pdf`));
+  return {
+    note,
+    ok: hasHtml && hasPdf,
+    error: hasHtml || hasPdf ? "partial site output is missing" : "not built yet",
+    sections: [],
+  };
+}
+
+function allIndexResults() {
+  return allNotes.map((note) => resultBySlug.get(note.slug) || existingResult(note));
+}
+
 for (const [index, note] of notes.entries()) {
   console.log(`[${index + 1}/${notes.length}] ${note.slug}`);
   try {
-    results.push(build(note));
+    const result = build(note);
+    results.push(result);
+    resultBySlug.set(note.slug, result);
   } catch (error) {
     console.error(`  failed: ${error.message}`);
-    results.push({ note, ok: false, error: error.message, sections: [] });
+    const result = { note, ok: false, error: error.message, sections: [] };
+    results.push(result);
+    resultBySlug.set(note.slug, result);
   }
   writeFileSync(path.join(buildDir, "manifest.json"), `${JSON.stringify(results, null, 2)}\n`);
-  writeFileSync(path.join(siteDir, "index.html"), topIndex(results));
+  writeFileSync(path.join(siteDir, "index.html"), topIndex(allIndexResults()));
 }
 
 writeFileSync(path.join(siteDir, ".nojekyll"), "");
