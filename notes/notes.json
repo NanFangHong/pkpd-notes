@@ -10,7 +10,7 @@
     "tex": "2026-05-10-matrix-ode-lti-mbam.tex",
     "pdf": "2026-05-10-matrix-ode-lti-mbam.pdf",
     "tags": ["linear algebra", "ODE", "LTI systems", "numerical linear algebra", "information geometry", "MBAM", "QSP"],
-    "summary": "一篇把矩阵技巧、ODE/LTI、数值线性代数、信息几何和 MBAM/QSP reduction 接成一条自学路线的长笔记。",
+    "summary": "一篇围绕 prediction map \\theta\\mapsto y(\\theta) 重写的长笔记：把矩阵技巧、ODE/LTI、数值线性代数、信息几何和 MBAM/QSP reduction 接成同一条推理脊柱。",
     "questions": [
       "为什么 MBAM 可以看成矩阵敏感性、ODE 动力系统、数值条件数和 Fisher 信息几何的交汇点？",
       "模型流形、Fisher information、sloppiness 和 geodesic boundary 分别对应什么数学对象？",

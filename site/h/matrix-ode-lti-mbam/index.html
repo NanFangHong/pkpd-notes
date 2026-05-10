@@ -3,135 +3,90 @@
 <body><div id="main"><h1>From Matrix Tricks to MBAM</h1><p>2026, MIT 6.S087, 18.03, 18.031, 18.335, 18.337, 6.441; Transtrum and Qiu MBAM/CRISP notes</p><p class="toc-note">This is an HTML version of the notes generated with pdf2htmlEX. You can either view all sections in a single page, or access individual sections below.</p><h2>Contents</h2><ul class="disp-toc"><li><a href="full.html">V Full version</a></li><li><a href="1.html">1 Notation and source map</a></li>
 <li class="subsection"><a href="1_1.html">1.1 Objects before formulas</a></li>
 <li class="subsection"><a href="1_2.html">1.2 The source packet</a></li>
-<li><a href="2.html">2 The main arc</a></li>
+<li><a href="2.html">2 The spine: one map, six lenses</a></li>
 <li class="subsection"><a href="2_1.html">2.1 One sentence</a></li>
-<li class="subsection"><a href="2_2.html">2.2 Why MBAM sits at the end</a></li>
-<li><a href="3.html">3 Vectors and linear maps</a></li>
+<li class="subsection"><a href="2_2.html">2.2 The object that survives every translation</a></li>
+<li class="subsection"><a href="2_3.html">2.3 A reader's map</a></li>
+<li class="subsection"><a href="2_4.html">2.4 Why MBAM sits at the end</a></li>
+<li><a href="3.html">3 Lens I: local linear structure</a></li>
 <li class="subsection"><a href="3_1.html">3.1 Coordinates are not the object</a></li>
 <li class="subsection"><a href="3_2.html">3.2 Four spaces</a></li>
-<li><a href="4.html">4 Norms, projections, and SVD</a></li>
+<li><a href="4.html">4 Lens II: what counts as a change</a></li>
 <li class="subsection"><a href="4_1.html">4.1 Norms encode what matters</a></li>
 <li class="subsection"><a href="4_2.html">4.2 The singular value decomposition</a></li>
 <li class="subsection"><a href="4_3.html">4.3 Projection as compression</a></li>
-<li><a href="5.html">5 Matrix calculus as local modeling</a></li>
+<li><a href="5.html">5 The hinge: from nonlinear model to Jacobian</a></li>
 <li class="subsection"><a href="5_1.html">5.1 Jacobians</a></li>
 <li class="subsection"><a href="5_2.html">5.2 Gradient, Hessian, Gauss–Newton</a></li>
-<li><a href="6.html">6 ODEs as state maps</a></li>
+<li><a href="6.html">6 Lens III: dynamics creates the prediction map</a></li>
 <li class="subsection"><a href="6_1.html">6.1 Modeling by rates</a></li>
 <li class="subsection"><a href="6_2.html">6.2 The flow map</a></li>
 <li class="subsection"><a href="6_3.html">6.3 Sensitivity equations</a></li>
-<li><a href="7.html">7 LTI systems</a></li>
+<li><a href="7.html">7 Lens IV: modes, poles, and time scales</a></li>
 <li class="subsection"><a href="7_1.html">7.1 Exponentials and eigenmodes</a></li>
 <li class="subsection"><a href="7_2.html">7.2 Convolution and impulse response</a></li>
 <li class="subsection"><a href="7_3.html">7.3 A pole is a behavioral scale</a></li>
-<li><a href="8.html">8 Numerical linear algebra</a></li>
+<li><a href="8.html">8 Lens V: trustworthy computation</a></li>
 <li class="subsection"><a href="8_1.html">8.1 Conditioning</a></li>
 <li class="subsection"><a href="8_2.html">8.2 Residual versus error</a></li>
 <li class="subsection"><a href="8_3.html">8.3 QR, SVD, and least squares</a></li>
-<li><a href="9.html">9 Iterative methods and computation</a></li>
+<li><a href="9.html">9 Large models and useful subspaces</a></li>
 <li class="subsection"><a href="9_1.html">9.1 Krylov thinking</a></li>
 <li class="subsection"><a href="9_2.html">9.2 Preconditioning</a></li>
 <li class="subsection"><a href="9_3.html">9.3 Parallel prefix as a small metaphor</a></li>
-<li><a href="10.html">10 Information and geometry</a></li>
+<li><a href="10.html">10 Lens VI: distinguishability as geometry</a></li>
 <li class="subsection"><a href="10_1.html">10.1 Divergence</a></li>
 <li class="subsection"><a href="10_2.html">10.2 Local behavior and Fisher information</a></li>
 <li class="subsection"><a href="10_3.html">10.3 Least squares as Fisher geometry</a></li>
-<li><a href="11.html">11 Parameter estimation and sloppiness</a></li>
+<li><a href="11.html">11 The inverse problem: sloppiness has meaning</a></li>
 <li class="subsection"><a href="11_1.html">11.1 The residual map</a></li>
 <li class="subsection"><a href="11_2.html">11.2 Sloppy spectra</a></li>
 <li class="subsection"><a href="11_3.html">11.3 Identifiable combinations</a></li>
-<li><a href="12.html">12 The model manifold</a></li>
+<li><a href="12.html">12 The model manifold: the same map seen globally</a></li>
 <li class="subsection"><a href="12_1.html">12.1 Prediction space</a></li>
 <li class="subsection"><a href="12_2.html">12.2 Hyper-ribbon intuition</a></li>
 <li class="subsection"><a href="12_3.html">12.3 Boundaries as approximations</a></li>
-<li><a href="13.html">13 MBAM</a></li>
+<li><a href="13.html">13 MBAM: walking from weak direction to simpler mechanism</a></li>
 <li class="subsection"><a href="13_1.html">13.1 The algorithm</a></li>
 <li class="subsection"><a href="13_2.html">13.2 Geodesic equation</a></li>
 <li class="subsection"><a href="13_3.html">13.3 Why this is not black-box reduction</a></li>
-<li><a href="14.html">14 Worked examples</a></li>
+<li><a href="14.html">14 Boundary examples: the abstractions become mechanisms</a></li>
 <li class="subsection"><a href="14_1.html">14.1 Sum of exponentials</a></li>
 <li class="subsection"><a href="14_2.html">14.2 Michaelis–Menten</a></li>
 <li class="subsection"><a href="14_3.html">14.3 An LTI reduction</a></li>
-<li><a href="15.html">15 QSP and CRISP</a></li>
+<li><a href="15.html">15 QSP and CRISP: the query closes the loop</a></li>
 <li class="subsection"><a href="15_1.html">15.1 QSP as query-driven modeling</a></li>
 <li class="subsection"><a href="15_2.html">15.2 CRISP language</a></li>
 <li class="subsection"><a href="15_3.html">15.3 Mechanistic control knobs</a></li>
-<li><a href="16.html">16 Worked notebook: covariance as geometry</a></li>
-<li class="subsection"><a href="16_1.html">16.1 Why covariance is a matrix</a></li>
-<li class="subsection"><a href="16_2.html">16.2 The duality with information</a></li>
-<li><a href="17.html">17 Worked notebook: projection and least squares</a></li>
-<li class="subsection"><a href="17_1.html">17.1 The nearest point problem</a></li>
-<li class="subsection"><a href="17_2.html">17.2 Weighted projection</a></li>
-<li><a href="18.html">18 Worked notebook: matrix derivatives</a></li>
-<li class="subsection"><a href="18_1.html">18.1 Differentials first</a></li>
-<li class="subsection"><a href="18_2.html">18.2 Trace trick</a></li>
-<li><a href="19.html">19 Worked notebook: whitening and likelihood</a></li>
-<li class="subsection"><a href="19_1.html">19.1 Gaussian residuals</a></li>
-<li class="subsection"><a href="19_2.html">19.2 Scaled sensitivity</a></li>
-<li><a href="20.html">20 Worked notebook: identifiable combinations by SVD</a></li>
-<li class="subsection"><a href="20_1.html">20.1 Linearized model</a></li>
-<li class="subsection"><a href="20_2.html">20.2 A practical interpretation</a></li>
-<li><a href="21.html">21 Worked notebook: exponential decay</a></li>
-<li class="subsection"><a href="21_1.html">21.1 One parameter</a></li>
-<li class="subsection"><a href="21_2.html">21.2 Two parameters</a></li>
-<li><a href="22.html">22 Worked notebook: sums of exponentials</a></li>
-<li class="subsection"><a href="22_1.html">22.1 Why they become sloppy</a></li>
-<li class="subsection"><a href="22_2.html">22.2 Connection to LTI</a></li>
-<li><a href="23.html">23 Worked notebook: sensitivity ODE</a></li>
-<li class="subsection"><a href="23_1.html">23.1 Derivation</a></li>
-<li class="subsection"><a href="23_2.html">23.2 Why finite differences can mislead</a></li>
-<li><a href="24.html">24 Worked notebook: two-compartment dynamics</a></li>
-<li class="subsection"><a href="24_1.html">24.1 A minimal PK-like LTI system</a></li>
-<li class="subsection"><a href="24_2.html">24.2 Boundary interpretation</a></li>
-<li><a href="25.html">25 Worked notebook: spring–mass–damper</a></li>
-<li class="subsection"><a href="25_1.html">25.1 Second-order equation</a></li>
-<li class="subsection"><a href="25_2.html">25.2 Nondimensional form</a></li>
-<li><a href="26.html">26 Worked notebook: convolution</a></li>
-<li class="subsection"><a href="26_1.html">26.1 Impulse response</a></li>
-<li class="subsection"><a href="26_2.html">26.2 Relevance of memory</a></li>
-<li><a href="27.html">27 Worked notebook: stiffness</a></li>
-<li class="subsection"><a href="27_1.html">27.1 Multiple time scales</a></li>
-<li class="subsection"><a href="27_2.html">27.2 Model reduction view</a></li>
-<li><a href="28.html">28 Worked notebook: finite precision</a></li>
-<li class="subsection"><a href="28_1.html">28.1 Roundoff as perturbation</a></li>
-<li class="subsection"><a href="28_2.html">28.2 Scientific analogy</a></li>
-<li><a href="29.html">29 Worked notebook: regularization</a></li>
-<li class="subsection"><a href="29_1.html">29.1 Ridge</a></li>
-<li class="subsection"><a href="29_2.html">29.2 Relation to Bayesian priors</a></li>
-<li><a href="30.html">30 Worked notebook: QR versus normal equations</a></li>
-<li class="subsection"><a href="30_1.html">30.1 Squaring the condition number</a></li>
-<li class="subsection"><a href="30_2.html">30.2 Model-fitting moral</a></li>
-<li><a href="31.html">31 Worked notebook: KL local expansion</a></li>
-<li class="subsection"><a href="31_1.html">31.1 One-dimensional sketch</a></li>
-<li class="subsection"><a href="31_2.html">31.2 Why the first-order term vanishes</a></li>
-<li><a href="32.html">32 Worked notebook: information projection</a></li>
-<li class="subsection"><a href="32_1.html">32.1 Projection between distributions</a></li>
-<li class="subsection"><a href="32_2.html">32.2 Model reduction reading</a></li>
-<li><a href="33.html">33 Worked notebook: model manifold for line fitting</a></li>
-<li class="subsection"><a href="33_1.html">33.1 A simple surface</a></li>
-<li class="subsection"><a href="33_2.html">33.2 Why nonlinear models are different</a></li>
-<li><a href="34.html">34 Worked notebook: geodesic boundaries</a></li>
-<li class="subsection"><a href="34_1.html">34.1 Local direction, nonlocal limit</a></li>
-<li class="subsection"><a href="34_2.html">34.2 The interpretive step</a></li>
-<li><a href="35.html">35 Worked notebook: boundary taxonomy</a></li>
-<li class="subsection"><a href="35_1.html">35.1 Common limits</a></li>
-<li class="subsection"><a href="35_2.html">35.2 Why limits preserve meaning</a></li>
-<li><a href="36.html">36 Worked notebook: MBAM and Michaelis–Menten carefully</a></li>
-<li class="subsection"><a href="36_1.html">36.1 Mass action</a></li>
-<li class="subsection"><a href="36_2.html">36.2 Conservation</a></li>
-<li><a href="37.html">37 Worked notebook: active manifold</a></li>
-<li class="subsection"><a href="37_1.html">37.1 Training data versus query</a></li>
-<li class="subsection"><a href="37_2.html">37.2 The active subspace</a></li>
-<li><a href="38.html">38 Worked notebook: CRISP for QSP</a></li>
-<li class="subsection"><a href="38_1.html">38.1 A workflow</a></li>
-<li class="subsection"><a href="38_2.html">38.2 Regulatory style interpretation</a></li>
-<li><a href="39.html">39 Worked notebook: the full conceptual chain</a></li>
-<li class="subsection"><a href="39_1.html">39.1 From matrix to manifold</a></li>
-<li class="subsection"><a href="39_2.html">39.2 From ODE to MBAM</a></li>
-<li><a href="40.html">40 A self-study route</a></li>
-<li class="subsection"><a href="40_1.html">40.1 The order I would read</a></li>
-<li class="subsection"><a href="40_2.html">40.2 A reading checklist for any model</a></li>
-<li><a href="41.html">41 Connection back to pharmacology</a></li>
-<li class="subsection"><a href="41_1.html">41.1 Why this belongs next to PK/PD</a></li>
-<li class="subsection"><a href="41_2.html">41.2 The one-sentence memory hook</a></li>
-<li class="subsection"><a href="41_3.html">41.3 Working conclusion</a></li></ul></div></body></html>
+<li><a href="16.html">16 Detailed worked notebook: the same spine in slow motion</a></li>
+<li class="subsection"><a href="16_1.html">16.1 Covariance as geometry</a></li>
+<li class="subsection"><a href="16_2.html">16.2 Projection and least squares</a></li>
+<li class="subsection"><a href="16_3.html">16.3 Matrix derivatives</a></li>
+<li class="subsection"><a href="16_4.html">16.4 Whitening and likelihood</a></li>
+<li class="subsection"><a href="16_5.html">16.5 Identifiable combinations by SVD</a></li>
+<li class="subsection"><a href="16_6.html">16.6 Exponential decay</a></li>
+<li class="subsection"><a href="16_7.html">16.7 Sums of exponentials</a></li>
+<li class="subsection"><a href="16_8.html">16.8 Sensitivity ODE</a></li>
+<li class="subsection"><a href="16_9.html">16.9 Two-compartment dynamics</a></li>
+<li class="subsection"><a href="16_10.html">16.10 Spring–mass–damper</a></li>
+<li class="subsection"><a href="16_11.html">16.11 Convolution</a></li>
+<li class="subsection"><a href="16_12.html">16.12 Stiffness</a></li>
+<li class="subsection"><a href="16_13.html">16.13 Finite precision</a></li>
+<li class="subsection"><a href="16_14.html">16.14 Regularization</a></li>
+<li class="subsection"><a href="16_15.html">16.15 QR versus normal equations</a></li>
+<li class="subsection"><a href="16_16.html">16.16 KL local expansion</a></li>
+<li class="subsection"><a href="16_17.html">16.17 Information projection</a></li>
+<li class="subsection"><a href="16_18.html">16.18 Model manifold for line fitting</a></li>
+<li class="subsection"><a href="16_19.html">16.19 Geodesic boundaries</a></li>
+<li class="subsection"><a href="16_20.html">16.20 Boundary taxonomy</a></li>
+<li class="subsection"><a href="16_21.html">16.21 MBAM and Michaelis–Menten carefully</a></li>
+<li class="subsection"><a href="16_22.html">16.22 Active manifold</a></li>
+<li class="subsection"><a href="16_23.html">16.23 CRISP for QSP</a></li>
+<li class="subsection"><a href="16_24.html">16.24 The full conceptual chain</a></li>
+<li><a href="17.html">17 A self-study route</a></li>
+<li class="subsection"><a href="17_1.html">17.1 The order I would read</a></li>
+<li class="subsection"><a href="17_2.html">17.2 A reading checklist for any model</a></li>
+<li><a href="18.html">18 Connection back to pharmacology</a></li>
+<li class="subsection"><a href="18_1.html">18.1 Why this belongs next to PK/PD</a></li>
+<li class="subsection"><a href="18_2.html">18.2 The one-sentence memory hook</a></li>
+<li class="subsection"><a href="18_3.html">18.3 Working conclusion</a></li></ul></div></body></html>

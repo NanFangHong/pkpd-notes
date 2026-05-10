@@ -1,6 +1,9 @@
-\section{Worked notebook: covariance as geometry}
+\noindent
+The worked notebook repeats the main spine at slower speed.  The first pass is purely linear: covariance gives shape, projection gives fitting, derivatives give the local map, and the SVD tells us which combinations are visible.
 
-\subsection{Why covariance is a matrix}
+\subsection{Covariance as geometry}
+
+\subsubsection*{Why covariance is a matrix}
 
 For a random vector \(\rv{x}\in\R^n\), covariance is
 \[
@@ -20,7 +23,7 @@ then contours of equal density are ellipsoids:
 \]
 Large eigenvalues of \(\Sigma\) are broad uncertainty directions.  Small eigenvalues are tightly known directions.
 
-\subsection{The duality with information}
+\subsubsection*{The duality with information}
 
 In a regular Gaussian approximation, the parameter covariance is approximately the inverse Fisher information:
 \[
@@ -30,9 +33,9 @@ In a regular Gaussian approximation, the parameter covariance is approximately t
 \]
 So the eigenvectors of \(\Sigma\) and \(\fim\) point in the same directions, but their eigenvalues invert.  A large covariance direction is a small information direction.  This is one of the cleanest bridges between statistics and numerical linear algebra.
 
-\section{Worked notebook: projection and least squares}
+\subsection{Projection and least squares}
 
-\subsection{The nearest point problem}
+\subsubsection*{The nearest point problem}
 
 Given \(\mat{A}\in\R^{m\times n}\) and \(\vect{b}\in\R^m\), least squares asks for
 \[
@@ -52,7 +55,7 @@ This is not magic.  At the closest point, the residual must be orthogonal to eve
   \mat{A}^{\transpose}(\mat{A}\widehat{\vect{x}}-\vect{b})=0.
 \]
 
-\subsection{Weighted projection}
+\subsubsection*{Weighted projection}
 
 If measurements have covariance \(\Sigma\), the geometry changes:
 \[
@@ -71,9 +74,9 @@ The normal equations become
 \]
 Whitening with \(\Sigma^{-1/2}\) turns the weighted problem into an ordinary Euclidean projection.  This is exactly what scaled residuals do in model fitting.
 
-\section{Worked notebook: matrix derivatives}
+\subsection{Matrix derivatives}
 
-\subsection{Differentials first}
+\subsubsection*{Differentials first}
 
 Matrix calculus is least confusing when written with differentials.  If
 \[
@@ -95,7 +98,7 @@ If \(\mat{A}\) is symmetric,
 \]
 The Hessian is \(\mat{A}\).
 
-\subsection{Trace trick}
+\subsubsection*{Trace trick}
 
 The trace identity
 \[
@@ -121,9 +124,9 @@ so
 \]
 This is the same normal-equation geometry in matrix form.
 
-\section{Worked notebook: whitening and likelihood}
+\subsection{Whitening and likelihood}
 
-\subsection{Gaussian residuals}
+\subsubsection*{Gaussian residuals}
 
 Suppose
 \[
@@ -155,7 +158,7 @@ Then
 \]
 Likelihood turns into Euclidean geometry after whitening.
 
-\subsection{Scaled sensitivity}
+\subsubsection*{Scaled sensitivity}
 
 The whitened Jacobian is
 \[
@@ -170,9 +173,9 @@ The Fisher information is
 \]
 Thus experimental uncertainty is not an afterthought.  It changes the metric on parameter space and therefore changes which directions are stiff or sloppy.
 
-\section{Worked notebook: identifiable combinations by SVD}
+\subsection{Identifiable combinations by SVD}
 
-\subsection{Linearized model}
+\subsubsection*{Linearized model}
 
 Linearize a nonlinear prediction around \(\param_0\):
 \[
@@ -199,13 +202,16 @@ The scalar
 \]
 is a locally identifiable combination if \(\sigma_j\) is large.
 
-\subsection{A practical interpretation}
+\subsubsection*{A practical interpretation}
 
 If a paper reports huge uncertainty in individual rate constants but stable predictions, do not immediately call the model bad.  Ask whether the predictions depend on a few combinations.  The raw parameters may be poorly identified while the scientifically relevant combinations are sharply constrained.
 
-\section{Worked notebook: exponential decay}
+\noindent
+The second pass puts the same linear ideas inside time.  An ODE is not a different subject here; it is the machine that produces \(\vect{y}(\param)\), and its sensitivities are the Jacobian columns we have already learned to read.
 
-\subsection{One parameter}
+\subsection{Exponential decay}
+
+\subsubsection*{One parameter}
 
 Consider
 \[
@@ -219,7 +225,7 @@ The sensitivity to \(k\) is
 \]
 Early time points have little sensitivity to \(k\), because \(t\) is small.  Late time points may also have little sensitivity if \(e^{-kt}\) is already near zero.  The most informative time scale is around \(t\sim 1/k\).
 
-\subsection{Two parameters}
+\subsubsection*{Two parameters}
 
 Now let
 \[
@@ -239,9 +245,9 @@ If all observations are very early, then
 \]
 The data mainly see \(A\) and \(Ak\), not \(A\) and \(k\) independently.  This is a baby version of identifiable combinations.
 
-\section{Worked notebook: sums of exponentials}
+\subsection{Sums of exponentials}
 
-\subsection{Why they become sloppy}
+\subsubsection*{Why they become sloppy}
 
 For
 \[
@@ -255,13 +261,13 @@ nearby rates can compensate:
 \]
 over a finite time window if \(\lambda_1\) and \(\lambda_2\) are close.  Very fast rates disappear after the early transient.  Very slow rates look nearly constant.  These are not numerical coincidences; they are model manifold boundaries.
 
-\subsection{Connection to LTI}
+\subsubsection*{Connection to LTI}
 
 Every stable finite-dimensional LTI system has impulse responses made from exponentials, possibly multiplied by polynomials for repeated poles.  Therefore the exponential-sum example is not a toy disconnected from systems theory.  It is the scalar shadow of modal decomposition.
 
-\section{Worked notebook: sensitivity ODE}
+\subsection{Sensitivity ODE}
 
-\subsection{Derivation}
+\subsubsection*{Derivation}
 
 Let
 \[
@@ -286,7 +292,7 @@ Differentiate both sides with respect to \(\param\):
 \]
 This sensitivity system is linear in \(\mat{S}\), even when the original ODE is nonlinear.
 
-\subsection{Why finite differences can mislead}
+\subsubsection*{Why finite differences can mislead}
 
 Finite differences approximate
 \[
@@ -296,9 +302,9 @@ Finite differences approximate
 \]
 If \(h\) is too large, the approximation is nonlinear.  If \(h\) is too small, floating-point cancellation dominates.  Sensitivity equations avoid many of these problems, which is why MBAM implementations often prefer them for ODE models.
 
-\section{Worked notebook: two-compartment dynamics}
+\subsection{Two-compartment dynamics}
 
-\subsection{A minimal PK-like LTI system}
+\subsubsection*{A minimal PK-like LTI system}
 
 Consider
 \[
@@ -317,7 +323,7 @@ Consider
 \]
 The eigenvalues of the system matrix produce two exponential phases.  If one phase is much faster than the sampling resolution, it may be practically invisible.
 
-\subsection{Boundary interpretation}
+\subsubsection*{Boundary interpretation}
 
 A fast exchange limit such as
 \[
@@ -327,9 +333,9 @@ A fast exchange limit such as
 \]
 can collapse two compartments into a quasi-equilibrated effective compartment.  The surviving parameter is not \(k_{12}\) or \(k_{21}\) alone, but a ratio or capacity-like combination.  This is exactly the kind of limit MBAM is designed to reveal.
 
-\section{Worked notebook: spring--mass--damper}
+\subsection{Spring--mass--damper}
 
-\subsection{Second-order equation}
+\subsubsection*{Second-order equation}
 
 The classical LTI example is
 \[
@@ -345,7 +351,7 @@ The poles solve
 \]
 They encode damping, oscillation, and stability.
 
-\subsection{Nondimensional form}
+\subsubsection*{Nondimensional form}
 
 Define
 \[
@@ -359,9 +365,9 @@ Then
 \]
 The three physical parameters \(m,b,k\) become combinations \(\omega_n,\zeta,1/m\).  Often these combinations are more interpretable than the raw parameters.
 
-\section{Worked notebook: convolution}
+\subsection{Convolution}
 
-\subsection{Impulse response}
+\subsubsection*{Impulse response}
 
 If \(h(t)\) is the impulse response, any input \(u(t)\) produces
 \[
@@ -369,13 +375,13 @@ If \(h(t)\) is the impulse response, any input \(u(t)\) produces
 \]
 Convolution says that the system remembers past input through a kernel.  A fast kernel has short memory; a slow kernel has long memory.
 
-\subsection{Relevance of memory}
+\subsubsection*{Relevance of memory}
 
 For a QSP model, deciding whether a subsystem can be reduced often means asking: does its memory kernel matter on the query time scale?  If not, it may be replaced by an algebraic relation, an effective delay, or a lower-order state.
 
-\section{Worked notebook: stiffness}
+\subsection{Stiffness}
 
-\subsection{Multiple time scales}
+\subsubsection*{Multiple time scales}
 
 An ODE is stiff when stable fast modes force tiny numerical steps even though the scientific behavior of interest evolves slowly.  A simple linear example is
 \[
@@ -385,13 +391,16 @@ An ODE is stiff when stable fast modes force tiny numerical steps even though th
 \]
 The second state decays rapidly, but explicit numerical methods may still be constrained by it.
 
-\subsection{Model reduction view}
+\subsubsection*{Model reduction view}
 
 Stiffness and sloppiness are not the same, but they often meet.  A fast stable mode may be numerically troublesome and prediction-irrelevant after a short transient.  A boundary approximation can remove it if the quantities of interest do not ask about that transient.
 
-\section{Worked notebook: finite precision}
+\noindent
+The third pass asks whether our computations are honest enough to support scientific interpretation.  Conditioning, regularization, and stable factorization are not numerical footnotes; they decide whether a small singular value is a property of the model or an artifact of the calculation.
 
-\subsection{Roundoff as perturbation}
+\subsection{Finite precision}
+
+\subsubsection*{Roundoff as perturbation}
 
 Floating-point arithmetic replaces exact operations by perturbed operations.  A computed solution often solves a nearby problem:
 \[
@@ -399,13 +408,13 @@ Floating-point arithmetic replaces exact operations by perturbed operations.  A 
 \]
 Backward error analysis asks whether the nearby problem is close enough to the original one.
 
-\subsection{Scientific analogy}
+\subsubsection*{Scientific analogy}
 
 Model reduction has a similar flavor.  A reduced model is acceptable if it solves a nearby prediction problem at the precision required by the scientific question.  The question is not whether the reduced model is literally identical.  It is whether the discrepancy is smaller than the relevant tolerance.
 
-\section{Worked notebook: regularization}
+\subsection{Regularization}
 
-\subsection{Ridge}
+\subsubsection*{Ridge}
 
 Ridge regression solves
 \[
@@ -425,13 +434,13 @@ The solution is
 \]
 It suppresses directions with small singular values.
 
-\subsection{Relation to Bayesian priors}
+\subsubsection*{Relation to Bayesian priors}
 
 The penalty \(\lambda\norm{\vect{x}}^2\) is equivalent to a Gaussian prior on \(\vect{x}\).  In mechanistic modeling, regularization can stabilize fitting, but it does not by itself explain which mechanisms are irrelevant.  MBAM aims for an explanatory reduction rather than only a stabilized inverse problem.
 
-\section{Worked notebook: QR versus normal equations}
+\subsection{QR versus normal equations}
 
-\subsection{Squaring the condition number}
+\subsubsection*{Squaring the condition number}
 
 Solving least squares through
 \[
@@ -445,13 +454,16 @@ can be numerically dangerous because
 \]
 QR and SVD avoid this squaring.
 
-\subsection{Model-fitting moral}
+\subsubsection*{Model-fitting moral}
 
 If a fitting problem is already ill-conditioned, careless numerical formulation can make it worse.  Before interpreting parameter uncertainty scientifically, we need to know whether the uncertainty comes from the model/data geometry or from unstable computation.
 
-\section{Worked notebook: KL local expansion}
+\noindent
+The fourth pass changes the distance measure.  Least squares measured Euclidean residuals; inference measures distinguishability between probability laws.  Fisher information is the bridge that lets the same Jacobian language survive this change.
 
-\subsection{One-dimensional sketch}
+\subsection{KL local expansion}
+
+\subsubsection*{One-dimensional sketch}
 
 Let \(p(x\mid\theta)\) be smooth.  The score is
 \[
@@ -472,7 +484,7 @@ Then for small \(\delta\),
   \frac{1}{2}I(\theta)\delta^2+o(\delta^2).
 \]
 
-\subsection{Why the first-order term vanishes}
+\subsubsection*{Why the first-order term vanishes}
 
 The first-order term vanishes because probabilities must still integrate to one:
 \[
@@ -482,9 +494,9 @@ The first-order term vanishes because probabilities must still integrate to one:
 \]
 This is the probabilistic reason Fisher information is second-order geometry.
 
-\section{Worked notebook: information projection}
+\subsection{Information projection}
 
-\subsection{Projection between distributions}
+\subsubsection*{Projection between distributions}
 
 Information projection asks for the member of a family closest in KL divergence:
 \[
@@ -495,13 +507,13 @@ Information projection asks for the member of a family closest in KL divergence:
 \]
 This is not Euclidean projection, but it plays a similar role in statistical geometry.
 
-\subsection{Model reduction reading}
+\subsubsection*{Model reduction reading}
 
 When a reduced model family is used to approximate a full model, we can think of the reduced family as a lower-dimensional surface.  The best reduced model is the projection of the full model's behavior onto that surface, according to the distinguishability relevant to the query.
 
-\section{Worked notebook: model manifold for line fitting}
+\subsection{Model manifold for line fitting}
 
-\subsection{A simple surface}
+\subsubsection*{A simple surface}
 
 Let
 \[
@@ -521,13 +533,16 @@ The model manifold is a plane in \(\R^M\).  The Jacobian is constant:
   \end{bmatrix}.
 \]
 
-\subsection{Why nonlinear models are different}
+\subsubsection*{Why nonlinear models are different}
 
 For nonlinear models, the tangent plane changes with \(\param\).  Small eigenvectors of the Fisher information may rotate as we move.  This is why MBAM follows a geodesic instead of simply deleting the smallest local singular vector at the starting point.
 
-\section{Worked notebook: geodesic boundaries}
+\noindent
+The final pass stops being merely local.  A sloppy direction at one point becomes useful only when we follow it until the equations reveal a boundary, a limit, or an approximation we can name.
 
-\subsection{Local direction, nonlocal limit}
+\subsection{Geodesic boundaries}
+
+\subsubsection*{Local direction, nonlocal limit}
 
 The least sensitive eigenvector is local:
 \[
@@ -537,7 +552,7 @@ The least sensitive eigenvector is local:
 \]
 Following the geodesic reveals how that direction evolves.  Near a boundary, the direction often simplifies and points toward a recognizable parameter limit.
 
-\subsection{The interpretive step}
+\subsubsection*{The interpretive step}
 
 The numerical geodesic might say:
 \[
@@ -549,9 +564,9 @@ The numerical geodesic might say:
 \]
 The modeler must then inspect the equations and take the limit carefully.  The resulting reduced model is the scientific product.
 
-\section{Worked notebook: boundary taxonomy}
+\subsection{Boundary taxonomy}
 
-\subsection{Common limits}
+\subsubsection*{Common limits}
 
 MBAM often finds limits such as:
 \[
@@ -564,13 +579,13 @@ MBAM often finds limits such as:
 \]
 These correspond to irreversibility, fast equilibration, quasi-steady state, thermodynamic limit, and continuum limit.
 
-\subsection{Why limits preserve meaning}
+\subsubsection*{Why limits preserve meaning}
 
 Deleting a variable by numerical black-box projection may preserve output but hide mechanism.  Taking a limit inside the original equations shows what physical or biological assumption is being made.
 
-\section{Worked notebook: MBAM and Michaelis--Menten carefully}
+\subsection{MBAM and Michaelis--Menten carefully}
 
-\subsection{Mass action}
+\subsubsection*{Mass action}
 
 For
 \[
@@ -591,7 +606,7 @@ If binding/unbinding is fast relative to catalysis, then \(k_f,k_r\to\infty\) wi
   C\approx \frac{ES}{K_d}.
 \]
 
-\subsection{Conservation}
+\subsubsection*{Conservation}
 
 With \(E_0=E+C\),
 \[
@@ -611,9 +626,12 @@ Thus
 \]
 The reduced model keeps the combination \(K_d=k_r/k_f\), not the two fast rates separately.
 
-\section{Worked notebook: active manifold}
+\noindent
+The last two examples close the loop back to QSP.  Once the reduced mechanism exists, we still have to ask which prediction it was reduced for, and whether the decision query really ignores what we removed.
 
-\subsection{Training data versus query}
+\subsection{Active manifold}
+
+\subsubsection*{Training data versus query}
 
 Let \(\data\) be calibration data and \(\qoi\) future predictions.  A parameter direction can be irrelevant to \(\qoi\) even if it affects unobserved internal variables.  Conversely, a direction can fit \(\data\) weakly but matter greatly for a future intervention.
 
@@ -624,13 +642,13 @@ This is why reduction should be query-specific:
   \jac_{\qoi}^{\transpose}\jac_{\qoi}.
 \]
 
-\subsection{The active subspace}
+\subsubsection*{The active subspace}
 
 The stiff eigendirections of \(\fim_{\qoi}\) span an active local subspace.  MBAM asks whether the inactive directions can be pushed to boundaries and removed while retaining the active behavior.  The result is not merely lower dimension; it is a simpler mechanistic explanation for the query.
 
-\section{Worked notebook: CRISP for QSP}
+\subsection{CRISP for QSP}
 
-\subsection{A workflow}
+\subsubsection*{A workflow}
 
 For a QSP project, a CRISP-like workflow reads:
 \begin{enumerate}[leftmargin=2em]
@@ -643,21 +661,21 @@ For a QSP project, a CRISP-like workflow reads:
   \item Refit and validate the reduced model for the query.
 \end{enumerate}
 
-\subsection{Regulatory style interpretation}
+\subsubsection*{Regulatory style interpretation}
 
 For model-informed decisions, a reduced QSP model should answer:
 \[
-  \text{What was removed?}
-  \qquad
-  \text{Why is it irrelevant?}
-  \qquad
-  \text{For which prediction is it irrelevant?}
+  \begin{array}{c}
+    \text{What was removed?}\\
+    \text{Why is it irrelevant?}\\
+    \text{For which prediction is it irrelevant?}
+  \end{array}
 \]
 This is the standard we should use in future pharmacology notes.
 
-\section{Worked notebook: the full conceptual chain}
+\subsection{The full conceptual chain}
 
-\subsection{From matrix to manifold}
+\subsubsection*{From matrix to manifold}
 
 The chain is:
 \[
@@ -675,18 +693,20 @@ The chain is:
 \]
 Each arrow changes vocabulary but preserves a central idea: how does a small movement in one space become a movement in another space?
 
-\subsection{From ODE to MBAM}
+\subsubsection*{From ODE to MBAM}
 
 The dynamic chain is:
 \[
-  \dot{\vect{x}}=\vect{f}(\vect{x},\param)
-  \quad\leadsto\quad
-  \vect{y}(\param)
-  \quad\leadsto\quad
-  \pd{\vect{y}}{\param}
-  \quad\leadsto\quad
-  \text{least visible parameter direction}
-  \quad\leadsto\quad
-  \text{boundary limit}.
+  \begin{array}{c}
+    \dot{\vect{x}}=\vect{f}(\vect{x},\param)
+    \quad\leadsto\quad
+    \vect{y}(\param)
+    \quad\leadsto\quad
+    \pd{\vect{y}}{\param}\\
+    \downarrow\\
+    \text{least visible parameter direction}
+    \quad\leadsto\quad
+    \text{boundary limit}
+  \end{array}
 \]
 That is the mathematical skeleton beneath many successful approximations in biology and pharmacology.
