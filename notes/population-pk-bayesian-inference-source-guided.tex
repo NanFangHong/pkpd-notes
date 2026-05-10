@@ -14,7 +14,7 @@ If \(y_i\) is the observed longitudinal record, define it.  If \(u_i\) is the do
 
 The probability-of-events unit is the first piece of PopPK decision language.  Events are not only mathematical subsets; they are clinical statements:
 \[
-  \{\textit{AUC}>U\},
+  \{\pksym{AUC}>U\},
   \qquad
   \{C_{\min}<L\},
   \qquad
@@ -89,7 +89,7 @@ The practical question is always:
 
 Continuous random variables complete the bridge to PK parameters.  Clearance, volume, rate constants, exposure, concentration, and response are continuous or treated as continuous.  Densities replace probability masses, and integrals replace sums:
 \[
-  P(A)=\int_A p(x)\,\dd x.
+  \Prob(A)=\int_A p(x)\,\dd x.
 \]
 Every marginal likelihood in PopPK is this idea repeated at scale.
 
@@ -167,7 +167,7 @@ The MCMC and approximate inference notes prepare the reader for modern computati
 
 For PopPK, one should report not only the model but the approximation:
 \[
-  \text{\textit{FOCE}? Laplace? \textit{SAEM}? importance sampling? full Bayesian \textit{MCMC}?}
+  \text{FOCE? Laplace? SAEM? importance sampling? full Bayesian MCMC?}
 \]
 Different approximations can lead to different estimates in hard models, so the algorithm is part of the inferential statement.
 
@@ -235,7 +235,7 @@ The PK appendix reminds us that the statistical hierarchy needs a pharmacologica
 
 The final synthesis is:
 \[
-  \text{\textit{PK} supplies the mechanistic map;}
+  \text{PK supplies the mechanistic map;}
   \qquad
   \text{Bayesian inference supplies the uncertainty map.}
 \]

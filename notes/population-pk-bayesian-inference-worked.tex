@@ -81,51 +81,51 @@ The predictive variance has two parts: observation noise \(\sigma^2\) and indivi
 
 \subsection{Why log transforms are common}
 
-Many PK parameters are positive: clearance, volume, rate constants, bioavailability fractions after suitable transformations.  A normal model directly on \(\textit{CL}_i\) can assign probability to negative clearance.  A lognormal model avoids this:
+Many PK parameters are positive: clearance, volume, rate constants, bioavailability fractions after suitable transformations.  A normal model directly on \(\pksym{CL}_i\) can assign probability to negative clearance.  A lognormal model avoids this:
 \[
-  \log \textit{CL}_i=\log \textit{CL}_{\pop}+\eta_{\textit{CL},i},
+  \log \pksym{CL}_i=\log \pksym{CL}_{\pop}+\eta_{\pklab{CL},i},
   \qquad
-  \eta_{\textit{CL},i}\sim\Normal(0,\omega_{\textit{CL}}^2).
+  \eta_{\pklab{CL},i}\sim\Normal(0,\omega_{\pklab{CL}}^2).
 \]
-Then \(\textit{CL}_i>0\) automatically.  More importantly, variability becomes multiplicative:
+Then \(\pksym{CL}_i>0\) automatically.  More importantly, variability becomes multiplicative:
 \[
-  \textit{CL}_i=\textit{CL}_{\pop}\exp(\eta_{\textit{CL},i}).
+  \pksym{CL}_i=\pksym{CL}_{\pop}\exp(\eta_{\pklab{CL},i}).
 \]
-If \(\eta_{\textit{CL},i}=0.2\), clearance is multiplied by \(\exp(0.2)\).  If \(\eta_{\textit{CL},i}=-0.2\), it is multiplied by \(\exp(-0.2)\).  The model is symmetric on the log scale, not the original scale.
+If \(\eta_{\pklab{CL},i}=0.2\), clearance is multiplied by \(\exp(0.2)\).  If \(\eta_{\pklab{CL},i}=-0.2\), it is multiplied by \(\exp(-0.2)\).  The model is symmetric on the log scale, not the original scale.
 
 \subsection{Typical value versus mean}
 
 For a lognormal parameter,
 \[
-  \E(\textit{CL}_i)=\textit{CL}_{\pop}\exp(\omega_{\textit{CL}}^2/2).
+  \E(\pksym{CL}_i)=\pksym{CL}_{\pop}\exp(\omega_{\pklab{CL}}^2/2).
 \]
-Thus \(\textit{CL}_{\pop}\) is the median and typical value on the original scale, not the arithmetic mean.  This distinction matters when interpreting fixed effects.  A report that calls \(\textit{CL}_{\pop}\) the mean clearance is using language loosely unless \(\omega^2\) is small.
+Thus \(\pksym{CL}_{\pop}\) is the median and typical value on the original scale, not the arithmetic mean.  This distinction matters when interpreting fixed effects.  A report that calls \(\pksym{CL}_{\pop}\) the mean clearance is using language loosely unless \(\omega^2\) is small.
 
 The same issue appears with covariates:
 \[
-  \textit{CL}_i=\textit{CL}_{\pop}\left(\frac{\textit{WT}_i}{70}\right)^\beta\exp(\eta_i).
+  \pksym{CL}_i=\pksym{CL}_{\pop}\left(\frac{\pksym{WT}_i}{70}\right)^\beta\exp(\eta_i).
 \]
-The covariate function gives the typical clearance for weight \(\textit{WT}_i\).  The population mean at that weight is larger by the lognormal factor if the random effect variance is nonzero.
+The covariate function gives the typical clearance for weight \(\pksym{WT}_i\).  The population mean at that weight is larger by the lognormal factor if the random effect variance is nonzero.
 
 \subsection{Correlation between random effects}
 
 If clearance and volume random effects are correlated,
 \[
-  \begin{pmatrix}\eta_{\textit{CL},i}\\ \eta_{V,i}\end{pmatrix}
+  \begin{pmatrix}\eta_{\pklab{CL},i}\\ \eta_{V,i}\end{pmatrix}
   \sim
   \Normal\left(
     \begin{pmatrix}0\\0\end{pmatrix},
     \begin{pmatrix}
-      \omega_{\textit{CL}}^2 & \rho\omega_{\textit{CL}}\omega_V\\
-      \rho\omega_{\textit{CL}}\omega_V & \omega_V^2
+      \omega_{\pklab{CL}}^2 & \rho\omega_{\pklab{CL}}\omega_V\\
+      \rho\omega_{\pklab{CL}}\omega_V & \omega_V^2
     \end{pmatrix}
   \right).
 \]
 The correlation \(\rho\) is not a decorative matrix entry.  It says whether individuals with high clearance tend also to have high volume.  This can affect predictions of half-life:
 \[
-  t_{1/2,i}=\frac{\log 2\,V_i}{\textit{CL}_i}.
+  t_{1/2,i}=\frac{\log 2\,V_i}{\pksym{CL}_i}.
 \]
-If \(V_i\) and \(\textit{CL}_i\) rise together, half-life may be less variable than either parameter alone.  A diagonal \(\Omega\) can therefore distort derived quantities even when marginal variability looks plausible.
+If \(V_i\) and \(\pksym{CL}_i\) rise together, half-life may be less variable than either parameter alone.  A diagonal \(\Omega\) can therefore distort derived quantities even when marginal variability looks plausible.
 
 \section{Worked notebook: covariate models}
 
@@ -133,23 +133,23 @@ If \(V_i\) and \(\textit{CL}_i\) rise together, half-life may be less variable t
 
 Covariate models should be centered so fixed effects remain interpretable.  Weight effects often use
 \[
-  \textit{CL}_i=\textit{CL}_{\pop}\left(\frac{\textit{WT}_i}{70}\right)^\beta\exp(\eta_i).
+  \pksym{CL}_i=\pksym{CL}_{\pop}\left(\frac{\pksym{WT}_i}{70}\right)^\beta\exp(\eta_i).
 \]
-Then \(\textit{CL}_{\pop}\) is the typical clearance at \(70\,\mathrm{kg}\).  Without centering, the intercept may refer to an impossible subject, making interpretation and numerical estimation worse.
+Then \(\pksym{CL}_{\pop}\) is the typical clearance at \(70\,\mathrm{kg}\).  Without centering, the intercept may refer to an impossible subject, making interpretation and numerical estimation worse.
 
 Centering also helps separate baseline physiology from covariate slope.  If age is centered at \(50\) years,
 \[
-  \log \textit{CL}_i=\log \textit{CL}_{\pop}+\beta_{age}(\textit{AGE}_i-50)+\eta_i,
+  \log \pksym{CL}_i=\log \pksym{CL}_{\pop}+\beta_{age}(\pksym{AGE}_i-50)+\eta_i,
 \]
-then \(\textit{CL}_{\pop}\) is typical clearance at age 50.  The slope describes multiplicative change per year on the log scale.
+then \(\pksym{CL}_{\pop}\) is typical clearance at age 50.  The slope describes multiplicative change per year on the log scale.
 
 \subsection{Allometry as prior biological structure}
 
 Allometric scaling often uses exponents near \(0.75\) for clearance and \(1\) for volume:
 \[
-  \textit{CL}_i=\textit{CL}_{\pop}\left(\frac{\textit{WT}_i}{70}\right)^{0.75}\exp(\eta_{\textit{CL},i}),
+  \pksym{CL}_i=\pksym{CL}_{\pop}\left(\frac{\pksym{WT}_i}{70}\right)^{0.75}\exp(\eta_{\pklab{CL},i}),
   \qquad
-  V_i=V_{\pop}\left(\frac{\textit{WT}_i}{70}\right)\exp(\eta_{V,i}).
+  V_i=V_{\pop}\left(\frac{\pksym{WT}_i}{70}\right)\exp(\eta_{V,i}).
 \]
 From a Bayesian perspective, a fixed allometric exponent acts like strong prior biological structure.  Estimating the exponent from data relaxes that structure but requires enough weight range and information.  The mature question is not whether fixed or estimated is universally better.  It is whether the dataset can support learning the exponent and whether external biology justifies constraining it.
 
@@ -157,7 +157,7 @@ From a Bayesian perspective, a fixed allometric exponent acts like strong prior 
 
 For a binary covariate \(z_i\), one common form is
 \[
-  \textit{CL}_i=\textit{CL}_{\pop}\exp(\beta z_i)\exp(\eta_i).
+  \pksym{CL}_i=\pksym{CL}_{\pop}\exp(\beta z_i)\exp(\eta_i).
 \]
 If \(z_i=1\), typical clearance is multiplied by \(\exp(\beta)\).  This makes categorical effects easy to interpret.  But statistical visibility is not causal certainty.  If the category is treatment group in a randomized trial, interpretation is stronger.  If it is comedication in observational data, confounding may remain.
 
@@ -348,11 +348,11 @@ This is a common source of confusion.  A VPC for model checking and a simulation
 
 Means and medians can look good while tails fail.  For narrow therapeutic index drugs, tail behavior may be the point.  The relevant predictive checks might be:
 \[
-  P(\tilde C_{\max}>C_{\mathrm{tox}}),
+  \Prob(\tilde C_{\max}>C_{\mathrm{tox}}),
   \qquad
-  P(\tilde C_{\min}<C_{\mathrm{eff}}),
+  \Prob(\tilde C_{\min}<C_{\mathrm{eff}}),
   \qquad
-  P(\widetilde{\textit{AUC}}>U).
+  \Prob(\widetilde{\pksym{AUC}}>U).
 \]
 If a model is intended for dosing, it should be checked where dosing can harm.
 
@@ -426,7 +426,7 @@ Diagnostic plots should be read as questions:
   \text{Observed vs predicted} & \text{Is the conditional mean structure plausible?}\\
   \text{Residual vs time} & \text{Is there missing dynamics?}\\
   \text{Residual vs prediction} & \text{Is the residual scale right?}\\
-  \textit{VPC} & \text{Is the population predictive distribution credible?}\\
+  \pklab{VPC} & \text{Is the population predictive distribution credible?}\\
   \text{Bootstrap} & \text{How stable are parameter estimates?}
   \end{array}
 \]
