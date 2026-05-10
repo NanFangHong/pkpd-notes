@@ -8,7 +8,7 @@ The practical translation is:
 \[
   \text{write down the object before estimating it.}
 \]
-If \(y_i\) is the observed longitudinal record, define it.  If \(u_i\) is the dose and sampling design, define it.  If \(c_i\) is covariate information, define which covariates are included and whether they are baseline or time-varying.  If \(\psi_i\) is the individual parameter vector, list its components and constraints.  This sounds slow, but it prevents the most expensive confusion later.
+If \(y_i\) is the observed longitudinal record, define it.  If \(u_i\) is the dose and sampling design, define it.  If \(c_i\) is covariate information, define which covariates are included and whether they are baseline or time-varying.  If \(\rpsi_i\) is the latent individual parameter vector, list its candidate value \(\psi_i\), its components, and its constraints.  This sounds slow, but it prevents the most expensive confusion later.
 
 \subsection{Probability of events}
 
@@ -50,11 +50,11 @@ The 6.008 graphical model notes are almost tailor-made for hierarchical pharmaco
 
 For PopPK, the basic graph is repeated:
 \[
-  c_i\to\psi_i\to y_i,
+  c_i\to\rpsi_i\to\rv{y}_i,
   \qquad
-  u_i\to y_i,
+  u_i\to\rv{y}_i,
   \qquad
-  \theta\to\psi_i.
+  \theta\to\rpsi_i.
 \]
 More complex graphs add disease states, adherence, dropout, PD response, mixture classes, or inter-occasion effects.  Each addition should correspond to a scientific reason, not a desire to make the graph impressive.
 
@@ -246,7 +246,7 @@ The final synthesis is:
 
 For any new paper, start by writing:
 \[
-  y_i,\quad \psi_i,\quad \theta,\quad c_i,\quad u_i.
+  \rv{y}_i,\quad \rpsi_i,\quad \theta,\quad c_i,\quad u_i.
 \]
 If the paper has response data, add \(r_i\).  If it has event times, add \(T_i\).  If it has latent classes, add \(z_i\).  If it has disease progression, add the disease state.  The act of naming variables is the start of understanding.
 
@@ -266,7 +266,7 @@ The factorization reveals conditional independence assumptions and missing-data 
 
 \subsection{Step 3: identify the inferential target}
 
-The target might be \(\theta\), \(\psi_i\), a covariate effect, a model comparison, a future exposure, a dose, or a clinical event probability.  Different targets require different summaries.  Do not let the software's default output decide the scientific target.
+The target might be \(\theta\), \(\rpsi_i\), a covariate effect, a model comparison, a future exposure, a dose, or a clinical event probability.  Different targets require different summaries.  Do not let the software's default output decide the scientific target.
 
 \subsection{Step 4: identify the approximation}
 

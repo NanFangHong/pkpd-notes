@@ -6,22 +6,22 @@ Before nonlinear ODEs, residual error models, and SAEM, it is worth solving a mo
 
 Let
 \[
-  \psi_i\mid \mu,\omega^2 \sim \Normal(\mu,\omega^2),
+  \rpsi_i\mid \mu,\omega^2 \sim \Normal(\mu,\omega^2),
   \qquad
-  y_{ij}\mid \psi_i,\sigma^2\sim\Normal(\psi_i,\sigma^2),
+  \rv{y}_{ij}\mid \rpsi_i=\psi_i,\sigma^2\sim\Normal(\psi_i,\sigma^2),
   \qquad
   j=1,\ldots,n_i.
 \]
-Think of \(\psi_i\) as an individual log-clearance and \(y_{ij}\) as noisy repeated observations of that log-clearance after some simplification.  This is not a realistic PK model, but it contains the same hierarchy:
+Think of \(\rpsi_i\) as an individual log-clearance before it is known, and \(y_{ij}\) as realized noisy observations of that log-clearance after some simplification.  This is not a realistic PK model, but it contains the same hierarchy:
 \[
   \text{population} \longrightarrow \text{individual parameter} \longrightarrow \text{observations}.
 \]
 
 \subsection{The individual posterior}
 
-Let \(\bar y_i=n_i^{-1}\sum_j y_{ij}\).  Conditional on \(\mu,\omega^2,\sigma^2\), the posterior for \(\psi_i\) is normal:
+Let \(\bar y_i=n_i^{-1}\sum_j y_{ij}\).  Conditional on \(\mu,\omega^2,\sigma^2\), the posterior for \(\rpsi_i\) is normal:
 \[
-  \psi_i\mid y_i
+  \rpsi_i\mid y_i
   \sim
   \Normal(m_i,s_i^2),
 \]
@@ -85,7 +85,7 @@ Many PK parameters are positive: clearance, volume, rate constants, bioavailabil
 \[
   \log \pksym{CL}_i=\log \pksym{CL}_{\pop}+\eta_{\pklab{CL},i},
   \qquad
-  \eta_{\pklab{CL},i}\sim\Normal(0,\omega_{\pklab{CL}}^2).
+  \reta_{\pklab{CL},i}\sim\Normal(0,\omega_{\pklab{CL}}^2).
 \]
 Then \(\pksym{CL}_i>0\) automatically.  More importantly, variability becomes multiplicative:
 \[
@@ -103,7 +103,7 @@ Thus \(\pksym{CL}_{\pop}\) is the median and typical value on the original scale
 
 The same issue appears with covariates:
 \[
-  \pksym{CL}_i=\pksym{CL}_{\pop}\left(\frac{\pksym{WT}_i}{70}\right)^\beta\exp(\eta_i).
+  \pksym{CL}_i=\pksym{CL}_{\pop}\left(\frac{\pksym{WT}_i}{70}\right)^\beta\exp(\reta_i).
 \]
 The covariate function gives the typical clearance for weight \(\pksym{WT}_i\).  The population mean at that weight is larger by the lognormal factor if the random effect variance is nonzero.
 
@@ -111,7 +111,7 @@ The covariate function gives the typical clearance for weight \(\pksym{WT}_i\). 
 
 If clearance and volume random effects are correlated,
 \[
-  \begin{pmatrix}\eta_{\pklab{CL},i}\\ \eta_{V,i}\end{pmatrix}
+  \begin{pmatrix}\reta_{\pklab{CL},i}\\ \reta_{V,i}\end{pmatrix}
   \sim
   \Normal\left(
     \begin{pmatrix}0\\0\end{pmatrix},
@@ -330,9 +330,9 @@ For individual-parameter simulation inside SAEM or full Bayesian inference, trac
 
 A basic population predictive simulation proceeds:
 \[
-  \tilde\psi_i\sim p_{\widehat\theta}(\psi_i\mid c_i),
+  \tilde{\rpsi}_i\sim p_{\widehat\theta}(\psi_i\mid c_i),
   \qquad
-  \tilde y_i\sim p_{\widehat\theta}(y_i\mid\tilde\psi_i,u_i).
+  \tilde{\rv{y}}_i\sim p_{\widehat\theta}(y_i\mid\tilde\psi_i,u_i).
 \]
 Repeat this many times.  Compute summaries of each simulated dataset.  Compare the observed summary to the simulated distribution.
 
@@ -431,4 +431,3 @@ Diagnostic plots should be read as questions:
   \end{array}
 \]
 The plots are not decorations after the model.  They are evidence about the model's probability law.
-

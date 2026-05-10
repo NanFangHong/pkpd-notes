@@ -21,7 +21,7 @@ The expanded version therefore follows a slower route:
 The order matters.  If we begin with NONMEM syntax, the reader sees THETA, ETA, EPSILON, OMEGA, and SIGMA as a software dialect.  If we begin with Lavielle's joint distribution but skip inference, the reader sees a clean model and does not know what is hard about it.  If we begin with Bayes rule but skip PK, the reader understands updating but not why individual parameters are biologically meaningful.  The point of this note is to keep all three views alive at the same time.
 
 \begin{remark}
-  I will use ``Bayesian'' in two levels.  In the strict level, a Bayesian model puts priors on all unknown quantities, including population parameters.  In the broader inferential level, a PopPK model is already Bayesian in spirit because individual parameters are latent variables updated by individual observations under a population distribution.  Much of classical Population PK is maximum likelihood for \(\theta\), but conditional inference for \(\psi_i\).  That mixed posture is not a defect; it is exactly why the field is intellectually interesting.
+  I will use ``Bayesian'' in two levels.  In the strict level, a Bayesian model puts priors on all unknown quantities, including population parameters.  In the broader inferential level, a PopPK model is already Bayesian in spirit because individual parameters are latent variables updated by individual observations under a population distribution.  Much of classical Population PK is maximum likelihood for \(\theta\), but conditional inference for \(\rpsi_i\).  That mixed posture is not a defect; it is exactly why the field is intellectually interesting.
 \end{remark}
 
 \subsection{The three texts in one sentence each}
@@ -66,7 +66,7 @@ If the model includes unobserved biology, the outcome may be enlarged to
 \[
   (y_i,\psi_i),
 \]
-where \(\psi_i\) might contain clearance, volume, absorption rate, baseline response, turnover parameters, or sensitivity parameters.  If the design itself is randomized, the outcome may also include \(u_i\).  If dropout is informative, the event time of dropout must become part of the outcome.  The modeler is already making a scientific claim when deciding what belongs in the sample space.
+where \(\psi_i\), as a candidate value of \(\rpsi_i\), might contain clearance, volume, absorption rate, baseline response, turnover parameters, or sensitivity parameters.  If the design itself is randomized, the outcome may also include \(u_i\).  If dropout is informative, the event time of dropout must become part of the outcome.  The modeler is already making a scientific claim when deciding what belongs in the sample space.
 
 This is the first place where Population PK becomes more subtle than curve fitting.  Curve fitting says: here are points and here is a curve.  Probability modeling says: here is a law that could have generated the record, the latent physiology, the measurement noise, and possibly the sampling schedule.  A curve is only one conditional mean or median inside that law.
 
@@ -171,11 +171,11 @@ if toxicity risk is the central concern.  This is where 6.008 expectation leads 
 
 It is common to write
 \[
-  y_{ij}\indep y_{ik}\mid \psi_i,\theta
+  \rv{y}_{ij}\indep \rv{y}_{ik}\mid \rpsi_i,\theta
 \]
-for two observations from the same subject.  This does not mean the observations are marginally independent.  They are connected through the same latent individual parameter \(\psi_i\).  Conditional independence is a statement about what remains after we condition on the relevant latent structure.
+for two observations from the same subject.  This does not mean the observations are marginally independent.  They are connected through the same latent individual parameter \(\rpsi_i\).  Conditional independence is a statement about what remains after we condition on the relevant latent structure.
 
-This distinction is crucial for repeated measures.  If a model treats observations as independent without individual random effects, it may underestimate uncertainty because it ignores within-subject correlation.  If a model includes \(\psi_i\), much of the dependence is explained by shared physiology.  Remaining residual dependence may still exist through assay drift, disease dynamics, adherence, or unmodeled feedback.  A good PopPK reader always asks: independent after conditioning on what?
+This distinction is crucial for repeated measures.  If a model treats observations as independent without individual random effects, it may underestimate uncertainty because it ignores within-subject correlation.  If a model includes \(\rpsi_i\), much of the dependence is explained by shared physiology.  Remaining residual dependence may still exist through assay drift, disease dynamics, adherence, or unmodeled feedback.  A good PopPK reader always asks: independent after conditioning on what?
 
 \section{Decision theory before dosing software}
 
@@ -195,7 +195,7 @@ The Bayesian action minimizes posterior predictive risk:
 \[
   a^\star
   =
-  \argmin_a \E\{L(a,\tilde{\rv y})\mid y_i\}.
+  \argmin_a \E\{L(a,\tilde{\rv{y}})\mid y_i\}.
 \]
 This formula is more honest than saying ``choose the dose that hits the target concentration.''  It forces the modeler to say what failure means.
 
@@ -229,15 +229,15 @@ This does not excuse sloppy modeling.  It prevents a narrow criterion from masqu
 
 A minimal population PK graphical model can be written as
 \[
-  \theta \longrightarrow \psi_i \longrightarrow y_i,
+  \theta \longrightarrow \rpsi_i \longrightarrow \rv{y}_i,
   \qquad
-  c_i \longrightarrow \psi_i,
+  c_i \longrightarrow \rpsi_i,
   \qquad
-  u_i \longrightarrow y_i,
+  u_i \longrightarrow \rv{y}_i,
   \qquad
   i=1,\ldots,N.
 \]
-Here \(\theta\) contains population-level parameters, \(c_i\) covariates, \(u_i\) the design or dosing regimen, \(\psi_i\) individual parameters, and \(y_i\) observations.  The factorization is
+Here \(\theta\) contains population-level parameters, \(c_i\) covariates, \(u_i\) the design or dosing regimen, \(\rpsi_i\) individual parameters, and \(\rv{y}_i\) observations.  The factorization is
 \[
   p_\theta(y_{1:N},\psi_{1:N}\mid c_{1:N},u_{1:N})
   =
@@ -285,7 +285,7 @@ One of Lavielle's most useful claims is that a model is a joint probability dist
   p_\theta(y_i\mid \psi_i,u_i)
   p_\theta(\psi_i\mid c_i).
 \]
-If \(\theta\) is also random, a Bayesian extension adds \(p(\theta)\).  If covariates or dosing records are modeled as random, they also enter.  But even the basic two-layer expression already changes how we think.  The question is not merely whether \(f(t;\psi_i)\) fits the observed curve.  The question is whether the joint law explains individual profiles, between-subject variability, residual noise, and prediction targets.
+If the population parameter is modeled as a random quantity, \(\rtheta\), a Bayesian extension adds a prior density \(p(\theta)\).  If covariates or dosing records are modeled as random, they also enter.  But even the basic two-layer expression already changes how we think.  The question is not merely whether \(f(t;\psi_i)\) fits the observed curve.  The question is whether the joint law explains individual profiles, between-subject variability, residual noise, and prediction targets.
 
 \subsection{Description, representation, implementation}
 
@@ -293,7 +293,7 @@ Lavielle's separation of description, representation, and implementation is a po
 
 \begin{itemize}[leftmargin=2em]
   \item The \term{description} is the scientific story: clearance varies between individuals; body weight may explain part of that variation; concentration is measured with assay noise.
-  \item The \term{representation} is the mathematical probability law: \(\pksym{CL}_i=\pksym{CL}_{\pop}(\pksym{WT}_i/70)^\beta\exp(\eta_{\pklab{CL},i})\), \(\eta_i\sim\Normal(0,\Omega)\), and an observation density.
+  \item The \term{representation} is the mathematical probability law: \(\pksym{CL}_i=\pksym{CL}_{\pop}(\pksym{WT}_i/70)^\beta\exp(\reta_{\pklab{CL},i})\), \(\reta_i\sim\Normal(0,\Omega)\), and an observation density.
   \item The \term{implementation} is the computational form: NONMEM control stream, Mlxtran project, Stan program, Monolix task, or a custom likelihood.
 \end{itemize}
 
@@ -303,16 +303,16 @@ Many arguments in modeling are actually category errors between these levels.  S
 
 For a common continuous-data model, one representation is:
 \[
-  \eta_i\sim\Normal(0,\Omega),
+  \reta_i\sim\Normal(0,\Omega),
   \qquad
-  h(\psi_i)=h(\psi_{\pop})+B c_i+\eta_i,
+  h(\rpsi_i)=h(\psi_{\pop})+B c_i+\reta_i,
 \]
 \[
   C_{ij}=f(t_{ij};\psi_i,u_i),
   \qquad
-  y_{ij}=C_{ij}+g(C_{ij};a,b)\varepsilon_{ij},
+  y_{ij}=C_{ij}+g(C_{ij};a,b)\repsilon_{ij},
   \qquad
-  \varepsilon_{ij}\iid\Normal(0,1).
+  \repsilon_{ij}\iid\Normal(0,1).
 \]
 The transformation \(h\) is often logarithmic for positive parameters.  The residual scale \(g\) might be constant, proportional, or combined.  The covariate term \(Bc_i\) may be linear, allometric, categorical, nonlinear, or absent.
 
@@ -363,9 +363,9 @@ The individual parameter model says how people differ.  A common form is
   =
   \log \pksym{CL}_{\pop}
   +\beta_{\pklab{WT}}\log(\pksym{WT}_i/70)
-  +\eta_{\pklab{CL},i},
+  +\reta_{\pklab{CL},i},
   \qquad
-  \eta_{\pklab{CL},i}\sim\Normal(0,\omega_{\pklab{CL}}^2).
+  \reta_{\pklab{CL},i}\sim\Normal(0,\omega_{\pklab{CL}}^2).
 \]
 This is not only a regression.  It is a probability distribution for individual clearance.  The covariate term explains systematic variability; the random effect represents remaining between-subject variability.  The log transform ensures positivity and often makes multiplicative biological variability more plausible.
 
@@ -415,13 +415,13 @@ For a one-compartment IV bolus model,
 \]
 For extravascular dosing with first-order absorption, the formula is more complicated, and for many systems the prediction is obtained by solving ODEs.  But the inferential role is the same: \(f\) is the deterministic forward map inside the stochastic observation law.
 
-This separation is useful.  The PK equation by itself is not a statistical model.  The statistical model begins when we say how \(\psi_i\) varies and how \(y_i\) deviates from \(f\).  The forward map provides pharmacological structure; probability wraps uncertainty around it.
+This separation is useful.  The PK equation by itself is not a statistical model.  The statistical model begins when we say how \(\rpsi_i\) varies and how \(\rv{y}_i\) deviates from \(f\).  The forward map provides pharmacological structure; probability wraps uncertainty around it.
 
 \subsection{Identifiability and design}
 
 Sparse sampling can make parameters hard to distinguish.  In a one-compartment model, early samples may inform volume and absorption; later samples inform elimination; troughs may inform clearance but not absorption.  A model can be algebraically correct and still weakly identified by the design.
 
-This is where \(u_i\) matters.  Doses and sampling times are not administrative details; they determine the likelihood's shape.  Two designs with the same number of samples can produce very different information about \(\psi_i\).  A Bayesian posterior under a weak design will remain broad or shrink strongly toward the population distribution.
+This is where \(u_i\) matters.  Doses and sampling times are not administrative details; they determine the likelihood's shape.  Two designs with the same number of samples can produce very different information about \(\rpsi_i\).  A Bayesian posterior under a weak design will remain broad or shrink strongly toward the population distribution.
 
 \subsection{PK/PD coupling}
 
@@ -583,13 +583,13 @@ The Bayesian language prevents overinterpretation:
 
 Model evaluation asks whether data generated from the fitted model resemble the observed data in scientifically relevant ways.  In Bayesian notation, simulate
 \[
-  \tilde y\sim p(\tilde y\mid y)
+  \tilde{\rv{y}}\sim p(\tilde y\mid y)
 \]
 or, in an ML PopPK workflow, simulate from the fitted population model
 \[
-  \tilde\psi_i\sim p_{\widehat\theta}(\psi_i\mid c_i),
+  \tilde{\rpsi}_i\sim p_{\widehat\theta}(\psi_i\mid c_i),
   \qquad
-  \tilde y_i\sim p_{\widehat\theta}(y_i\mid \tilde\psi_i,u_i).
+  \tilde{\rv{y}}_i\sim p_{\widehat\theta}(y_i\mid \tilde\psi_i,u_i).
 \]
 Then compare observed and simulated summaries.
 
@@ -648,9 +648,9 @@ This says drug inhibits production, while response decays through turnover.  The
 
 \section{Full Bayesian Population PK}
 
-\subsection{What changes when \(\theta\) is random}
+\subsection{What changes when \(\rtheta\) is random}
 
-Classical PopPK often estimates \(\theta\) by maximum likelihood and then conditions on \(\widehat\theta\).  Full Bayesian PopPK puts a prior on \(\theta\):
+Classical PopPK often estimates \(\theta\) by maximum likelihood and then conditions on \(\widehat\theta\).  Full Bayesian PopPK treats \(\rtheta\) as uncertain by putting a prior on the value \(\theta\):
 \[
   p(\theta,\psi_{1:N}\mid y)
   \propto

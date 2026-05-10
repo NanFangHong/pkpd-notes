@@ -18,6 +18,11 @@
 \DeclareMathOperator{\diag}{diag}
 \DeclareMathOperator{\logit}{logit}
 \newcommand{\rv}[1]{\mathsf{#1}}
+\newcommand{\rpsi}{\boldsymbol{\psi}}
+\newcommand{\reta}{\boldsymbol{\eta}}
+\newcommand{\rtheta}{\boldsymbol{\theta}}
+\newcommand{\repsilon}{\boldsymbol{\epsilon}}
+\newcommand{\rphi}{\boldsymbol{\phi}}
 \newcommand{\bs}[1]{\boldsymbol{#1}}
 \newcommand{\given}{\,|\,}
 \newcommand{\Prob}{\mathbb{P}}
@@ -47,10 +52,58 @@
 
   \vspace{5pt}
   \noindent\textbf{Style}\\
-  This is a reconstruction rather than an excerpt. The notation borrows the 6.437 random-variable convention: random quantities use sans-serif symbols, while realizations and parameters use ordinary type. The Population PK structure follows Lavielle's \(y_i,\psi_i,\theta\) language.\hspace*{\fill}[notation]
+  This is a reconstruction rather than an excerpt. The notation borrows the 6.437 random-variable convention: Latin random quantities use sans-serif symbols, Greek random quantities use bold Greek, and realizations or candidate values use ordinary type. The Population PK structure follows Lavielle's \(y_i,\psi_i,\theta\) language.\hspace*{\fill}[notation]
 }
 
 \tableofcontents
+
+\section{Notation and preliminaries}
+
+\subsection{Random variable versus realization}
+
+6.437 的一个很美的符号习惯是：random variables 用 sans-serif，比如 \(\rv{x}\)；具体实现值或 deterministic quantities 用普通 serif，比如 \(x\)。这篇笔记从一开始就采用这个区分，因为 Population PK 最容易混淆的正是 random quantity、realized data、candidate parameter value 和 deterministic population parameter。
+\[
+  \begin{aligned}
+    \rv{y}_i &\quad \text{is random data before observation},\\
+    y_i &\quad \text{is the observed dataset},\\
+    \rpsi_i &\quad \text{is the latent random individual parameter},\\
+    \psi_i &\quad \text{is a candidate or realized value of that parameter}.
+  \end{aligned}
+\]
+
+\begin{notation}
+  Latin random variables use sans-serif, e.g. \(\rv{x},\rv{y},\rv{CL},\rv{AUC}\). Greek letters are a visual exception: in standard LaTeX, \(\mathsf{\psi}\) looks almost the same as \(\psi\), so random Greek quantities use bold Greek: \(\rpsi,\reta,\rtheta,\repsilon,\rphi\). Realized or candidate Greek values remain ordinary: \(\psi,\eta,\theta,\epsilon,\phi\).
+\end{notation}
+
+\subsection{Operators, sets, labels, and PK symbols}
+
+Probability and expectation follow the 6.437 visual convention:
+\[
+  \Prob(\rv{x}=x)=p_{\rv{x}}(x),
+  \qquad
+  \E[g(\rv{x})]=\int g(x)p_{\rv{x}}(x)\,\dd x.
+\]
+Sets and events use calligraphic letters, for example \(\mathcal{X}\) for an alphabet and \(\mathcal{A}\) for an event.  Pharmacometric multi-letter quantities use two roles:
+\[
+  \begin{aligned}
+    \rv{CL}_i,\ \rv{AUC}_i
+    &\quad \text{for random quantities},\\
+    \pksym{CL}_i,\ \pksym{AUC}_i
+    &\quad \text{for values or deterministic symbols}.
+  \end{aligned}
+\]
+Subscripts and method names that are labels use roman type:
+\[
+  \omega_{\pklab{CL}}^2,
+  \qquad
+  \widehat\psi_i^{\pklab{MAP}},
+  \qquad
+  \psi_i^{\pklab{PK}}.
+\]
+
+\begin{warning}
+  A point estimate such as \(\widehat\psi_i^{\pklab{MAP}}\) is not the same object as the latent random parameter \(\rpsi_i\).  The former is a decision or summary; the latter is an uncertain quantity under a probability law.  This distinction is the whole reason for the typography.
+\end{warning}
 
 \section{Source map and thesis}
 
@@ -159,9 +212,9 @@ Granularity & PopPK version \\
 \midrule
 One observation & \(\rv{y}_{ij}\), a concentration at one time. \\
 One individual & \(\rv{y}_i=(\rv{y}_{i1},\ldots,\rv{y}_{in_i})\), the longitudinal record. \\
-One latent individual & \((\rv{y}_i,\rv{\psi}_i)\), observations plus the subject's hidden PK parameters. \\
-The population sample & \((\rv{y}_{1:N},\rv{\psi}_{1:N})\), all individuals and all latent heterogeneity. \\
-Future trial or clinic & \((\tilde{\rv{y}},\tilde{\rv{\psi}})\), prediction for new individuals. \\
+One latent individual & \((\rv{y}_i,\rpsi_i)\), observations plus the subject's hidden PK parameters. \\
+The population sample & \((\rv{y}_{1:N},\rpsi_{1:N})\), all individuals and all latent heterogeneity. \\
+Future trial or clinic & \((\tilde{\rv{y}},\tilde{\rpsi})\), prediction for new individuals. \\
 \bottomrule
 \end{tabularx}
 \end{center}
@@ -303,14 +356,14 @@ from conditional independence:
 \]
 Population PK lives on conditional independence. Given individual parameters, observations are often assumed independent:
 \[
-  \rv{y}_{ij}\indep \rv{y}_{ik}\given \rv{\psi}_i
+  \rv{y}_{ij}\indep \rv{y}_{ik}\given \rpsi_i
   \quad (j\ne k).
 \]
 Given population parameters, individuals are often assumed independent:
 \[
-  (\rv{y}_i,\rv{\psi}_i)
+  (\rv{y}_i,\rpsi_i)
   \indep
-  (\rv{y}_l,\rv{\psi}_l)
+  (\rv{y}_l,\rpsi_l)
   \given \theta
   \quad (i\ne l).
 \]
@@ -327,7 +380,7 @@ For a posterior \(p(\psi_i\given y_i)\):
   \widehat{\psi}(y_i)
   =
   \argmin_a
-  \E\{C(\rv{\psi}_i,a)\given y_i\}.
+  \E\{C(\rpsi_i,a)\given y_i\}.
 \]
 Different losses give different summaries:
 
@@ -396,7 +449,7 @@ The ``plate'' around individuals means repeat this structure \(N\) times:
 \[
   \theta
   \rightarrow
-  \rv{\psi}_i
+  \rpsi_i
   \rightarrow
   \rv{y}_{ij}.
 \]
@@ -405,7 +458,7 @@ The population parameters \(\theta\) are shared; individual parameters \(\psi_i\
 \begin{center}
 \begin{tikzpicture}[>=stealth, node distance=1.55cm, every node/.style={align=center}]
   \node[draw, rounded corners, minimum width=1.4cm, minimum height=0.7cm] (theta) {\(\theta\)};
-  \node[draw, rounded corners, below=of theta, minimum width=1.4cm, minimum height=0.7cm] (psi) {\(\rv{\psi}_i\)};
+  \node[draw, rounded corners, below=of theta, minimum width=1.4cm, minimum height=0.7cm] (psi) {\(\rpsi_i\)};
   \node[draw, rounded corners, below=of psi, minimum width=1.4cm, minimum height=0.7cm] (y) {\(\rv{y}_{ij}\)};
   \node[draw, rounded corners, left=of psi, minimum width=1.2cm, minimum height=0.7cm] (c) {\(c_i\)};
   \node[draw, rounded corners, right=of y, minimum width=1.2cm, minimum height=0.7cm] (t) {\(t_{ij},u_i\)};
@@ -439,7 +492,7 @@ Good model criticism often means asking which missing node would explain the res
 \]
 where \(x^{(k)}\sim p(x)\). PopPK needs this constantly:
 \[
-  \E[g(\rv{\psi}_i)\given y_i]
+  \E[g(\rpsi_i)\given y_i]
   \approx
   \frac{1}{K}\sum_{k=1}^K g(\psi_i^{(k)}),
   \qquad
@@ -451,9 +504,9 @@ This is the conceptual ancestor of posterior simulation, importance sampling, MC
 
 A population model can simulate future individuals:
 \[
-  \tilde\psi \sim p_{\widehat\theta}(\psi\given \tilde c),
+  \tilde{\rpsi} \sim p_{\widehat\theta}(\psi\given \tilde c),
   \qquad
-  \tilde y\sim p_{\widehat\theta}(y\given \tilde\psi,\tilde u).
+  \tilde{\rv{y}}\sim p_{\widehat\theta}(y\given \tilde\psi,\tilde u).
 \]
 This two-step simulation is exactly what VPC-like thinking requires. It is also the cleanest way to teach what \(\Omega\) means: not a nuisance variance, but a generator of plausible biological diversity.
 
@@ -645,7 +698,7 @@ Under posterior \(p(\psi_i\given y_i)\):
 \[
   \widehat{\psi}^{median}_i
   \text{ solves }
-  \Prob(\rv{\psi}_i\le \widehat{\psi}^{median}_i\given y_i)=\frac{1}{2}.
+  \Prob(\rpsi_i\le \widehat{\psi}^{median}_i\given y_i)=\frac{1}{2}.
 \]
 For skewed log-normal-like posteriors, these can differ substantially.
 
@@ -702,9 +755,9 @@ For residual errors, they include sums of squared residuals. This is precisely w
 
 Suppose
 \[
-  \rv{\eta}_i\sim \Normal(0,\Omega),
+  \reta_i\sim \Normal(0,\Omega),
   \qquad
-  h(\rv{\psi}_i)=\mu+B c_i+\rv{\eta}_i.
+  h(\rpsi_i)=\mu+B c_i+\reta_i.
 \]
 If \(\eta_i\) were observed, \(\Omega\) would be estimated from empirical covariance:
 \[
@@ -716,7 +769,7 @@ But \(\eta_i\) is hidden. EM-style algorithms replace this by
 \[
   \frac{1}{N}\sum_i
   \E_{\theta^{(k)}}[
-    \rv{\eta}_i\rv{\eta}_i^T
+    \reta_i\reta_i^T
     \given y_i
   ].
 \]
@@ -798,7 +851,7 @@ whose stationary distribution is the target posterior:
 \]
 Then expectations are approximated by chain averages:
 \[
-  \E[g(\rv{\psi})\given y]
+  \E[g(\rpsi)\given y]
   \approx
   \frac{1}{K}\sum_{k=1}^K g(\psi^{(k)}).
 \]
@@ -814,28 +867,7 @@ A posterior predictive check asks whether observed data look typical under the f
 \]
 The statistic \(T\) might be peak concentration, trough, quantile over time, residual pattern, or dropout rate. This is typicality thinking translated into pharmacometrics.
 
-\section{The 6.437 notation discipline}
-
-\subsection{Random variable versus realization}
-
-6.437 的一个很美的符号习惯是：random variables 用 sans-serif，比如 \(\rv{x}\)；具体实现值或 deterministic parameters 用 serif，比如 \(x\)。我在这篇笔记里采用这个区分：
-\[
-  \begin{aligned}
-    \rv{y}_i &\quad \text{is random data},\\
-    y_i &\quad \text{is the observed dataset}.
-  \end{aligned}
-\]
-同理，
-\[
-  \begin{aligned}
-    \rv{\psi}_i &\quad \text{is the latent individual parameter},\\
-    \psi_i &\quad \text{is a candidate value of that parameter}.
-  \end{aligned}
-\]
-
-\begin{notation}
-  我会把 random quantities 写成 \(\rv{y},\rv{\psi},\rv{\eta}\)，把 realized data 和 deterministic parameters 写成 \(y,\psi,\eta,\theta\)。Population parameters \(\theta\) 在 maximum likelihood 或 empirical Bayes 语境下是 deterministic-but-unknown；在 full Bayesian 语境下也可以进一步建模为 random variable \(\rv{\theta}\)。
-\end{notation}
+\section{Probability laws and posterior updates}
 
 \subsection{Probability laws}
 
@@ -843,7 +875,7 @@ The statistic \(T\) might be peak concentration, trough, quantile over time, res
 
 例如一个观察模型
 \[
-  \rv{y}_{ij}\given \rv{\psi}_i=\psi_i
+  \rv{y}_{ij}\given \rpsi_i=\psi_i
   \sim
   \Normal\!\left(f(t_{ij};\psi_i,u_i),\,\sigma^2\right)
 \]
@@ -897,7 +929,7 @@ Population PK 里它变成：
 \[
   \widehat{\psi}^{\pklab{MMSE}}_i
   =
-  \E_\theta[\rv{\psi}_i\given y_i],
+  \E_\theta[\rpsi_i\given y_i],
 \]
 或者 posterior median、credible interval、posterior predictive distribution。不同 summary 对应不同 loss function。
 
@@ -957,9 +989,9 @@ Decision rule \(\delta(y)\) & 是否调剂量、是否加采样点、是否换�
   =
   f(t_{ij};\psi_i,u_i)
   +
-  g(t_{ij};\psi_i,\xi)\rv{\epsilon}_{ij},
+  g(t_{ij};\psi_i,\xi)\repsilon_{ij},
   \qquad
-  \rv{\epsilon}_{ij}\iid \Normal(0,1).
+  \repsilon_{ij}\iid \Normal(0,1).
 \]
 常见 residual error choices:
 \[
@@ -988,9 +1020,9 @@ Decision rule \(\delta(y)\) & 是否调剂量、是否加采样点、是否换�
 
 Lavielle 的 population approach 可以读成：
 \[
-  \rv{\psi}_i \sim p_\theta(\psi\given c_i),
+  \rpsi_i \sim p_\theta(\psi\given c_i),
   \qquad
-  \rv{y}_i\given \rv{\psi}_i=\psi_i \sim p_\theta(y\given \psi_i,u_i).
+  \rv{y}_i\given \rpsi_i=\psi_i \sim p_\theta(y\given \psi_i,u_i).
 \]
 第一层描述 inter-individual variability；第二层描述 observation variability。
 
@@ -1000,18 +1032,18 @@ Lavielle 的 population approach 可以读成：
   =
   \log \pksym{CL}_{\pop} + \beta_{\pklab{CL}}^{\pklab{WT}}\log\!\left(\frac{\pksym{WT}_i}{70}\right)
   +
-  \rv{\eta}_{\pklab{CL},i},
+  \reta_{\pklab{CL},i},
 \]
 \[
-  \rv{\eta}_{\pklab{CL},i}\sim \Normal(0,\omega_{\pklab{CL}}^2).
+  \reta_{\pklab{CL},i}\sim \Normal(0,\omega_{\pklab{CL}}^2).
 \]
 更紧凑地写：
 \[
-  h(\rv{\psi}_i)
+  h(\rpsi_i)
   =
-  \mu + B c_i + \rv{\eta}_i,
+  \mu + B c_i + \reta_i,
   \qquad
-  \rv{\eta}_i\sim \Normal(0,\Omega).
+  \reta_i\sim \Normal(0,\Omega).
 \]
 其中 \(h\) 可以是 log, logit, probit, identity 等 transformation。
 
@@ -1026,7 +1058,7 @@ Lavielle 的 population approach 可以读成：
   \]
   \item 定义围绕 typical individual 的 unexplained variability:
   \[
-    h(\rv{\psi}_i)-h(\widetilde\psi_i)=\rv{\eta}_i.
+    h(\rpsi_i)-h(\widetilde\psi_i)=\reta_i.
   \]
 \end{itemize}
 
@@ -1061,7 +1093,7 @@ Lavielle 的 population approach 可以读成：
 \begin{center}
 \begin{tikzpicture}[>=stealth, node distance=2.2cm, every node/.style={align=center}]
   \node[draw, rounded corners, minimum width=1.7cm, minimum height=0.75cm] (theta) {\(\theta\)};
-  \node[draw, rounded corners, below left=1.1cm and 1.3cm of theta, minimum width=1.7cm, minimum height=0.75cm] (psi) {\(\rv{\psi}_i\)};
+  \node[draw, rounded corners, below left=1.1cm and 1.3cm of theta, minimum width=1.7cm, minimum height=0.75cm] (psi) {\(\rpsi_i\)};
   \node[draw, rounded corners, left=1.8cm of psi, minimum width=1.5cm, minimum height=0.75cm] (cov) {\(c_i\)};
   \node[draw, rounded corners, below=1.25cm of psi, minimum width=1.7cm, minimum height=0.75cm] (y) {\(\rv{y}_{ij}\)};
   \node[draw, rounded corners, right=1.8cm of y, minimum width=1.5cm, minimum height=0.75cm] (des) {\(u_i,t_{ij}\)};
@@ -1186,7 +1218,7 @@ Define
   =
   \E_{\theta^{(k)}}
   \left[
-    \log p_\theta(\rv{y},\rv{\psi})
+    \log p_\theta(\rv{y},\rpsi)
     \given \rv{y}=y
   \right].
 \]
@@ -1205,7 +1237,7 @@ In simple exponential-family models this can be analytic. In nonlinear mixed eff
 
 SAEM, associated with Lavielle's school and implemented in Monolix, modifies EM for hard incomplete-data problems \cite{kuhn2005saem,lavielle2015mixed}. Instead of exactly computing
 \[
-  \E_{\theta^{(k)}}[S(\rv{\psi})\given y],
+  \E_{\theta^{(k)}}[S(\rpsi)\given y],
 \]
 it simulates \(\psi^{(k)}\) from the conditional distribution and updates sufficient statistics through stochastic approximation:
 \[
@@ -1253,24 +1285,24 @@ Classical NONMEM notation is usually:
 \[
   \begin{aligned}
     \theta &\quad \text{fixed effects},\\
-    \eta_i &\sim \Normal(0,\Omega)
+    \reta_i &\sim \Normal(0,\Omega)
       \quad \text{inter-individual random effects},\\
-    \epsilon_{ij} &\sim \Normal(0,\Sigma)
+    \repsilon_{ij} &\sim \Normal(0,\Sigma)
       \quad \text{residual errors}.
   \end{aligned}
 \]
 A typical model:
 \[
-  \pksym{CL}_i = \theta_{\pklab{CL}}\exp(\eta_{\pklab{CL},i}),
+  \pksym{CL}_i = \theta_{\pklab{CL}}\exp(\reta_{\pklab{CL},i}),
   \qquad
-  V_i = \theta_V\exp(\eta_{V,i}),
+  V_i = \theta_V\exp(\reta_{V,i}),
 \]
 \[
   y_{ij}
   =
   f(t_{ij};\pksym{CL}_i,V_i,k_{a,i})
   +
-  \epsilon_{ij}.
+  \repsilon_{ij}.
 \]
 This is exactly the same hierarchy, written through random effects instead of directly through \(p(\psi_i\given c_i;\theta)\).
 
@@ -1306,7 +1338,7 @@ For intuition:
 
 \subsection{Adding a prior on population parameters}
 
-Empirical Bayes PopPK estimates \(\theta\), then conditions on \(\widehat\theta\). Full Bayesian PopPK gives \(\theta\) its own prior:
+Empirical Bayes PopPK estimates \(\theta\), then conditions on \(\widehat\theta\). Full Bayesian PopPK treats the population parameter as a random quantity, \(\rtheta\), by giving its value \(\theta\) a prior:
 \[
   p(\theta,\psi_{1:N}\given y)
   \propto
@@ -1315,7 +1347,7 @@ Empirical Bayes PopPK estimates \(\theta\), then conditions on \(\widehat\theta\
   p_\theta(\psi_i\given c_i)
   p_\theta(y_i\given \psi_i,u_i).
 \]
-Then posterior uncertainty in \(\theta\) is propagated into individual parameters and predictions:
+Then posterior uncertainty in \(\rtheta\) is propagated into individual parameters and predictions:
 \[
   p(\tilde y\given y)
   =
@@ -1333,8 +1365,8 @@ Then posterior uncertainty in \(\theta\) is propagated into individual parameter
 Approach & What uncertainty is retained? \\
 \midrule
 Population ML & \(\widehat\theta\) is a point estimate; uncertainty can be approximated by Fisher information, bootstrap, profile likelihood. \\
-Empirical Bayes individual estimation & \(\psi_i\) is inferred conditionally on \(\widehat\theta\); population uncertainty is often ignored in the individual posterior. \\
-Full Bayesian & \(\theta\) and \(\psi_i\) are jointly uncertain; posterior and posterior predictive intervals naturally include both levels. \\
+Empirical Bayes individual estimation & \(\rpsi_i\) is inferred conditionally on \(\widehat\theta\); population uncertainty is often ignored in the individual posterior. \\
+Full Bayesian & \(\rtheta\) and \(\rpsi_i\) are jointly uncertain; posterior and posterior predictive intervals naturally include both levels. \\
 \bottomrule
 \end{tabularx}
 \end{center}
