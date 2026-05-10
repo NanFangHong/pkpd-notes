@@ -3,7 +3,7 @@
 \def\npart {Bayesian Population PK}
 \def\nterm {Inference reading notes}
 \def\nyear {2026}
-\def\nlecturer {MIT 6.008/6.437 and Marc Lavielle}
+\def\nlecturer {MIT 6.008/6.437/6.435 and Marc Lavielle}
 \def\ncourse {Population PK as Bayesian Inference}
 \def\ncoursehead {Bayesian PopPK}
 \def\nauthor {NanFangHong}
@@ -44,7 +44,7 @@
 \maketitle
 {\small
   \noindent\textbf{Reading motive}\\
-  These notes connect the inference language of MIT 6.008/6.437 with Marc Lavielle's mixed effects population approach, but the final organizing object is not a course list.  It is the hierarchy
+  These notes connect the inference language of MIT 6.008/6.437, the Bayesian modeling workflow of MIT 6.435, and Marc Lavielle's mixed effects population approach, but the final organizing object is not a course list.  It is the hierarchy
   \[
     \theta
     \longrightarrow
@@ -126,7 +126,7 @@ The whole note can be compressed into one sentence:
   Population PK is a probability law in which a population parameter \(\theta\) defines a distribution over latent individual physiology \(\rpsi_i\), the individual physiology and design \(u_i\) generate observations \(\rv{y}_i\), the observations update belief about individuals and populations, and the resulting predictive law supports a pharmacological decision \(a_i\).
 \end{quote}
 
-The long version is only a careful unfolding of that sentence.  6.008 names the probability objects, 6.437 names the inference and decision operations, Lavielle names the mixed-effects hierarchy, and NONMEM/SAEM name historically important computational approximations.
+  The long version is only a careful unfolding of that sentence.  6.008 names the probability objects, 6.437 names the inference and decision operations, 6.435 names the Bayesian modeling workflow, Lavielle names the mixed-effects hierarchy, and NONMEM/SAEM name historically important computational approximations.
 
 \subsection{The source packet}
 
@@ -135,6 +135,7 @@ The long version is only a careful unfolding of that sentence.  6.008 names the 
 \begin{itemize}[leftmargin=2em]
   \item \textbf{MIT 6.008}: probability law、conditional probability、random variables、decision making、graphical models、model selection、asymptotics、Markov chains、sampling methods、continuous inference。它是 6.437 的地基，给出 ``how to think probabilistically'' 的起点 \cite{mit6008notes}。
   \item \textbf{MIT 6.437}: Bayesian hypothesis testing、Bayesian parameter estimation、non-Bayesian decision theory、exponential families、sufficient statistics、EM、information geometry、modeling as inference、MCMC、typicality、method of types、asymptotics 和 model selection。它不是另起炉灶，而是在 6.008 的 probability/inference grammar 上继续加深 \cite{mit6437notes}。
+  \item \textbf{MIT 6.435}: Bayesian modeling and inference。它补上的不是另一个 estimator，而是完整 workflow: identify the analysis goal, build a prior-likelihood model, compute or approximate the posterior, summarize the posterior, simulate predictions, check the model, and revise \cite{mit6435notes}。
   \item \textbf{Lavielle}: mixed effects models for the population approach。它把这个 grammar 落到 pharmacometrics: observations \(y_i\)、individual parameters \(\psi_i\)、population parameters \(\theta\)、covariates \(c_i\)、and the joint model \cite{lavielle2015mixed}。
 \end{itemize}
 
@@ -150,13 +151,15 @@ The long version is only a careful unfolding of that sentence.  6.008 names the 
   \longrightarrow
   \text{6.437}
   \longrightarrow
+  \text{6.435}
+  \longrightarrow
   \text{Lavielle}
   \longrightarrow
   \text{NONMEM/Monolix/SAEM}.
 \]
 
 \begin{warning}
-  如果跳过 6.008，6.437 里的 posterior、risk、EM、typicality、model selection 会变成一串公式；如果跳过 6.437，Population PK 里的 likelihood、EBE、SAEM、posterior predictive check 又会像软件黑话。6.008 是语感，6.437 是深度，Lavielle 是落地。
+  如果跳过 6.008，6.437 里的 posterior、risk、EM、typicality、model selection 会变成一串公式；如果跳过 6.437，Population PK 里的 likelihood、EBE、SAEM、posterior predictive check 又会像软件黑话；如果跳过 6.435，Bayesian 分析会被误解成一次性算 posterior，而不是模型构造、模拟、推断、检查、修正的一整圈。6.008 是语感，6.437 是深度，6.435 是 workflow，Lavielle 是落地。
 \end{warning}
 
 但成书后的逻辑不能只是课程顺序。课程顺序回答 ``我该先学什么''；笔记主线回答 ``这些东西如何变成同一个 PopPK inference system''。所以后面每个章节都会回到同一条链：
@@ -201,6 +204,7 @@ Different communities describe the same hierarchy with different surface languag
   \begin{array}{lll}
     \text{6.008} &:& \text{sample space, conditioning, random variables, decision rules},\\
     \text{6.437} &:& \text{posterior, risk, marginalization, EM, information, sampling},\\
+    \text{6.435} &:& \text{prior, likelihood, posterior, predictive simulation, model checking},\\
     \text{Lavielle} &:& y_i,\psi_i,\theta,c_i,u_i,\text{ tasks and methods},\\
     \text{NONMEM} &:& \pklab{THETA},\pklab{ETA},\pklab{EPSILON},\Omega,\Sigma,\pklab{OFV}.
   \end{array}
@@ -687,6 +691,108 @@ From here onward, every PopPK concept should be read through a two-layer lens:
 \[
   \text{6.437 asks: what inference or decision are we performing with it?}
 \]
+
+\section{6.435: Bayesian modeling as a workflow}
+
+\subsection{The loop: build, infer, simulate, criticize}
+
+6.435 adds a missing layer to the story.  6.008 and 6.437 can make Bayesian inference sound like a formula:
+\[
+  p(\theta\given y)\propto p(y\given\theta)p(\theta).
+\]
+But Bayesian modeling in practice is a loop:
+\[
+  \begin{array}{c}
+    \text{name the analysis goal}\\
+    \downarrow\\
+    \text{build prior and likelihood}\\
+    \downarrow\\
+    \text{compute or approximate the posterior}\\
+    \downarrow\\
+    \text{simulate posterior predictions}\\
+    \downarrow\\
+    \text{check, criticize, and revise the model}.
+  \end{array}
+\]
+This is exactly the rhythm I wanted in my earlier quantitative pharmacology note: simulation and Bayesian inference are the two directions of the same map \cite{hong2020quantpharm}.  Simulation goes from parameters to data:
+\[
+  \theta,\psi_i,u_i
+  \longmapsto
+  \tilde y_i,
+\]
+while Bayesian inference goes from data back to plausible parameters:
+\[
+  y_i
+  \longmapsto
+  p(\theta,\psi_i\given y_i).
+\]
+Good quantitative pharmacology lives by moving back and forth between these two arrows.  If the simulated world does not resemble the observed world, the inverse inference was performed under the wrong forward story.
+
+\subsection{Prior predictive and posterior predictive thinking}
+
+For PopPK, prior predictive simulation asks:
+\[
+  \rpsi_i\sim p_\theta(\psi_i\given c_i),
+  \qquad
+  \rv{y}_i\sim p_\theta(y_i\given \rpsi_i,u_i),
+\]
+before looking at the data.  This checks whether the model can even generate biologically plausible subjects, concentrations, biomarkers, or adverse events.
+
+Posterior predictive simulation asks:
+\[
+  \tilde{\rv{y}}_i
+  \sim
+  p(\tilde y_i\given y)
+  =
+  \int
+  p(\tilde y_i\given \psi_i,\theta)
+  p(\psi_i,\theta\given y)
+  \dd\psi_i\,\dd\theta.
+\]
+This checks whether the fitted model can regenerate the aspects of the observed data that matter for the scientific question.  VPC and PPC are therefore not decorative diagnostics.  They are the forward half of Bayesian inference returning to inspect the inverse half.
+
+\subsection{Exchangeability and why population parameters exist}
+
+6.435's discussion of exchangeability and de Finetti gives a clean philosophical support for Population PK.  If subjects are treated as exchangeable after conditioning on covariates, then a shared latent population law is not arbitrary decoration.  It is the object that makes individual records conditionally independent:
+\[
+  p(y_{1:N},\psi_{1:N}\given\theta,c_{1:N},u_{1:N})
+  =
+  \prod_{i=1}^N
+  p_\theta(\psi_i\given c_i)
+  p_\theta(y_i\given\psi_i,u_i).
+\]
+The moment we doubt exchangeability, we should ask what is missing: site effects, batch effects, adherence, genotype, disease subtype, time-varying physiology, or treatment history.  This is more useful than saying vaguely that the model has unexplained variability.  It tells us which plate should be split or which parent node should be added.
+
+\subsection{Approximation is also a modeling choice}
+
+6.435 also changes how I read approximate inference.  VB, ADVI, MCMC, importance sampling, SAEM, FOCE, and Laplace are not interchangeable buttons.  Each gives access to different functionals of a hard posterior or marginal likelihood.  So the question is not only
+\[
+  \text{Did the algorithm converge?}
+\]
+but also
+\[
+  \text{Did the approximation preserve the posterior feature needed for the decision?}
+\]
+A variational approximation may give useful posterior means but underestimate uncertainty; a Laplace approximation may work near a single mode but miss skewness or multimodality; an MCMC chain may target the right distribution but mix poorly.  In PopPK, these distinctions matter because dose decisions, covariate claims, and subgroup discovery may depend more on tails and correlations than on posterior means.
+
+\subsection{Nonparametric Bayes and unknown heterogeneity}
+
+The Bayesian nonparametric part of 6.435 is not needed for the basic PopPK hierarchy, but it widens the imagination.  Classical PopPK usually assumes a fixed-dimensional random-effects distribution, often Gaussian after transformation.  But real populations may contain latent subgroups: slow and fast metabolizers, mechanistic responder classes, disease endotypes, adherence phenotypes, or toxicity-susceptible states.
+
+A mixture model writes
+\[
+  z_i\sim \mathrm{Categorical}(\pi),
+  \qquad
+  \rpsi_i\given z_i=k\sim p_{\theta_k}(\psi),
+  \qquad
+  \rv{y}_i\given \rpsi_i\sim p(y_i\given\psi_i).
+\]
+A Dirichlet-process-like view lets the number of occupied subgroups grow with data, rather than fixing it at the beginning.  The practical lesson is modest but important: sometimes ``unexplained variability'' is not merely wider \(\Omega\); it may be unresolved structure.
+
+I would not put a nonparametric prior into every pharmacometric analysis.  But I would keep the 6.435 question alive:
+\begin{quote}
+  Are we forcing a simple population distribution to absorb biological heterogeneity that should be represented as latent structure?
+\end{quote}
 
 \section{Model comparison as evidence and decision}
 

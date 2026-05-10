@@ -177,6 +177,37 @@ Different approximations can lead to different estimates in hard models, so the 
 
 Typicality and asymptotics teach what large samples look like under a probability law.  In PopPK, predictive checks are a finite-sample cousin of this idea: if the fitted model were true, what datasets would be ordinary?  VPCs are visual typicality checks for pharmacometric summaries.
 
+\subsection{Source-guided route through 6.435}
+
+\subsubsection*{Bayesian methodology}
+
+6.435 starts with the practical cycle: build a likelihood and prior, compute the posterior, report summaries, then check whether those summaries and model assumptions are adequate.  This is the missing workflow layer between 6.437's inference theory and Lavielle's pharmacometric implementation.
+
+For PopPK, I translate the 6.435 cycle as:
+\[
+  \begin{array}{c}
+    \text{define }p_\theta(\psi_i\given c_i)p_\theta(y_i\given\psi_i,u_i)\\
+    \downarrow\\
+    \text{infer }\theta\text{ and }p(\psi_i\given y_i)\\
+    \downarrow\\
+    \text{simulate }\tilde y_i\text{ under the fitted model}\\
+    \downarrow\\
+    \text{revise the structural, variability, or observation model.}
+  \end{array}
+\]
+
+\subsubsection*{Exchangeability}
+
+The exchangeability/de Finetti discussion gives a reason why population-level parameters are natural.  If subjects are exchangeable after covariates and design are named, then a shared population distribution can make their records conditionally independent.  If exchangeability fails, the model is asking for another layer: site, batch, disease subtype, adherence, or latent response class.
+
+\subsubsection*{Approximate inference}
+
+The 6.435 variational, Monte Carlo, and MCMC lectures repeatedly separate the target posterior from the approximation used to summarize it.  This is directly pharmacometric.  FOCE, Laplace, SAEM, VB, ADVI, and MCMC all answer approximate versions of a hard integral; the approximation should be judged by the scientific functional of interest, not by algorithmic elegance alone.
+
+\subsubsection*{Bayesian nonparametrics}
+
+The Bayesian nonparametrics lectures are most useful here as a warning against over-simple heterogeneity.  If \(\Omega\) becomes a trash can for unexplained variability, the model may be missing latent groups.  Mixture models, Dirichlet-process mixtures, and Chinese-restaurant-process thinking suggest one possible language for learning subgroup structure as data accumulate.
+
 \subsection{Source-guided route through Lavielle}
 
 \subsubsection*{Part I: preliminary concepts}

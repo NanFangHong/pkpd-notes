@@ -1,6 +1,6 @@
 <!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Population PK as Bayesian Inference</title><style>html,body{margin:0;padding:0;background:#f7f7f5;color:#141414}body{font-family:Georgia,"Times New Roman",serif;line-height:1.48}#main{max-width:900px;margin:0 auto;padding:48px 28px 72px;background:#fff;min-height:100vh;box-sizing:border-box}a{color:#064f83;text-decoration:none}a:hover{text-decoration:underline}h1{font-weight:normal;border-bottom:1px solid #d6d6d2;padding-bottom:.35rem;margin-top:0}.toc-note{color:#4d4d4d;max-width:680px}.disp-toc{padding-left:1.15rem}.disp-toc li{margin:.18rem 0}.subsection{margin-left:1.45rem}.math-title{white-space:nowrap}</style></head>
-<body><div id="main"><h1>Population PK as Bayesian Inference</h1><p>2026, Lavielle, Mixed Effects Models for the Population Approach; MIT 6.008/6.437 notes</p><p class="toc-note">This is an HTML version of the notes generated with pdf2htmlEX. You can either view all sections in a single page, or access individual sections below.</p><h2>Contents</h2><ul class="disp-toc"><li><a href="full.html">V Full version</a></li><li><a href="1.html">1 Notation and preliminaries</a></li>
+<body><div id="main"><h1>Population PK as Bayesian Inference</h1><p>2026, Lavielle, Mixed Effects Models for the Population Approach; MIT 6.008/6.437/6.435 notes</p><p class="toc-note">This is an HTML version of the notes generated with pdf2htmlEX. You can either view all sections in a single page, or access individual sections below.</p><h2>Contents</h2><ul class="disp-toc"><li><a href="full.html">V Full version</a></li><li><a href="1.html">1 Notation and preliminaries</a></li>
 <li class="subsection"><a href="1_1.html">1.1 Random variable versus realization</a></li>
 <li class="subsection"><a href="1_2.html">1.2 Operators, sets, labels, and PK symbols</a></li>
 <li><a href="2.html">2 The spine: one hierarchy, six moves</a></li>
@@ -42,106 +42,113 @@
 <li><a href="10.html">10 6.437: deepen the same hierarchy</a></li>
 <li class="subsection"><a href="10_1.html">10.1 What gets added</a></li>
 <li class="subsection"><a href="10_2.html">10.2 How to read the rest</a></li>
-<li><a href="11.html">11 Model comparison as evidence and decision</a></li>
-<li class="subsection"><a href="11_1.html">11.1 Hypotheses as random variables</a></li>
-<li class="subsection"><a href="11_2.html">11.2 Likelihood ratio as evidence</a></li>
-<li class="subsection"><a href="11_3.html">11.3 Decision costs</a></li>
-<li><a href="12.html">12 Posterior summaries are loss-dependent</a></li>
-<li class="subsection"><a href="12_1.html">12.1 Posterior as the sufficient belief</a></li>
-<li class="subsection"><a href="12_2.html">12.2 MAP, mean, median</a></li>
-<li class="subsection"><a href="12_3.html">12.3 Posterior predictive distribution</a></li>
-<li><a href="13.html">13 Complete-data structure and exponential-family intuition</a></li>
-<li class="subsection"><a href="13_1.html">13.1 Why exponential families matter</a></li>
-<li class="subsection"><a href="13_2.html">13.2 A Gaussian random-effects example</a></li>
-<li><a href="14.html">14 Marginalization makes EM necessary</a></li>
-<li class="subsection"><a href="14_1.html">14.1 Observed likelihood is hard because of marginalization</a></li>
-<li class="subsection"><a href="14_2.html">14.2 The \(Q\)-function</a></li>
-<li class="subsection"><a href="14_3.html">14.3 Why EM increases likelihood</a></li>
-<li><a href="15.html">15 Sampling and typicality in high-dimensional PopPK</a></li>
-<li class="subsection"><a href="15_1.html">15.1 Why high dimension is strange</a></li>
-<li class="subsection"><a href="15_2.html">15.2 MCMC as dependent Monte Carlo</a></li>
-<li class="subsection"><a href="15_3.html">15.3 Typicality and model checking</a></li>
-<li><a href="16.html">16 The hierarchy in its PopPK form</a></li>
-<li class="subsection"><a href="16_1.html">16.1 Probability laws</a></li>
-<li class="subsection"><a href="16_2.html">16.2 Conditioning is information update</a></li>
-<li><a href="17.html">17 Decision theory before software output</a></li>
-<li class="subsection"><a href="17_1.html">17.1 Soft information and hard decisions</a></li>
-<li class="subsection"><a href="17_2.html">17.2 Risk, utility, and pharmacology</a></li>
-<li><a href="18.html">18 Structural PK as a forward map inside probability</a></li>
-<li class="subsection"><a href="18_1.html">18.1 A one-compartment structural model</a></li>
-<li class="subsection"><a href="18_2.html">18.2 Observation model</a></li>
-<li class="subsection"><a href="18_3.html">18.3 Why nonlinear matters</a></li>
-<li><a href="19.html">19 Individual parameters as latent physiology</a></li>
-<li class="subsection"><a href="19_1.html">19.1 The Lavielle layer</a></li>
-<li class="subsection"><a href="19_2.html">19.2 Typical value and variability</a></li>
-<li class="subsection"><a href="19_3.html">19.3 Shrinkage from sparse data</a></li>
-<li><a href="20.html">20 The full graphical model and factorization</a></li>
-<li class="subsection"><a href="20_1.html">20.1 A picture of conditional independence</a></li>
-<li class="subsection"><a href="20_2.html">20.2 Factorization</a></li>
-<li><a href="21.html">21 Population, individual, and predictive targets</a></li>
-<li class="subsection"><a href="21_1.html">21.1 Population parameters</a></li>
-<li class="subsection"><a href="21_2.html">21.2 Individual parameters</a></li>
-<li><a href="22.html">22 The incomplete-data problem: where computation begins</a></li>
-<li class="subsection"><a href="22_1.html">22.1 Complete data would be easy</a></li>
-<li class="subsection"><a href="22_2.html">22.2 EM in one line</a></li>
-<li><a href="23.html">23 SAEM: Lavielle's computational bridge</a></li>
-<li class="subsection"><a href="23_1.html">23.1 Why stochastic approximation</a></li>
-<li class="subsection"><a href="23_2.html">23.2 The Bayesian heart inside ML</a></li>
-<li class="subsection"><a href="23_3.html">23.3 SAEM versus exact EM</a></li>
-<li><a href="24.html">24 NONMEM as the same hierarchy in another dialect</a></li>
-<li class="subsection"><a href="24_1.html">24.1 Theta, eta, epsilon</a></li>
-<li class="subsection"><a href="24_2.html">24.2 The objective function</a></li>
-<li class="subsection"><a href="24_3.html">24.3 FO, FOCE, Laplace as approximations</a></li>
-<li><a href="25.html">25 Full Bayesian Population PK: one more layer of uncertainty</a></li>
-<li class="subsection"><a href="25_1.html">25.1 Adding a prior on population parameters</a></li>
-<li class="subsection"><a href="25_2.html">25.2 What changes conceptually</a></li>
-<li class="subsection"><a href="25_3.html">25.3 Bayesian but not mystical</a></li>
-<li><a href="26.html">26 Warfarin as a running example of missing structure</a></li>
-<li class="subsection"><a href="26_1.html">26.1 Immediate response fails</a></li>
-<li class="subsection"><a href="26_2.html">26.2 Effect compartment</a></li>
-<li class="subsection"><a href="26_3.html">26.3 Indirect response</a></li>
-<li><a href="27.html">27 Model evaluation as predictive criticism</a></li>
-<li class="subsection"><a href="27_1.html">27.1 Prediction before p-values</a></li>
-<li class="subsection"><a href="27_2.html">27.2 Residuals need context</a></li>
-<li class="subsection"><a href="27_3.html">27.3 Model selection</a></li>
-<li><a href="28.html">28 How to read a PopPK paper as an inference system</a></li>
-<li class="subsection"><a href="28_1.html">28.1 The inference checklist</a></li>
-<li class="subsection"><a href="28_2.html">28.2 Reading NONMEM output</a></li>
-<li><a href="29.html">29 Slow pass: the same hierarchy with more texture</a></li>
-<li class="subsection"><a href="29_1.html">29.1 Orientation: why the slow pass exists</a></li>
-<li class="subsection"><a href="29_2.html">29.2 6.008 carefully: probability law before Bayes rule</a></li>
-<li class="subsection"><a href="29_3.html">29.3 Random variables as pharmacological summaries</a></li>
-<li class="subsection"><a href="29_4.html">29.4 Decision theory before dosing software</a></li>
-<li class="subsection"><a href="29_5.html">29.5 Graphical models for the population approach</a></li>
-<li class="subsection"><a href="29_6.html">29.6 Lavielle's joint-distribution thesis</a></li>
-<li class="subsection"><a href="29_7.html">29.7 Observation models</a></li>
-<li class="subsection"><a href="29_8.html">29.8 Individual parameter models</a></li>
-<li class="subsection"><a href="29_9.html">29.9 Structural PK as a forward map</a></li>
-<li class="subsection"><a href="29_10.html">29.10 Marginal likelihood and the hard integral</a></li>
-<li class="subsection"><a href="29_11.html">29.11 EM, SAEM, and missing individual parameters</a></li>
-<li class="subsection"><a href="29_12.html">29.12 NONMEM as a notation and approximation culture</a></li>
-<li class="subsection"><a href="29_13.html">29.13 Model evaluation as calibrated imagination</a></li>
-<li class="subsection"><a href="29_14.html">29.14 Warfarin re-read</a></li>
-<li class="subsection"><a href="29_15.html">29.15 Full Bayesian Population PK</a></li>
-<li class="subsection"><a href="29_16.html">29.16 A reading protocol for PopPK papers</a></li>
-<li><a href="30.html">30 Worked notebook: the hierarchy in examples</a></li>
-<li class="subsection"><a href="30_1.html">30.1 A two-level normal model</a></li>
-<li class="subsection"><a href="30_2.html">30.2 Lognormal random effects</a></li>
-<li class="subsection"><a href="30_3.html">30.3 Covariate models</a></li>
-<li class="subsection"><a href="30_4.html">30.4 Residual error</a></li>
-<li class="subsection"><a href="30_5.html">30.5 Linearization and Laplace</a></li>
-<li class="subsection"><a href="30_6.html">30.6 SAEM in slow motion</a></li>
-<li class="subsection"><a href="30_7.html">30.7 Metropolis-Hastings for one subject</a></li>
-<li class="subsection"><a href="30_8.html">30.8 Posterior predictive checks and VPC</a></li>
-<li class="subsection"><a href="30_9.html">30.9 Information geometry intuition</a></li>
-<li class="subsection"><a href="30_10.html">30.10 From individual to population</a></li>
-<li class="subsection"><a href="30_11.html">30.11 Model reports</a></li>
-<li><a href="31.html">31 Source-guided reading route</a></li>
-<li class="subsection"><a href="31_1.html">31.1 Source-guided route through 6.008</a></li>
-<li class="subsection"><a href="31_2.html">31.2 Source-guided route through 6.437</a></li>
-<li class="subsection"><a href="31_3.html">31.3 Source-guided route through Lavielle</a></li>
-<li class="subsection"><a href="31_4.html">31.4 A full reading loop</a></li>
-<li><a href="32.html">32 A minimal self-study path</a></li>
-<li class="subsection"><a href="32_1.html">32.1 Conceptual order</a></li>
-<li class="subsection"><a href="32_2.html">32.2 The one-sentence memory hook</a></li>
-<li class="subsection"><a href="32_3.html">32.3 My working conclusion</a></li></ul></div></body></html>
+<li><a href="11.html">11 6.435: Bayesian modeling as a workflow</a></li>
+<li class="subsection"><a href="11_1.html">11.1 The loop: build, infer, simulate, criticize</a></li>
+<li class="subsection"><a href="11_2.html">11.2 Prior predictive and posterior predictive thinking</a></li>
+<li class="subsection"><a href="11_3.html">11.3 Exchangeability and why population parameters exist</a></li>
+<li class="subsection"><a href="11_4.html">11.4 Approximation is also a modeling choice</a></li>
+<li class="subsection"><a href="11_5.html">11.5 Nonparametric Bayes and unknown heterogeneity</a></li>
+<li><a href="12.html">12 Model comparison as evidence and decision</a></li>
+<li class="subsection"><a href="12_1.html">12.1 Hypotheses as random variables</a></li>
+<li class="subsection"><a href="12_2.html">12.2 Likelihood ratio as evidence</a></li>
+<li class="subsection"><a href="12_3.html">12.3 Decision costs</a></li>
+<li><a href="13.html">13 Posterior summaries are loss-dependent</a></li>
+<li class="subsection"><a href="13_1.html">13.1 Posterior as the sufficient belief</a></li>
+<li class="subsection"><a href="13_2.html">13.2 MAP, mean, median</a></li>
+<li class="subsection"><a href="13_3.html">13.3 Posterior predictive distribution</a></li>
+<li><a href="14.html">14 Complete-data structure and exponential-family intuition</a></li>
+<li class="subsection"><a href="14_1.html">14.1 Why exponential families matter</a></li>
+<li class="subsection"><a href="14_2.html">14.2 A Gaussian random-effects example</a></li>
+<li><a href="15.html">15 Marginalization makes EM necessary</a></li>
+<li class="subsection"><a href="15_1.html">15.1 Observed likelihood is hard because of marginalization</a></li>
+<li class="subsection"><a href="15_2.html">15.2 The \(Q\)-function</a></li>
+<li class="subsection"><a href="15_3.html">15.3 Why EM increases likelihood</a></li>
+<li><a href="16.html">16 Sampling and typicality in high-dimensional PopPK</a></li>
+<li class="subsection"><a href="16_1.html">16.1 Why high dimension is strange</a></li>
+<li class="subsection"><a href="16_2.html">16.2 MCMC as dependent Monte Carlo</a></li>
+<li class="subsection"><a href="16_3.html">16.3 Typicality and model checking</a></li>
+<li><a href="17.html">17 The hierarchy in its PopPK form</a></li>
+<li class="subsection"><a href="17_1.html">17.1 Probability laws</a></li>
+<li class="subsection"><a href="17_2.html">17.2 Conditioning is information update</a></li>
+<li><a href="18.html">18 Decision theory before software output</a></li>
+<li class="subsection"><a href="18_1.html">18.1 Soft information and hard decisions</a></li>
+<li class="subsection"><a href="18_2.html">18.2 Risk, utility, and pharmacology</a></li>
+<li><a href="19.html">19 Structural PK as a forward map inside probability</a></li>
+<li class="subsection"><a href="19_1.html">19.1 A one-compartment structural model</a></li>
+<li class="subsection"><a href="19_2.html">19.2 Observation model</a></li>
+<li class="subsection"><a href="19_3.html">19.3 Why nonlinear matters</a></li>
+<li><a href="20.html">20 Individual parameters as latent physiology</a></li>
+<li class="subsection"><a href="20_1.html">20.1 The Lavielle layer</a></li>
+<li class="subsection"><a href="20_2.html">20.2 Typical value and variability</a></li>
+<li class="subsection"><a href="20_3.html">20.3 Shrinkage from sparse data</a></li>
+<li><a href="21.html">21 The full graphical model and factorization</a></li>
+<li class="subsection"><a href="21_1.html">21.1 A picture of conditional independence</a></li>
+<li class="subsection"><a href="21_2.html">21.2 Factorization</a></li>
+<li><a href="22.html">22 Population, individual, and predictive targets</a></li>
+<li class="subsection"><a href="22_1.html">22.1 Population parameters</a></li>
+<li class="subsection"><a href="22_2.html">22.2 Individual parameters</a></li>
+<li><a href="23.html">23 The incomplete-data problem: where computation begins</a></li>
+<li class="subsection"><a href="23_1.html">23.1 Complete data would be easy</a></li>
+<li class="subsection"><a href="23_2.html">23.2 EM in one line</a></li>
+<li><a href="24.html">24 SAEM: Lavielle's computational bridge</a></li>
+<li class="subsection"><a href="24_1.html">24.1 Why stochastic approximation</a></li>
+<li class="subsection"><a href="24_2.html">24.2 The Bayesian heart inside ML</a></li>
+<li class="subsection"><a href="24_3.html">24.3 SAEM versus exact EM</a></li>
+<li><a href="25.html">25 NONMEM as the same hierarchy in another dialect</a></li>
+<li class="subsection"><a href="25_1.html">25.1 Theta, eta, epsilon</a></li>
+<li class="subsection"><a href="25_2.html">25.2 The objective function</a></li>
+<li class="subsection"><a href="25_3.html">25.3 FO, FOCE, Laplace as approximations</a></li>
+<li><a href="26.html">26 Full Bayesian Population PK: one more layer of uncertainty</a></li>
+<li class="subsection"><a href="26_1.html">26.1 Adding a prior on population parameters</a></li>
+<li class="subsection"><a href="26_2.html">26.2 What changes conceptually</a></li>
+<li class="subsection"><a href="26_3.html">26.3 Bayesian but not mystical</a></li>
+<li><a href="27.html">27 Warfarin as a running example of missing structure</a></li>
+<li class="subsection"><a href="27_1.html">27.1 Immediate response fails</a></li>
+<li class="subsection"><a href="27_2.html">27.2 Effect compartment</a></li>
+<li class="subsection"><a href="27_3.html">27.3 Indirect response</a></li>
+<li><a href="28.html">28 Model evaluation as predictive criticism</a></li>
+<li class="subsection"><a href="28_1.html">28.1 Prediction before p-values</a></li>
+<li class="subsection"><a href="28_2.html">28.2 Residuals need context</a></li>
+<li class="subsection"><a href="28_3.html">28.3 Model selection</a></li>
+<li><a href="29.html">29 How to read a PopPK paper as an inference system</a></li>
+<li class="subsection"><a href="29_1.html">29.1 The inference checklist</a></li>
+<li class="subsection"><a href="29_2.html">29.2 Reading NONMEM output</a></li>
+<li><a href="30.html">30 Slow pass: the same hierarchy with more texture</a></li>
+<li class="subsection"><a href="30_1.html">30.1 Orientation: why the slow pass exists</a></li>
+<li class="subsection"><a href="30_2.html">30.2 6.008 carefully: probability law before Bayes rule</a></li>
+<li class="subsection"><a href="30_3.html">30.3 Random variables as pharmacological summaries</a></li>
+<li class="subsection"><a href="30_4.html">30.4 Decision theory before dosing software</a></li>
+<li class="subsection"><a href="30_5.html">30.5 Graphical models for the population approach</a></li>
+<li class="subsection"><a href="30_6.html">30.6 Lavielle's joint-distribution thesis</a></li>
+<li class="subsection"><a href="30_7.html">30.7 Observation models</a></li>
+<li class="subsection"><a href="30_8.html">30.8 Individual parameter models</a></li>
+<li class="subsection"><a href="30_9.html">30.9 Structural PK as a forward map</a></li>
+<li class="subsection"><a href="30_10.html">30.10 Marginal likelihood and the hard integral</a></li>
+<li class="subsection"><a href="30_11.html">30.11 EM, SAEM, and missing individual parameters</a></li>
+<li class="subsection"><a href="30_12.html">30.12 NONMEM as a notation and approximation culture</a></li>
+<li class="subsection"><a href="30_13.html">30.13 Model evaluation as calibrated imagination</a></li>
+<li class="subsection"><a href="30_14.html">30.14 Warfarin re-read</a></li>
+<li class="subsection"><a href="30_15.html">30.15 Full Bayesian Population PK</a></li>
+<li class="subsection"><a href="30_16.html">30.16 A reading protocol for PopPK papers</a></li>
+<li><a href="31.html">31 Worked notebook: the hierarchy in examples</a></li>
+<li class="subsection"><a href="31_1.html">31.1 A two-level normal model</a></li>
+<li class="subsection"><a href="31_2.html">31.2 Lognormal random effects</a></li>
+<li class="subsection"><a href="31_3.html">31.3 Covariate models</a></li>
+<li class="subsection"><a href="31_4.html">31.4 Residual error</a></li>
+<li class="subsection"><a href="31_5.html">31.5 Linearization and Laplace</a></li>
+<li class="subsection"><a href="31_6.html">31.6 SAEM in slow motion</a></li>
+<li class="subsection"><a href="31_7.html">31.7 Metropolis-Hastings for one subject</a></li>
+<li class="subsection"><a href="31_8.html">31.8 Posterior predictive checks and VPC</a></li>
+<li class="subsection"><a href="31_9.html">31.9 Information geometry intuition</a></li>
+<li class="subsection"><a href="31_10.html">31.10 From individual to population</a></li>
+<li class="subsection"><a href="31_11.html">31.11 Model reports</a></li>
+<li><a href="32.html">32 Source-guided reading route</a></li>
+<li class="subsection"><a href="32_1.html">32.1 Source-guided route through 6.008</a></li>
+<li class="subsection"><a href="32_2.html">32.2 Source-guided route through 6.437</a></li>
+<li class="subsection"><a href="32_3.html">32.3 Source-guided route through 6.435</a></li>
+<li class="subsection"><a href="32_4.html">32.4 Source-guided route through Lavielle</a></li>
+<li class="subsection"><a href="32_5.html">32.5 A full reading loop</a></li>
+<li><a href="33.html">33 A minimal self-study path</a></li>
+<li class="subsection"><a href="33_1.html">33.1 Conceptual order</a></li>
+<li class="subsection"><a href="33_2.html">33.2 The one-sentence memory hook</a></li>
+<li class="subsection"><a href="33_3.html">33.3 My working conclusion</a></li></ul></div></body></html>

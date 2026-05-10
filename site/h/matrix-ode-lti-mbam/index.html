@@ -1,13 +1,14 @@
 <!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>From Matrix Tricks to MBAM</title><style>html,body{margin:0;padding:0;background:#f7f7f5;color:#141414}body{font-family:Georgia,"Times New Roman",serif;line-height:1.48}#main{max-width:900px;margin:0 auto;padding:48px 28px 72px;background:#fff;min-height:100vh;box-sizing:border-box}a{color:#064f83;text-decoration:none}a:hover{text-decoration:underline}h1{font-weight:normal;border-bottom:1px solid #d6d6d2;padding-bottom:.35rem;margin-top:0}.toc-note{color:#4d4d4d;max-width:680px}.disp-toc{padding-left:1.15rem}.disp-toc li{margin:.18rem 0}.subsection{margin-left:1.45rem}.math-title{white-space:nowrap}</style></head>
-<body><div id="main"><h1>From Matrix Tricks to MBAM</h1><p>2026, MIT 6.S087, 18.03, 18.031, 18.335, 18.337, 6.441; Transtrum and Qiu MBAM/CRISP notes</p><p class="toc-note">This is an HTML version of the notes generated with pdf2htmlEX. You can either view all sections in a single page, or access individual sections below.</p><h2>Contents</h2><ul class="disp-toc"><li><a href="full.html">V Full version</a></li><li><a href="1.html">1 Notation and source map</a></li>
+<body><div id="main"><h1>From Matrix Tricks to MBAM</h1><p>2026, MIT 6.S087, 18.03, 18.031, 18.335, 18.337, 6.441, 6.435; Transtrum and Qiu MBAM/CRISP notes; QSP plate-notation draft</p><p class="toc-note">This is an HTML version of the notes generated with pdf2htmlEX. You can either view all sections in a single page, or access individual sections below.</p><h2>Contents</h2><ul class="disp-toc"><li><a href="full.html">V Full version</a></li><li><a href="1.html">1 Notation and source map</a></li>
 <li class="subsection"><a href="1_1.html">1.1 Objects before formulas</a></li>
 <li class="subsection"><a href="1_2.html">1.2 The source packet</a></li>
 <li><a href="2.html">2 The spine: one map, six lenses</a></li>
 <li class="subsection"><a href="2_1.html">2.1 One sentence</a></li>
 <li class="subsection"><a href="2_2.html">2.2 The object that survives every translation</a></li>
 <li class="subsection"><a href="2_3.html">2.3 A reader's map</a></li>
-<li class="subsection"><a href="2_4.html">2.4 Why MBAM sits at the end</a></li>
+<li class="subsection"><a href="2_4.html">2.4 Simulation and Bayesian inference are opposite arrows</a></li>
+<li class="subsection"><a href="2_5.html">2.5 Why MBAM sits at the end</a></li>
 <li><a href="3.html">3 Lens I: local linear structure</a></li>
 <li class="subsection"><a href="3_1.html">3.1 Coordinates are not the object</a></li>
 <li class="subsection"><a href="3_2.html">3.2 Four spaces</a></li>
@@ -58,35 +59,39 @@
 <li class="subsection"><a href="15_1.html">15.1 QSP as query-driven modeling</a></li>
 <li class="subsection"><a href="15_2.html">15.2 CRISP language</a></li>
 <li class="subsection"><a href="15_3.html">15.3 Mechanistic control knobs</a></li>
-<li><a href="16.html">16 Detailed worked notebook: the same spine in slow motion</a></li>
-<li class="subsection"><a href="16_1.html">16.1 Covariance as geometry</a></li>
-<li class="subsection"><a href="16_2.html">16.2 Projection and least squares</a></li>
-<li class="subsection"><a href="16_3.html">16.3 Matrix derivatives</a></li>
-<li class="subsection"><a href="16_4.html">16.4 Whitening and likelihood</a></li>
-<li class="subsection"><a href="16_5.html">16.5 Identifiable combinations by SVD</a></li>
-<li class="subsection"><a href="16_6.html">16.6 Exponential decay</a></li>
-<li class="subsection"><a href="16_7.html">16.7 Sums of exponentials</a></li>
-<li class="subsection"><a href="16_8.html">16.8 Sensitivity ODE</a></li>
-<li class="subsection"><a href="16_9.html">16.9 Two-compartment dynamics</a></li>
-<li class="subsection"><a href="16_10.html">16.10 Spring–mass–damper</a></li>
-<li class="subsection"><a href="16_11.html">16.11 Convolution</a></li>
-<li class="subsection"><a href="16_12.html">16.12 Stiffness</a></li>
-<li class="subsection"><a href="16_13.html">16.13 Finite precision</a></li>
-<li class="subsection"><a href="16_14.html">16.14 Regularization</a></li>
-<li class="subsection"><a href="16_15.html">16.15 QR versus normal equations</a></li>
-<li class="subsection"><a href="16_16.html">16.16 KL local expansion</a></li>
-<li class="subsection"><a href="16_17.html">16.17 Information projection</a></li>
-<li class="subsection"><a href="16_18.html">16.18 Model manifold for line fitting</a></li>
-<li class="subsection"><a href="16_19.html">16.19 Geodesic boundaries</a></li>
-<li class="subsection"><a href="16_20.html">16.20 Boundary taxonomy</a></li>
-<li class="subsection"><a href="16_21.html">16.21 MBAM and Michaelis–Menten carefully</a></li>
-<li class="subsection"><a href="16_22.html">16.22 Active manifold</a></li>
-<li class="subsection"><a href="16_23.html">16.23 CRISP for QSP</a></li>
-<li class="subsection"><a href="16_24.html">16.24 The full conceptual chain</a></li>
-<li><a href="17.html">17 A self-study route</a></li>
-<li class="subsection"><a href="17_1.html">17.1 The order I would read</a></li>
-<li class="subsection"><a href="17_2.html">17.2 A reading checklist for any model</a></li>
-<li><a href="18.html">18 Connection back to pharmacology</a></li>
-<li class="subsection"><a href="18_1.html">18.1 Why this belongs next to PK/PD</a></li>
-<li class="subsection"><a href="18_2.html">18.2 The one-sentence memory hook</a></li>
-<li class="subsection"><a href="18_3.html">18.3 Working conclusion</a></li></ul></div></body></html>
+<li><a href="16.html">16 Plate notation for QSP: the probabilistic shell around mechanism</a></li>
+<li class="subsection"><a href="16_1.html">16.1 Why a QSP diagram is not enough</a></li>
+<li class="subsection"><a href="16_2.html">16.2 A minimal QSP plate</a></li>
+<li class="subsection"><a href="16_3.html">16.3 What the plate buys us in toxicology</a></li>
+<li><a href="17.html">17 Detailed worked notebook: the same spine in slow motion</a></li>
+<li class="subsection"><a href="17_1.html">17.1 Covariance as geometry</a></li>
+<li class="subsection"><a href="17_2.html">17.2 Projection and least squares</a></li>
+<li class="subsection"><a href="17_3.html">17.3 Matrix derivatives</a></li>
+<li class="subsection"><a href="17_4.html">17.4 Whitening and likelihood</a></li>
+<li class="subsection"><a href="17_5.html">17.5 Identifiable combinations by SVD</a></li>
+<li class="subsection"><a href="17_6.html">17.6 Exponential decay</a></li>
+<li class="subsection"><a href="17_7.html">17.7 Sums of exponentials</a></li>
+<li class="subsection"><a href="17_8.html">17.8 Sensitivity ODE</a></li>
+<li class="subsection"><a href="17_9.html">17.9 Two-compartment dynamics</a></li>
+<li class="subsection"><a href="17_10.html">17.10 Spring–mass–damper</a></li>
+<li class="subsection"><a href="17_11.html">17.11 Convolution</a></li>
+<li class="subsection"><a href="17_12.html">17.12 Stiffness</a></li>
+<li class="subsection"><a href="17_13.html">17.13 Finite precision</a></li>
+<li class="subsection"><a href="17_14.html">17.14 Regularization</a></li>
+<li class="subsection"><a href="17_15.html">17.15 QR versus normal equations</a></li>
+<li class="subsection"><a href="17_16.html">17.16 KL local expansion</a></li>
+<li class="subsection"><a href="17_17.html">17.17 Information projection</a></li>
+<li class="subsection"><a href="17_18.html">17.18 Model manifold for line fitting</a></li>
+<li class="subsection"><a href="17_19.html">17.19 Geodesic boundaries</a></li>
+<li class="subsection"><a href="17_20.html">17.20 Boundary taxonomy</a></li>
+<li class="subsection"><a href="17_21.html">17.21 MBAM and Michaelis–Menten carefully</a></li>
+<li class="subsection"><a href="17_22.html">17.22 Active manifold</a></li>
+<li class="subsection"><a href="17_23.html">17.23 CRISP for QSP</a></li>
+<li class="subsection"><a href="17_24.html">17.24 The full conceptual chain</a></li>
+<li><a href="18.html">18 A self-study route</a></li>
+<li class="subsection"><a href="18_1.html">18.1 The order I would read</a></li>
+<li class="subsection"><a href="18_2.html">18.2 A reading checklist for any model</a></li>
+<li><a href="19.html">19 Connection back to pharmacology</a></li>
+<li class="subsection"><a href="19_1.html">19.1 Why this belongs next to PK/PD</a></li>
+<li class="subsection"><a href="19_2.html">19.2 The one-sentence memory hook</a></li>
+<li class="subsection"><a href="19_3.html">19.3 Working conclusion</a></li></ul></div></body></html>

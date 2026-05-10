@@ -26,9 +26,9 @@ The order matters.  If we begin with NONMEM syntax, the reader sees THETA, ETA, 
   I will use ``Bayesian'' in two levels.  In the strict level, a Bayesian model puts priors on all unknown quantities, including population parameters.  In the broader inferential level, a PopPK model is already Bayesian in spirit because individual parameters are latent variables updated by individual observations under a population distribution.  Much of classical Population PK is maximum likelihood for \(\theta\), but conditional inference for \(\rpsi_i\).  That mixed posture is not a defect; it is exactly why the field is intellectually interesting.
 \end{remark}
 
-\subsubsection*{The three texts in one sentence each}
+\subsubsection*{The four texts in one sentence each}
 
-The 6.008 notes teach the grammar of probability modeling: decide what the sample space is, assign a probability law, condition on observations, and compute probabilities, expectations, decisions, or approximations \cite{mit6008notes}.  The 6.437 notes deepen the grammar: inference is decision-making under loss, likelihood ratios compare hypotheses, posterior distributions summarize unknown quantities, information measures compare probability laws, EM and MCMC appear when exact marginalization is hard, and asymptotic arguments explain what happens when data are abundant \cite{mit6437notes}.  Lavielle's book gives the pharmacometric stage on which the grammar acts: observations \(y_i\), individual parameters \(\psi_i\), population parameters \(\theta\), covariates \(c_i\), designs \(u_i\), tasks, methods, and tools \cite{lavielle2015mixed}.
+The 6.008 notes teach the grammar of probability modeling: decide what the sample space is, assign a probability law, condition on observations, and compute probabilities, expectations, decisions, or approximations \cite{mit6008notes}.  The 6.437 notes deepen the grammar: inference is decision-making under loss, likelihood ratios compare hypotheses, posterior distributions summarize unknown quantities, information measures compare probability laws, EM and MCMC appear when exact marginalization is hard, and asymptotic arguments explain what happens when data are abundant \cite{mit6437notes}.  The 6.435 notes turn the grammar into workflow: identify the analysis goal, build a likelihood and prior, approximate the posterior, report the functionals that matter, simulate predictions, check the model, and iterate \cite{mit6435notes}.  Lavielle's book gives the pharmacometric stage on which the grammar acts: observations \(y_i\), individual parameters \(\psi_i\), population parameters \(\theta\), covariates \(c_i\), designs \(u_i\), tasks, methods, and tools \cite{lavielle2015mixed}.
 
 I want the reader to learn a habit:
 \[
@@ -53,6 +53,7 @@ Source & Question it asks \\
 \midrule
 6.008 & What probability model are we even talking about? \\
 6.437 & What inference, decision, or approximation follows from that model? \\
+6.435 & How do simulation, posterior inference, predictive checking, and model revision form one workflow? \\
 Lavielle & How is this hierarchy represented, estimated, diagnosed, and used? \\
 \(\pklab{NONMEM}\) & How does this object appear in a historical pharmacometric syntax? \\
 \bottomrule

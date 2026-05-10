@@ -5,22 +5,24 @@
     "title": "From Matrix Tricks to MBAM",
     "category": "Mathematical Modeling Foundations",
     "year": "2026",
-    "paper": "MIT 6.S087, 18.03, 18.031, 18.335, 18.337, 6.441; Transtrum and Qiu MBAM/CRISP notes",
+    "paper": "MIT 6.S087, 18.03, 18.031, 18.335, 18.337, 6.441, 6.435; Transtrum and Qiu MBAM/CRISP notes; QSP plate-notation draft",
     "citationKey": "matrixOdeLtiMbam2026",
     "tex": "2026-05-10-matrix-ode-lti-mbam.tex",
     "pdf": "2026-05-10-matrix-ode-lti-mbam.pdf",
-    "tags": ["linear algebra", "ODE", "LTI systems", "numerical linear algebra", "information geometry", "MBAM", "QSP"],
-    "summary": "一篇围绕 prediction map \\theta\\mapsto y(\\theta) 重写的长笔记：把矩阵技巧、ODE/LTI、数值线性代数、信息几何和 MBAM/QSP reduction 接成同一条推理脊柱。",
+    "tags": ["linear algebra", "ODE", "LTI systems", "numerical linear algebra", "information geometry", "MBAM", "QSP", "Bayesian workflow", "plate notation"],
+    "summary": "一篇围绕 prediction map \\theta\\mapsto y(\\theta) 重写的长笔记：把矩阵技巧、ODE/LTI、数值线性代数、信息几何、Bayesian simulation-inference loop、plate notation 和 MBAM/QSP reduction 接成同一条推理脊柱。",
     "questions": [
       "为什么 MBAM 可以看成矩阵敏感性、ODE 动力系统、数值条件数和 Fisher 信息几何的交汇点？",
       "模型流形、Fisher information、sloppiness 和 geodesic boundary 分别对应什么数学对象？",
-      "如何从复杂 QSP 模型中读出对特定预测真正重要的 mechanistic control knobs？"
+      "如何从复杂 QSP 模型中读出对特定预测真正重要的 mechanistic control knobs？",
+      "Plate notation 如何把 QSP 的个体、时间、组织、观测噪声、latent state 和 mechanistic ODE 放在同一张概率图里？"
     ],
     "model": "\\theta\\mapsto y(\\theta),\\quad \\mathcal{I}(\\theta)=J(\\theta)^T J(\\theta)",
     "takeaways": [
       "矩阵的奇异值告诉我们局部哪些参数方向会改变预测，哪些方向几乎不可见。",
       "ODE/LTI 模型的模式、极点和时间尺度给 MBAM 的边界极限提供物理解释。",
-      "MBAM 的核心不是随便删参数，而是沿 Fisher metric 的弱方向找到有机制意义的 limiting approximation。"
+      "MBAM 的核心不是随便删参数，而是沿 Fisher metric 的弱方向找到有机制意义的 limiting approximation。",
+      "QSP 需要两层图：mechanistic diagram 说明系统如何流动，plate diagram 说明哪些量被观测、重复、共享、随机化和推断。"
     ]
   },
   {
@@ -29,22 +31,24 @@
     "title": "Population PK as Bayesian Inference",
     "category": "Bayesian Population PK",
     "year": "2026",
-    "paper": "Lavielle, Mixed Effects Models for the Population Approach; MIT 6.008/6.437 notes",
+    "paper": "Lavielle, Mixed Effects Models for the Population Approach; MIT 6.008/6.437/6.435 notes",
     "citationKey": "lavielle2015mixed",
     "tex": "2026-05-09-population-pk-bayesian-inference.tex",
     "pdf": "2026-05-09-population-pk-bayesian-inference.pdf",
-    "tags": ["Population PK", "Bayesian inference", "NONMEM", "SAEM", "hierarchical models"],
-    "summary": "一篇围绕 \\theta\\to\\psi_i\\to y_i\\to\\tilde y_i\\to a_i 重写的长笔记：从 6.008/6.437 的 Bayesian inference 语言出发，把 Lavielle mixed effects、SAEM、NONMEM、预测检查和剂量决策接成同一条 PopPK 推理脊柱。",
+    "tags": ["Population PK", "Bayesian inference", "NONMEM", "SAEM", "hierarchical models", "Bayesian workflow", "posterior predictive checking"],
+    "summary": "一篇围绕 \\theta\\to\\psi_i\\to y_i\\to\\tilde y_i\\to a_i 重写的长笔记：从 6.008/6.437/6.435 的 Bayesian inference 语言与 modeling workflow 出发，把 Lavielle mixed effects、SAEM、NONMEM、预测检查和剂量决策接成同一条 PopPK 推理脊柱。",
     "questions": [
       "Population PK 为什么天然是 latent-variable Bayesian inference 问题？",
       "NONMEM 的经典 theta/eta/epsilon 语言和 Lavielle 的 hierarchical model 语言如何互译？",
-      "经验贝叶斯、population maximum likelihood、SAEM 和 full Bayesian posterior 的区别在哪里？"
+      "经验贝叶斯、population maximum likelihood、SAEM 和 full Bayesian posterior 的区别在哪里？",
+      "如何把 simulation、posterior inference、posterior predictive check 和 model revision 组织成 Population PK 的工作流？"
     ],
     "model": "p_\\theta(y,\\psi)=\\prod_i p_\\theta(y_i\\mid\\psi_i)p_\\theta(\\psi_i\\mid c_i)",
     "takeaways": [
       "Population PK 的核心不是把每个人单独拟合好，而是在 population distribution 和 individual posterior 之间交换信息。",
       "NONMEM 和 Lavielle/Monolix 都在处理同一个 marginal likelihood 积分，只是近似与算法语言不同。",
-      "Bayesian inference 视角能把 covariate modeling、EBE shrinkage、VPC/PPC 和 model selection 放进同一个逻辑系统。"
+      "Bayesian inference 视角能把 covariate modeling、EBE shrinkage、VPC/PPC 和 model selection 放进同一个逻辑系统。",
+      "6.435 补上的关键层次是 workflow：先定义科学问题，再建 prior-likelihood 模型，随后推断、模拟、检查、修正。"
     ]
   },
   {

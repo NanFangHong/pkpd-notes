@@ -357,7 +357,8 @@ function workTex(note, htmlMode) {
   const original = readFileSync(source, "utf8");
   assertNoGeneratedLongform(original, note);
   const prepared = rewriteBibPaths(original, path.dirname(source));
-  writeFileSync(path.join(work, `${note.slug}.tex`), htmlMode ? injectHtmlMode(prepared) : prepared);
+  const htmlPrepared = htmlMode ? injectHtmlMode(prepared).replace(/\\tableofcontents\b/g, "\\pkpdnewhtmlpage\n\\tableofcontents") : prepared;
+  writeFileSync(path.join(work, `${note.slug}.tex`), htmlPrepared);
   return work;
 }
 
@@ -572,7 +573,8 @@ function writeNoteSite(note, pages, sections, pdf) {
   writeFileSync(path.join(dir, "full.html"), full);
   writeFileSync(path.join(dir, "full"), full);
 
-  const routed = sections.map((section, i) => ({ ...section, page: i + 2, html: `${section.id}.html` }));
+  const frontPageCount = Math.max(1, pages.length - sections.length);
+  const routed = sections.map((section, i) => ({ ...section, page: i + frontPageCount + 1, html: `${section.id}.html` }));
   for (const [index, section] of routed.entries()) {
     const page = pages.find((candidate) => candidate.page === section.page);
     if (!page) {

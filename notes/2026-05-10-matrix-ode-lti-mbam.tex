@@ -3,12 +3,13 @@
 \def\npart {Mathematical Modeling Foundations}
 \def\nterm {Matrix, dynamics, geometry}
 \def\nyear {2026}
-\def\nlecturer {MIT 6.S087/18.03/18.031/18.335/18.337/6.441; MBAM/QSP}
+\def\nlecturer {MIT 6.S087/18.03/18.031/18.335/18.337/6.441/6.435; MBAM/QSP}
 \def\ncourse {From Matrix Tricks to MBAM}
 \def\ncoursehead {Matrix to MBAM}
 \def\nauthor {NanFangHong}
 
 \input{header}
+\usetikzlibrary{fit,positioning}
 
 \DeclareMathOperator{\rank}{rank}
 \DeclareMathOperator{\range}{range}
@@ -34,8 +35,10 @@
 \newcommand{\rv}[1]{\mathsf{#1}}
 \newcommand{\param}{\theta}
 \newcommand{\rtheta}{\boldsymbol{\theta}}
+\newcommand{\rx}{\boldsymbol{x}}
 \newcommand{\qoi}{\mathcal{Q}}
 \newcommand{\data}{\mathcal{D}}
+\newcommand{\given}{\,|\,}
 \newcommand{\model}{\mathcal{M}}
 \newcommand{\loss}{\mathcal{L}}
 \newcommand{\fim}{\mathcal{I}}
@@ -51,11 +54,11 @@
 \maketitle
 {\small
   \noindent\textbf{Reading motive}\\
-  这篇笔记不再把 MIT 线性代数、ODE、LTI、数值计算、信息论/信息几何和 MBAM/QSP 当作相邻课程来摆放，而是把它们看成同一个对象的不同投影。这个对象就是
+  这篇笔记不再把 MIT 线性代数、ODE、LTI、数值计算、信息论/信息几何、Bayesian modeling 和 MBAM/QSP 当作相邻课程来摆放，而是把它们看成同一个对象的不同投影。这个对象就是
   \[
     \param\longmapsto\vect{y}(\param),
   \]
-  the map from mechanisms to predictions.  Everything below asks one question from different angles: how does a mechanistic parameter move the predictions we care about?\hspace*{\fill}[spine]
+  the map from mechanisms to predictions.  Everything below asks one question from different angles: how does a mechanistic parameter move the predictions we care about, and how do data move our belief back over mechanisms?\hspace*{\fill}[spine]
 
   \vspace{5pt}
   \noindent\textbf{Audience}\\
@@ -63,7 +66,7 @@
 
   \vspace{5pt}
   \noindent\textbf{Style}\\
-  This is a synthesis note rather than an excerpt.  It keeps the dec41/pdf2htmlEX layout, uses the same notation discipline as the Population PK note, and tries to make every chapter hand its object to the next one.\hspace*{\fill}[workflow]
+  This is a synthesis note rather than an excerpt.  It keeps the dec41/pdf2htmlEX layout, uses the same notation discipline as the Population PK note, and now treats simulation, Bayesian inference, and plate notation as part of the same QSP grammar.\hspace*{\fill}[workflow]
 }
 
 \tableofcontents
@@ -107,12 +110,15 @@ Matrix Cookbook & derivative identities and matrix reference grammar & 72 \\
 18.335 Numerical Computing & finite precision, conditioning, direct/iterative methods, eigenvalue algorithms & 729 \\
 18.337 Julia Computing & random matrices, fast multipole ideas, parallel prefix, computation as structure & 160+ \\
 6.441 Information Theory & divergence, mutual information, local Fisher geometry, information projection & 294 \\
+6.435 Bayesian Modeling & prior-likelihood-posterior workflow, plate notation, approximate inference, Bayesian nonparametrics & 40+ \\
 MBAM and CRISP papers & model manifolds, sloppiness, geodesic boundaries, QSP fit-for-purpose reduction & 88 \\
+Quantitative pharmacology notes & simulation as forward mapping and Bayesian inference as reverse mapping & 3 \\
+GRC toxicology draft & plate notation as visual grammar for QSP, toxicology, and AI-augmented mechanistic models & 4 \\
 \bottomrule
 \end{tabularx}
 \end{center}
 
-The exact page counts are less important than the conceptual order.  The early notes teach how to compute the local map.  The middle notes teach how dynamics creates the map.  The later notes teach why the map becomes geometry.  MBAM then asks what the geometry says we can remove.
+The exact page counts are less important than the conceptual order.  The early notes teach how to compute the local map.  The middle notes teach how dynamics creates the map.  The later notes teach why the map becomes geometry.  6.435 adds the Bayesian workflow around the map.  MBAM then asks what the geometry says we can remove.
 
 \section{The spine: one map, six lenses}
 
@@ -162,6 +168,38 @@ The chapters therefore have a dependency, not merely an order:
 \end{array}
 \]
 If a section ever feels abstract, return to this diagram and ask: which arrow is being clarified?
+
+\subsection{Simulation and Bayesian inference are opposite arrows}
+
+My old quantitative pharmacology note put the disciplinary intuition very simply: quantitative pharmacology uses differential equations to describe the trajectory of the world, and then uses data to travel back toward the hidden knobs of that world.  In this note's notation, simulation is the forward arrow:
+\[
+  \param
+  \longmapsto
+  \vect{x}(t;\param)
+  \longmapsto
+  \vect{y}(\param),
+\]
+while Bayesian inference is the reverse arrow:
+\[
+  \data
+  \longmapsto
+  p(\param\given\data)
+  \longmapsto
+  p(\vect{y}_{\mathrm{new}}\given\data).
+\]
+This is not a contradiction.  It is the basic rhythm of mechanistic science:
+\[
+  \begin{array}{c}
+    \text{simulate from mechanism to possible data}\\
+    \downarrow\\
+    \text{compare possible data with observed data}\\
+    \downarrow\\
+    \text{update belief about mechanisms}\\
+    \downarrow\\
+    \text{simulate again for prediction, design, and criticism.}
+  \end{array}
+\]
+QSP lives exactly in this back-and-forth.  A forward simulation without inverse inference is only storytelling; inverse inference without a trusted forward simulator is curve fitting wearing mechanistic clothing.
 
 \subsection{Why MBAM sits at the end}
 
@@ -790,6 +828,77 @@ The best reduced model does more than save computation.  It identifies control k
 \]
 such that the quantities of interest depend mainly on \(\phi\), not on all microscopic parameters.  In systems biology, these combinations may correspond to time-scale ratios, saturation constants, feedback strengths, or pathway capacities.  This is the end of the chain that began with a Jacobian: a singular direction becomes a mechanistic control knob.
 
+\section{Plate notation for QSP: the probabilistic shell around mechanism}
+
+\subsection{Why a QSP diagram is not enough}
+
+A traditional QSP diagram is excellent at showing mechanistic flow: ligand activates receptor, receptor changes signaling, signaling changes biomarker, biomarker affects phenotype.  But it often hides the probabilistic architecture:
+\begin{itemize}[leftmargin=2em]
+  \item Which quantities are fixed design choices?
+  \item Which biological states are latent and inferred?
+  \item Which parameters vary between individuals?
+  \item Which measurements are noisy observations of hidden states?
+  \item Where do covariates, omics features, or AI-derived latent features enter?
+\end{itemize}
+Plate notation answers a different question from a pathway diagram.  A pathway diagram says what interacts mechanistically.  A plate diagram says what is random, what is observed, what is repeated, and what conditions what.
+
+\subsection{A minimal QSP plate}
+
+For a QSP model with \(N\) individuals and \(T_i\) observation times, a probabilistic shell can be drawn as:
+
+\begin{center}
+\begin{tikzpicture}[>=stealth, node distance=1.35cm, every node/.style={align=center}]
+  \node[draw, rounded corners, minimum width=1.4cm, minimum height=0.65cm] (theta) {\(\theta\)};
+  \node[draw, rounded corners, right=1.7cm of theta, minimum width=1.4cm, minimum height=0.65cm] (omega) {\(\Omega\)};
+  \node[draw, rounded corners, below=1.0cm of theta, minimum width=1.3cm, minimum height=0.65cm] (c) {\(c_i\)};
+  \node[draw, rounded corners, right=1.7cm of c, minimum width=1.4cm, minimum height=0.65cm] (psi) {\(\rtheta_i\)};
+  \node[draw, rounded corners, right=1.9cm of psi, minimum width=1.5cm, minimum height=0.65cm] (x) {\(\rx_i(t)\)};
+  \node[draw, rounded corners, right=1.9cm of x, minimum width=1.4cm, minimum height=0.65cm] (y) {\(\rv{y}_{ij}\)};
+  \node[draw, rounded corners, above=0.9cm of x, minimum width=1.4cm, minimum height=0.65cm] (u) {\(u_i(t)\)};
+  \node[draw, rounded corners, below=0.9cm of x, minimum width=1.4cm, minimum height=0.65cm] (h) {\(\rv{h}_i\)};
+  \node[draw, rounded corners, below=0.9cm of y, minimum width=1.4cm, minimum height=0.65cm] (eps) {\(\epsilon_{ij}\)};
+
+  \draw[->] (theta) -- (psi);
+  \draw[->] (omega) -- (psi);
+  \draw[->] (c) -- (psi);
+  \draw[->] (psi) -- (x);
+  \draw[->] (u) -- (x);
+  \draw[->] (h) -- (x);
+  \draw[->] (x) -- (y);
+  \draw[->] (eps) -- (y);
+
+  \node[draw, dashed, rounded corners, fit=(c)(psi)(x)(y)(u)(h)(eps), inner sep=0.35cm, label=below:{individual \(i=1,\ldots,N\)}] {};
+  \node[draw, dotted, rounded corners, fit=(y)(eps), inner sep=0.20cm, label=above:{time \(j=1,\ldots,T_i\)}] {};
+\end{tikzpicture}
+\captionof{figure}{A QSP plate separates the mechanistic state equation from the probabilistic hierarchy.  The mechanistic ODE lives inside \(\rx_i(t)\); the plate tells us how population parameters, individual variation, covariates, latent features, design, and measurement error generate observed biomarkers.}
+\end{center}
+
+The corresponding verbal model is:
+\[
+  \rtheta_i\sim p_\theta(\theta_i\given c_i,\Omega),
+  \qquad
+  \frac{\dd \rx_i(t)}{\dd t}=f(\rx_i(t),\rtheta_i,u_i(t),\rv{h}_i),
+  \qquad
+  \rv{y}_{ij}\sim p(y_{ij}\given \rx_i(t_{ij}),\epsilon_{ij}).
+\]
+The ODE gives causality inside a subject.  The plate gives replication, uncertainty, and observation.
+
+\subsection{What the plate buys us in toxicology}
+
+The GRC toxicology draft's core idea is that plate notation is a visual grammar for mechanistic models with uncertainty.  In QSP toxicology, this is especially helpful because the model often combines:
+\begin{itemize}[leftmargin=2em]
+  \item hierarchical variability across donors, cell lines, animals, or patients;
+  \item latent biological states such as injury stage, pathway activation, or target-site exposure;
+  \item noisy biomarkers, omics measurements, and histopathology endpoints;
+  \item AI/ML-derived features that summarize images, transcripts, or high-dimensional assays;
+  \item regulatory decisions that require reproducible model structure, not only successful prediction.
+\end{itemize}
+The plate does not replace the QSP mechanism.  It wraps the mechanism in a probabilistic contract.  Once the contract is visible, different teams can ask precise questions: which latent states are inferred, which variables are measured, which dependencies are assumed, and which modules can be recombined without changing the meaning of the model.
+
+\begin{remark}
+  This is also where Bayesian modeling and MBAM meet.  Plate notation says which uncertainty structure surrounds the QSP map; MBAM asks which mechanistic directions inside that map are distinguishable for the query.  One clarifies the probabilistic shell, the other clarifies the mechanistic core.
+\end{remark}
+
 \section{Detailed worked notebook: the same spine in slow motion}
 
 The following workbook is not a second, unrelated set of chapters.  It repeats the same spine at lower altitude.  The first group builds the linear and statistical geometry.  The second group shows how ODE/LTI systems create the relevant sensitivities and time scales.  The third group turns those sensitivities into Fisher geometry and model manifolds.  The final group shows how boundaries become MBAM and CRISP reductions.  Read it as a spiral: each example returns to
@@ -815,6 +924,7 @@ I would not start with MBAM directly.  I would read in this order:
   \item 18.031: LTI systems, convolution, transfer functions, poles.
   \item 18.335: conditioning, residual/error distinction, QR/SVD, iterative methods.
   \item 6.441: divergence, local Fisher geometry, information projection.
+  \item 6.435: Bayesian workflow, plate notation, approximate inference, and model criticism.
   \item MBAM papers: model manifold, geodesics, boundary limits.
   \item QSP CRISP paper: how these ideas become a workflow for pharmacological models.
 \end{enumerate}
@@ -827,6 +937,7 @@ When reading a QSP or systems biology model, ask:
   \item What are the parameters \(\param\)?
   \item What are the quantities of interest \(\qoi\)?
   \item What is the prediction map \(\param\mapsto\vect{y}(\param)\)?
+  \item What is observed, what is latent, and what plate structure repeats across subjects, times, tissues, or assays?
   \item How is \(\jac=\partial\vect{y}/\partial\param\) computed?
   \item What are the large and small singular directions?
   \item Which small directions correspond to interpretable limits?
