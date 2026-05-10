@@ -34,7 +34,7 @@
     "tex": "2026-05-09-population-pk-bayesian-inference.tex",
     "pdf": "2026-05-09-population-pk-bayesian-inference.pdf",
     "tags": ["Population PK", "Bayesian inference", "NONMEM", "SAEM", "hierarchical models"],
-    "summary": "一篇从 6.008/6.437 的 Bayesian inference 语言出发、沿着 Lavielle mixed effects population approach 解释 Population PK 的自学型长笔记。",
+    "summary": "一篇围绕 \\theta\\to\\psi_i\\to y_i\\to\\tilde y_i\\to a_i 重写的长笔记：从 6.008/6.437 的 Bayesian inference 语言出发，把 Lavielle mixed effects、SAEM、NONMEM、预测检查和剂量决策接成同一条 PopPK 推理脊柱。",
     "questions": [
       "Population PK 为什么天然是 latent-variable Bayesian inference 问题？",
       "NONMEM 的经典 theta/eta/epsilon 语言和 Lavielle 的 hierarchical model 语言如何互译？",

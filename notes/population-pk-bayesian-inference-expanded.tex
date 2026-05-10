@@ -1,22 +1,24 @@
-\section{Slow source map}
+\subsection{Orientation: why the slow pass exists}
 
-\subsection{What this expansion is trying to do}
+\subsubsection*{What this expansion is trying to do}
 
 The first draft gave the right high-level bridge but it moved too quickly.  A reader who has not taken 6.008 or 6.437 needs more than a dictionary between symbols.  They need to feel why the symbols were invented.  They need to see how a small probability question becomes a dosing question, how a latent-variable question becomes a mixed-effects model, and how a computational question becomes NONMEM, SAEM, or MCMC.
 
 The expanded version therefore follows a slower route:
 \[
-  \text{probability object}
-  \longrightarrow
-  \text{conditioning}
-  \longrightarrow
-  \text{decision}
-  \longrightarrow
-  \text{hierarchy}
-  \longrightarrow
-  \text{algorithm}
-  \longrightarrow
-  \text{pharmacological judgment}.
+  \begin{array}{c}
+    \text{probability object}\\
+    \downarrow\\
+    \text{conditioning}\\
+    \downarrow\\
+    \text{decision}\\
+    \downarrow\\
+    \text{hierarchy}\\
+    \downarrow\\
+    \text{algorithm}\\
+    \downarrow\\
+    \text{pharmacological judgment}.
+  \end{array}
 \]
 The order matters.  If we begin with NONMEM syntax, the reader sees THETA, ETA, EPSILON, OMEGA, and SIGMA as a software dialect.  If we begin with Lavielle's joint distribution but skip inference, the reader sees a clean model and does not know what is hard about it.  If we begin with Bayes rule but skip PK, the reader understands updating but not why individual parameters are biologically meaningful.  The point of this note is to keep all three views alive at the same time.
 
@@ -24,7 +26,7 @@ The order matters.  If we begin with NONMEM syntax, the reader sees THETA, ETA, 
   I will use ``Bayesian'' in two levels.  In the strict level, a Bayesian model puts priors on all unknown quantities, including population parameters.  In the broader inferential level, a PopPK model is already Bayesian in spirit because individual parameters are latent variables updated by individual observations under a population distribution.  Much of classical Population PK is maximum likelihood for \(\theta\), but conditional inference for \(\rpsi_i\).  That mixed posture is not a defect; it is exactly why the field is intellectually interesting.
 \end{remark}
 
-\subsection{The three texts in one sentence each}
+\subsubsection*{The three texts in one sentence each}
 
 The 6.008 notes teach the grammar of probability modeling: decide what the sample space is, assign a probability law, condition on observations, and compute probabilities, expectations, decisions, or approximations \cite{mit6008notes}.  The 6.437 notes deepen the grammar: inference is decision-making under loss, likelihood ratios compare hypotheses, posterior distributions summarize unknown quantities, information measures compare probability laws, EM and MCMC appear when exact marginalization is hard, and asymptotic arguments explain what happens when data are abundant \cite{mit6437notes}.  Lavielle's book gives the pharmacometric stage on which the grammar acts: observations \(y_i\), individual parameters \(\psi_i\), population parameters \(\theta\), covariates \(c_i\), designs \(u_i\), tasks, methods, and tools \cite{lavielle2015mixed}.
 
@@ -41,22 +43,26 @@ The redraw should answer four questions:
 \end{enumerate}
 Only after these four questions are stable should we ask which software or algorithm is being used.
 
-\subsection{A source hierarchy rather than a literature review}
+\subsubsection*{A source hierarchy rather than a literature review}
 
-This is not a literature review.  A literature review would place many papers side by side and compare claims.  Here I am building a reading hierarchy.  The hierarchy is:
-\[
-  \begin{array}{lll}
-  \text{6.008} & \text{asks} & \text{What probability model are we even talking about?}\\
-  \text{6.437} & \text{asks} & \text{What inference, decision, or approximation follows from that model?}\\
-  \text{Lavielle} & \text{asks} & \text{How is this hierarchy represented, estimated, diagnosed, and used?}\\
-  \pklab{NONMEM} & \text{asks} & \text{How does this object appear in a historical pharmacometric syntax?}
-  \end{array}
-\]
+This is not a literature review.  A literature review would place many papers side by side and compare claims.  Here I am building a reading hierarchy:
+\begin{center}
+\begin{tabularx}{0.96\textwidth}{p{0.18\textwidth}X}
+\toprule
+Source & Question it asks \\
+\midrule
+6.008 & What probability model are we even talking about? \\
+6.437 & What inference, decision, or approximation follows from that model? \\
+Lavielle & How is this hierarchy represented, estimated, diagnosed, and used? \\
+\(\pklab{NONMEM}\) & How does this object appear in a historical pharmacometric syntax? \\
+\bottomrule
+\end{tabularx}
+\end{center}
 When the four rows disagree, the note slows down.  For example, an EBE in NONMEM syntax may look like a subject's true clearance.  But from the 6.437 view it is a posterior summary under a loss function or approximation.  From Lavielle's view it is the estimation of an individual parameter conditional on an estimated population model.  From 6.008's view it is a random variable transformed after conditioning.  These are not pedantic distinctions.  They decide whether we can interpret a covariate effect, trust a dose adjustment, or compare two models.
 
-\section{6.008 carefully: probability law before Bayes rule}
+\subsection{6.008 carefully: probability law before Bayes rule}
 
-\subsection{The sample point is not a blood concentration}
+\subsubsection*{The sample point is not a blood concentration}
 
 The first subtle point is that a sample point is not necessarily a single blood concentration.  If a subject receives a dose regimen and produces a longitudinal record, a natural sample outcome contains the entire observed trajectory:
 \[
@@ -74,7 +80,7 @@ This is the first place where Population PK becomes more subtle than curve fitti
   Suppose two subjects have the same observed concentration at two early time points.  One model treats this as evidence that their clearances are similar.  Another model says the sampling schedule is too early to distinguish clearance from volume.  The observed numbers are the same, but the sample space and latent structure create different inferential meanings.
 \end{eg}
 
-\subsection{Events are clinical subsets}
+\subsubsection*{Events are clinical subsets}
 
 In 6.008, an event is a subset of the sample space.  In PopPK, this sounds abstract until we write clinical events:
 \[
@@ -88,7 +94,7 @@ These are not decorative.  They are what dosing decisions are often about.  A mo
 
 This is why the 6.008 language should come before software.  If the event has not been named, the analysis cannot know what probability matters.  The event may be exposure-based, response-based, toxicity-based, adherence-based, or survival-based.  Each event changes the target of inference.
 
-\subsection{Probability laws as commitments}
+\subsubsection*{Probability laws as commitments}
 
 A probability law is a commitment about variation.  In a simple one-compartment model, one might write
 \[
@@ -106,7 +112,7 @@ we commit to approximately lognormal multiplicative error.  The structural curve
 
 Lavielle's emphasis on description, representation, and implementation is useful here.  The description may say ``proportional residual error.''  The mathematical representation might be a lognormal observation density.  The implementation might be NONMEM code, Mlxtran code, Stan code, or an R function.  A reader should be able to move between these without changing the underlying probability law.
 
-\subsection{The law of total probability is the population idea}
+\subsubsection*{The law of total probability is the population idea}
 
 The law of total probability is the first real bridge to Population PK.  For a new observation \(y_i\),
 \[
@@ -119,7 +125,7 @@ This is not a technical afterthought.  It is the population approach in one line
 
 The same identity also explains why nonlinear mixed-effects estimation is hard.  The integrand contains a nonlinear forward model, possibly an ODE solution, and a high-dimensional random effect.  The integral is rarely closed-form.  Therefore algorithms enter not because pharmacometricians enjoy algorithms, but because the probability law demands marginalization.
 
-\subsection{Bayes rule as individual reweighting}
+\subsubsection*{Bayes rule as individual reweighting}
 
 For an individual subject, Bayes rule gives
 \[
@@ -135,9 +141,9 @@ The numerator has two forces.  The population distribution says which physiologi
 
 This equation is the cleanest way to understand shrinkage.  If \(y_i\) is rich, the likelihood is sharp and the posterior moves toward the individual evidence.  If \(y_i\) is sparse or noisy, the likelihood is broad and the posterior remains closer to the population distribution.  Shrinkage is not a software artifact.  It is the geometry of conditional probability under limited information.
 
-\section{Random variables as pharmacological summaries}
+\subsection{Random variables as pharmacological summaries}
 
-\subsection{A random variable is a question asked of the outcome}
+\subsubsection*{A random variable is a question asked of the outcome}
 
 6.008 treats a random variable as a function from outcomes to numbers.  In PopPK, that function is often a pharmacological summary:
 \[
@@ -153,7 +159,7 @@ Once \(\pksym{CL}_i\), \(k_i\), or the whole curve \(C_i(t)\) is uncertain, thes
 \]
 The posterior distribution of \(\pksym{CL}_i\) induces a posterior distribution of \(\pksym{AUC}_i\).  The posterior predictive distribution of future concentrations induces probabilities of clinical target attainment.  This is where the random-variable language becomes directly useful.
 
-\subsection{Expectations are summaries, not reality}
+\subsubsection*{Expectations are summaries, not reality}
 
 An expectation is often useful:
 \[
@@ -167,7 +173,7 @@ But the expectation is not the same as the whole posterior distribution.  In asy
 \]
 if toxicity risk is the central concern.  This is where 6.008 expectation leads naturally into 6.437 decision theory.
 
-\subsection{Independence is a modeling assumption}
+\subsubsection*{Independence is a modeling assumption}
 
 It is common to write
 \[
@@ -177,9 +183,9 @@ for two observations from the same subject.  This does not mean the observations
 
 This distinction is crucial for repeated measures.  If a model treats observations as independent without individual random effects, it may underestimate uncertainty because it ignores within-subject correlation.  If a model includes \(\rpsi_i\), much of the dependence is explained by shared physiology.  Remaining residual dependence may still exist through assay drift, disease dynamics, adherence, or unmodeled feedback.  A good PopPK reader always asks: independent after conditioning on what?
 
-\section{Decision theory before dosing software}
+\subsection{Decision theory before dosing software}
 
-\subsection{Estimation is a decision with a loss}
+\subsubsection*{Estimation is a decision with a loss}
 
 6.437 makes explicit what is implicit in many reports: an estimate is a decision.  If we report a posterior mean, we are usually acting as if squared-error loss is relevant.  If we report a posterior median, absolute-error loss is often lurking.  If we report a MAP or EBE mode, a zero-one or local mode-seeking logic is being used.  These summaries can differ when the posterior is skewed or multimodal.
 
@@ -199,7 +205,7 @@ The Bayesian action minimizes posterior predictive risk:
 \]
 This formula is more honest than saying ``choose the dose that hits the target concentration.''  It forces the modeler to say what failure means.
 
-\subsection{Why clinical asymmetry matters}
+\subsubsection*{Why clinical asymmetry matters}
 
 In some drugs, underdosing is the main danger.  In others, toxicity dominates.  For warfarin, both sides matter: too little anticoagulation fails to prevent thrombosis; too much increases bleeding risk.  A symmetric statistical error metric may not match this clinical asymmetry.  The 6.437 move is to put the asymmetry into the loss.
 
@@ -213,7 +219,7 @@ The loss does not need to be final or perfectly quantified.  Even a qualitative 
 \]
 Once written, we can ask whether the PopPK model actually provides the predictive quantities needed to evaluate the table.
 
-\subsection{The danger of decision-blind model selection}
+\subsubsection*{The danger of decision-blind model selection}
 
 Model selection is often performed with OFV, AIC, BIC, diagnostic plots, and VPC.  These are valuable, but they do not automatically answer the decision question.  A model may improve OFV by fitting a minor absorption feature while leaving dose-relevant trough prediction unchanged.  Another model may have similar OFV but better tail calibration for a high-risk subgroup.
 
@@ -223,9 +229,9 @@ The decision-theoretic reading is:
 \]
 This does not excuse sloppy modeling.  It prevents a narrow criterion from masquerading as clinical adequacy.
 
-\section{Graphical models for the population approach}
+\subsection{Graphical models for the population approach}
 
-\subsection{The basic plate}
+\subsubsection*{The basic plate}
 
 A minimal population PK graphical model can be written as
 \[
@@ -256,7 +262,7 @@ This is the mathematical reason the subject-level records can be conditionally i
   \,\dd\psi_i.
 \]
 
-\subsection{What the plate hides}
+\subsubsection*{What the plate hides}
 
 The plate is compact, but it hides important choices.  Does \(u_i\) include only planned dose and sampling times, or also adherence?  Are covariates \(c_i\) fixed, measured with error, or time-varying?  Is dropout independent given \(\psi_i\), or does worsening disease affect both dropout and response?  Does disease progression introduce another latent state?  Does the residual error have serial correlation?
 
@@ -268,15 +274,15 @@ Each of these choices changes the graph.  For instance, if dropout time \(T_i\) 
 \]
 or a joint latent disease model might be needed.  Ignoring this can bias estimation because the observed record is no longer a simple random slice of the intended process.
 
-\subsection{The graph as a reading tool}
+\subsubsection*{The graph as a reading tool}
 
 When reading a paper, redraw the graph before judging the model.  If the paper says ``renal function was a significant covariate on clearance,'' draw \(c_i\to \pksym{CL}_i\).  If the paper says ``inter-occasion variability was included on bioavailability,'' draw an occasion-level random effect below the subject-level random effect.  If the paper says ``BLQ data were handled with M3,'' draw the censoring event as part of the observation mechanism.
 
 This is not busywork.  It reveals whether a claim is about the structural model, the residual model, the covariate model, the sampling process, or the decision rule.
 
-\section{Lavielle's joint-distribution thesis}
+\subsection{Lavielle's joint-distribution thesis}
 
-\subsection{A model is not only a structural equation}
+\subsubsection*{A model is not only a structural equation}
 
 One of Lavielle's most useful claims is that a model is a joint probability distribution.  A structural equation is only one component.  In continuous PK data, the full model needs at least:
 \[
@@ -287,7 +293,7 @@ One of Lavielle's most useful claims is that a model is a joint probability dist
 \]
 If the population parameter is modeled as a random quantity, \(\rtheta\), a Bayesian extension adds a prior density \(p(\theta)\).  If covariates or dosing records are modeled as random, they also enter.  But even the basic two-layer expression already changes how we think.  The question is not merely whether \(f(t;\psi_i)\) fits the observed curve.  The question is whether the joint law explains individual profiles, between-subject variability, residual noise, and prediction targets.
 
-\subsection{Description, representation, implementation}
+\subsubsection*{Description, representation, implementation}
 
 Lavielle's separation of description, representation, and implementation is a powerful anti-confusion device.
 
@@ -299,7 +305,7 @@ Lavielle's separation of description, representation, and implementation is a po
 
 Many arguments in modeling are actually category errors between these levels.  Someone may criticize an implementation detail as if it were a scientific description.  Someone else may defend a scientific story without showing a coherent probability law.  A careful PopPK note keeps the levels separate.
 
-\subsection{A complete PopPK law}
+\subsubsection*{A complete PopPK law}
 
 For a common continuous-data model, one representation is:
 \[
@@ -318,9 +324,9 @@ The transformation \(h\) is often logarithmic for positive parameters.  The resi
 
 This one representation already contains many modeling commitments.  Does every parameter have an \(\eta\)?  Is \(\Omega\) diagonal?  Are residuals independent?  Are covariates centered?  Are parameters constrained by transformation or by truncation?  Each answer changes inference.
 
-\section{Observation models}
+\subsection{Observation models}
 
-\subsection{Continuous observations}
+\subsubsection*{Continuous observations}
 
 For continuous concentrations or responses, Lavielle's Chapter 4 emphasizes that the observation model is not merely ``add error.''  It defines the conditional density \(p(y_i\mid\psi_i)\).  With independent residuals,
 \[
@@ -337,7 +343,7 @@ Here \(f_{ij}(\psi_i)=f(t_{ij};\psi_i,u_i)\), and \(g_{ij}\) may depend on the p
 
 For concentration data spanning orders of magnitude, proportional or lognormal error can be more plausible than additive error.  For responses with bounded ranges, transformations or non-Gaussian likelihoods may be needed.  For BLQ data, replacing observations by a fixed value can distort the likelihood; censoring-based likelihood terms are more principled.
 
-\subsection{Count, categorical, and time-to-event observations}
+\subsubsection*{Count, categorical, and time-to-event observations}
 
 Lavielle's broader point is that the population approach is not limited to continuous PK data.  If \(y_i\) is a count, a Poisson or negative-binomial observation model may be appropriate.  If \(y_i\) is categorical, the structural model may define category probabilities.  If \(y_i\) is a time-to-event outcome, the model may define a hazard or survival function.
 
@@ -347,15 +353,15 @@ The Bayesian inference language is unchanged:
 \]
 is still the conditional observation law.  What changes is the family of densities or probabilities.  This is important for PK/PD because pharmacological effects are often not clean continuous laboratory measurements.  Pain scores, toxicity grades, event times, response categories, and dropout can all be modeled in the same hierarchical grammar.
 
-\subsection{Residuals are derived objects}
+\subsubsection*{Residuals are derived objects}
 
 Residuals are not raw facts.  They are transformations defined by a fitted model.  An individual weighted residual, a conditional weighted residual, and an NPDE answer different questions.  A residual plot is therefore a diagnostic of a probability law, not simply a scatterplot of errors.
 
 If residuals show time trend, the structural model may be missing dynamics.  If residual variance grows with prediction, the error model may be wrong.  If residuals differ by covariate group, the covariate model may be incomplete.  If residuals have heavy tails, a Gaussian observation density may be fragile.  Diagnostic reading is posterior criticism in practical clothing.
 
-\section{Individual parameter models}
+\subsection{Individual parameter models}
 
-\subsection{The population distribution}
+\subsubsection*{The population distribution}
 
 The individual parameter model says how people differ.  A common form is
 \[
@@ -371,13 +377,14 @@ This is not only a regression.  It is a probability distribution for individual 
 
 The model answers two different questions at once:
 \[
-  \text{What is typical for a covariate profile?}
-  \qquad
-  \text{How much unexplained variability remains?}
+  \begin{array}{c}
+    \text{What is typical for a covariate profile?}\\
+    \text{How much unexplained variability remains?}
+  \end{array}
 \]
 Confusing these questions is common.  A covariate may have a statistically visible effect but leave most variability unexplained.  Conversely, a covariate may explain important variability in a subgroup even if global fit changes modestly.
 
-\subsection{Covariates are not causal by default}
+\subsubsection*{Covariates are not causal by default}
 
 A covariate model is often written as if it explains biology:
 \[
@@ -387,7 +394,7 @@ But the coefficient \(\beta\) is causal only under additional assumptions about 
 
 The Bayesian reading is cautious: the covariate model changes \(p(\psi_i\mid c_i)\).  Whether that conditional association supports intervention is a separate causal question.  This distinction matters if the model is used to recommend dose changes based on modifiable covariates.
 
-\subsection{Inter-occasion variability}
+\subsubsection*{Inter-occasion variability}
 
 Sometimes a subject's parameter changes across occasions:
 \[
@@ -401,9 +408,9 @@ where \(\eta_i\) is between-subject variability and \(\kappa_{ik}\) is inter-occ
 
 This is not a technical ornament.  Without inter-occasion variability, the model may force within-subject changes into residual error or distort between-subject variability.  With it, the model can distinguish persistent individual differences from occasion-specific fluctuations.
 
-\section{Structural PK as a forward map}
+\subsection{Structural PK as a forward map}
 
-\subsection{The model as a deterministic solver inside probability}
+\subsubsection*{The model as a deterministic solver inside probability}
 
 The structural PK model maps parameters and design to predictions:
 \[
@@ -417,13 +424,13 @@ For extravascular dosing with first-order absorption, the formula is more compli
 
 This separation is useful.  The PK equation by itself is not a statistical model.  The statistical model begins when we say how \(\rpsi_i\) varies and how \(\rv{y}_i\) deviates from \(f\).  The forward map provides pharmacological structure; probability wraps uncertainty around it.
 
-\subsection{Identifiability and design}
+\subsubsection*{Identifiability and design}
 
 Sparse sampling can make parameters hard to distinguish.  In a one-compartment model, early samples may inform volume and absorption; later samples inform elimination; troughs may inform clearance but not absorption.  A model can be algebraically correct and still weakly identified by the design.
 
 This is where \(u_i\) matters.  Doses and sampling times are not administrative details; they determine the likelihood's shape.  Two designs with the same number of samples can produce very different information about \(\rpsi_i\).  A Bayesian posterior under a weak design will remain broad or shrink strongly toward the population distribution.
 
-\subsection{PK/PD coupling}
+\subsubsection*{PK/PD coupling}
 
 PK/PD modeling introduces another forward layer:
 \[
@@ -437,9 +444,9 @@ Immediate effect models, effect-compartment models, and indirect response models
 
 Warfarin is a useful example because concentration and response are not synchronized.  A direct immediate response model can fit poorly because the pharmacodynamic effect is delayed relative to concentration.  Introducing an effect compartment or turnover model changes the latent state, the forward map, and the interpretation of parameters.
 
-\section{Marginal likelihood and the hard integral}
+\subsection{Marginal likelihood and the hard integral}
 
-\subsection{The individual contribution}
+\subsubsection*{The individual contribution}
 
 The population likelihood is built from individual contributions:
 \[
@@ -466,7 +473,7 @@ This is why individual posteriors appear even in an ML workflow.  During computa
 \]
 The population parameters are estimated by ML, but the individual parameters are interpreted through conditional distributions.
 
-\subsection{Why approximation enters}
+\subsubsection*{Why approximation enters}
 
 If \(f\) is nonlinear and \(\psi_i\) is multidimensional, \(\ell_i(\theta)\) is hard.  Several approximation cultures arise:
 \begin{itemize}[leftmargin=2em]
@@ -478,7 +485,7 @@ If \(f\) is nonlinear and \(\psi_i\) is multidimensional, \(\ell_i(\theta)\) is 
 \end{itemize}
 These are not competing philosophies so much as different responses to the same integral.
 
-\subsection{The individual mode is not the integral}
+\subsubsection*{The individual mode is not the integral}
 
 The conditional mode
 \[
@@ -489,9 +496,9 @@ The conditional mode
 \]
 is useful, but it is not the same as marginalization.  Replacing an integral by a mode can be accurate in some local Gaussian settings and poor in skewed, weakly informed, or multimodal settings.  This is one reason FOCE, Laplace, SAEM, and MCMC can disagree in difficult models.
 
-\section{EM, SAEM, and missing individual parameters}
+\subsection{EM, SAEM, and missing individual parameters}
 
-\subsection{Complete data}
+\subsubsection*{Complete data}
 
 If \(\psi_i\) were observed, the complete-data log-likelihood would be
 \[
@@ -505,7 +512,7 @@ If \(\psi_i\) were observed, the complete-data log-likelihood would be
 \]
 This is easier than the observed likelihood because the integral disappears.  EM uses this easier object by averaging it under the current conditional distribution of missing data.
 
-\subsection{The EM idea}
+\subsubsection*{The EM idea}
 
 At iteration \(k\), EM constructs
 \[
@@ -518,19 +525,19 @@ At iteration \(k\), EM constructs
 \]
 Then it chooses a new \(\theta\) that improves or maximizes \(Q\).  The 6.437 view is that EM is a lower-bound or alternating-optimization method.  The PopPK view is that EM repeatedly imputes the latent individual parameters probabilistically and then refits the population model.
 
-\subsection{SAEM's pharmacometric value}
+\subsubsection*{SAEM's pharmacometric value}
 
 In nonlinear mixed-effects models, the expectation in \(Q\) may be hard.  SAEM replaces exact expectation with stochastic approximation.  It simulates plausible individual parameters from conditional distributions, updates sufficient statistics gradually, and then maximizes an approximate complete-data criterion.
 
 This gives a very useful conceptual summary:
-\[
-  \text{SAEM is ML for population parameters using Bayesian-looking draws for individuals.}
-\]
+\begin{quote}
+  SAEM is ML for population parameters using Bayesian-looking draws for individuals.
+\end{quote}
 The algorithm is not fully Bayesian unless \(\theta\) also receives a prior and is sampled or integrated.  But the conditional simulation step is naturally understood by anyone comfortable with posterior distributions.
 
-\section{NONMEM as a notation and approximation culture}
+\subsection{NONMEM as a notation and approximation culture}
 
-\subsection{THETA, ETA, EPSILON}
+\subsubsection*{THETA, ETA, EPSILON}
 
 NONMEM's notation can be translated:
 \[
@@ -555,7 +562,7 @@ is not just code.  It is a distributional statement:
 \]
 This translation makes NONMEM less mysterious.  It is a compact language for hierarchical probability models.
 
-\subsection{FO, FOCE, Laplace}
+\subsubsection*{FO, FOCE, Laplace}
 
 First-order methods approximate the nonlinear model around typical random effects.  FOCE improves this by expanding around individual conditional estimates.  Laplace uses curvature near the conditional mode to approximate the integral.  These methods are local.  They can be efficient and powerful, but the reader should know what is being approximated.
 
@@ -565,7 +572,7 @@ The target remains the marginal likelihood:
 \]
 The approximations differ in how they replace this hard integral by something tractable.  This makes the comparison with SAEM precise: SAEM uses simulation and stochastic approximation; FOCE/Laplace use local approximation.
 
-\subsection{EBEs and shrinkage}
+\subsubsection*{EBEs and shrinkage}
 
 An empirical Bayes estimate is often a conditional mode or related summary under \(\widehat\theta\).  It is useful for diagnostics and interpretation, but it is not a direct observation.  High shrinkage means individual data are not informative enough to pull estimates far from the population.  Using high-shrinkage EBEs for covariate discovery can be misleading because the apparent individual variability has been compressed by the model.
 
@@ -577,9 +584,9 @@ The Bayesian language prevents overinterpretation:
   \quad\text{not a measured biological truth.}
 \]
 
-\section{Model evaluation as calibrated imagination}
+\subsection{Model evaluation as calibrated imagination}
 
-\subsection{Posterior predictive thinking}
+\subsubsection*{Posterior predictive thinking}
 
 Model evaluation asks whether data generated from the fitted model resemble the observed data in scientifically relevant ways.  In Bayesian notation, simulate
 \[
@@ -595,7 +602,7 @@ Then compare observed and simulated summaries.
 
 This is calibrated imagination: the model imagines new datasets.  Diagnostics ask whether those imagined datasets look like the real one.
 
-\subsection{Visual predictive checks}
+\subsubsection*{Visual predictive checks}
 
 A VPC is not merely a plot.  It is a comparison between observed summaries and predictive summaries under the model.  The reader should ask:
 \begin{enumerate}[leftmargin=2em]
@@ -607,24 +614,24 @@ A VPC is not merely a plot.  It is a comparison between observed summaries and p
 \end{enumerate}
 The 6.008/6.437 language clarifies the object: a VPC checks a function of the predictive distribution.
 
-\subsection{Model selection as multiple evidence streams}
+\subsubsection*{Model selection as multiple evidence streams}
 
 No single criterion should dominate.  OFV and likelihood compare fit under a statistical criterion.  AIC and BIC penalize complexity differently.  Bootstrap and Fisher information describe parameter uncertainty.  VPC and PPC examine predictive behavior.  Residual diagnostics examine local misfit.  Clinical decision analysis asks whether the model is adequate for its intended use.
 
 The mature view is not ``choose the lowest number.''  It is:
-\[
-  \text{Choose the model whose probability law is adequate for the scientific and clinical task.}
-\]
+\begin{quote}
+  Choose the model whose probability law is adequate for the scientific and clinical task.
+\end{quote}
 
-\section{Warfarin re-read}
+\subsection{Warfarin re-read}
 
-\subsection{Why the example is instructive}
+\subsubsection*{Why the example is instructive}
 
 Warfarin is pedagogically rich because the PK and PD time scales separate.  Concentration rises and falls, but the anticoagulant response reflects biological turnover.  A direct-effect model can be too impatient: it expects response to follow concentration immediately.
 
 In inference terms, the data push against the conditional observation law.  The residuals or concentration-response plot show systematic structure.  The model does not merely have noisy observations; it has the wrong latent dynamics.
 
-\subsection{Effect compartment as latent state}
+\subsubsection*{Effect compartment as latent state}
 
 The effect-compartment model introduces a latent concentration \(C_e(t)\):
 \[
@@ -634,7 +641,7 @@ The response depends on \(C_e(t)\) rather than \(C(t)\).  In graphical terms, th
 
 The modeling move is instructive: when the observed relationship has hysteresis, add a state that can carry memory.  That is a pharmacological idea expressed as a probabilistic model.
 
-\subsection{Indirect response as mechanism}
+\subsubsection*{Indirect response as mechanism}
 
 An indirect response model goes further by modeling production and loss:
 \[
@@ -646,9 +653,9 @@ An indirect response model goes further by modeling production and loss:
 \]
 This says drug inhibits production, while response decays through turnover.  The parameters are more mechanistic than a pure delay parameter, but they may also be harder to identify.  The model is attractive only if the data and design support the extra structure.
 
-\section{Full Bayesian Population PK}
+\subsection{Full Bayesian Population PK}
 
-\subsection{What changes when \(\rtheta\) is random}
+\subsubsection*{What changes when \(\rtheta\) is random}
 
 Classical PopPK often estimates \(\theta\) by maximum likelihood and then conditions on \(\widehat\theta\).  Full Bayesian PopPK treats \(\rtheta\) as uncertain by putting a prior on the value \(\theta\):
 \[
@@ -661,13 +668,13 @@ Classical PopPK often estimates \(\theta\) by maximum likelihood and then condit
 \]
 Now population uncertainty propagates into individual estimates and predictions.  This can matter in small datasets, sparse subgroups, weakly identified models, and extrapolation settings.
 
-\subsection{Why full Bayes is not automatically superior}
+\subsubsection*{Why full Bayes is not automatically superior}
 
 Full Bayesian modeling asks for priors, computation, convergence diagnostics, posterior predictive checking, and sensitivity analysis.  Poor priors can dominate weak data.  Poor MCMC can give false confidence.  A complex Bayesian model can be less transparent than a simpler ML model if the workflow is not disciplined.
 
 The advantage is conceptual completeness.  All uncertainty can be represented in one posterior.  The cost is that every part of the representation must be defended.
 
-\subsection{A practical compromise}
+\subsubsection*{A practical compromise}
 
 Many pharmacometric workflows are hybrid:
 \[
@@ -679,9 +686,9 @@ Many pharmacometric workflows are hybrid:
 \]
 plus bootstrap, profile likelihood, or sampling-based diagnostics for population uncertainty.  This is not incoherent if the analyst understands what uncertainty is and is not being retained.  The danger is to present conditional individual uncertainty as if population uncertainty were also included.
 
-\section{A reading protocol for PopPK papers}
+\subsection{A reading protocol for PopPK papers}
 
-\subsection{Reconstruct the hierarchy}
+\subsubsection*{Reconstruct the hierarchy}
 
 For each paper, write the hierarchy explicitly:
 \[
@@ -691,13 +698,13 @@ For each paper, write the hierarchy explicitly:
 \]
 Then identify which factors are modeled and which are conditioned on.  This immediately reveals whether dose, sampling, covariates, dropout, BLQ, and response dynamics are part of the probability law or treated as fixed context.
 
-\subsection{Translate the software}
+\subsubsection*{Translate the software}
 
 If the paper uses NONMEM, translate THETA/ETA/EPSILON to \(\theta,\eta,\varepsilon\).  If it uses Monolix, translate structural model, statistical model, covariate model, and tasks into the same hierarchy.  If it uses Stan, identify priors and posterior computation.  If it reports only equations, infer what implementation must have done.
 
 The goal is not to prefer one tool.  The goal is to keep the probability object invariant across tools.
 
-\subsection{Ask the decision question}
+\subsubsection*{Ask the decision question}
 
 Finally ask what the model is for.  Description, explanation, simulation, dose selection, trial design, covariate screening, extrapolation, and regulatory communication are different tasks.  A model adequate for one may be inadequate for another.
 
