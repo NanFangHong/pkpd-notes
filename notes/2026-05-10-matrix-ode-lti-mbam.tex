@@ -1,0 +1,813 @@
+\documentclass[a4paper]{article}
+
+\def\npart {Mathematical Modeling Foundations}
+\def\nterm {Matrix, dynamics, geometry}
+\def\nyear {2026}
+\def\nlecturer {MIT 6.S087/18.03/18.031/18.335/18.337/6.441; MBAM/QSP}
+\def\ncourse {From Matrix Tricks to MBAM}
+\def\ncoursehead {Matrix to MBAM}
+\def\nauthor {NanFangHong}
+
+\input{header}
+
+\DeclareMathOperator{\rank}{rank}
+\DeclareMathOperator{\range}{range}
+\DeclareMathOperator{\nullsp}{null}
+\DeclareMathOperator{\tr}{tr}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\spanop}{span}
+\DeclareMathOperator{\argmin}{argmin}
+\DeclareMathOperator{\argmax}{argmax}
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\KL}{D}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Prob}{\mathbb{P}}
+\newcommand{\ddt}{\frac{\dd}{\dd t}}
+\newcommand{\pd}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\mat}[1]{\mathbf{#1}}
+\newcommand{\vect}[1]{\mathbf{#1}}
+\newcommand{\rv}[1]{\mathsf{#1}}
+\newcommand{\param}{\theta}
+\newcommand{\rtheta}{\boldsymbol{\theta}}
+\newcommand{\qoi}{\mathcal{Q}}
+\newcommand{\data}{\mathcal{D}}
+\newcommand{\model}{\mathcal{M}}
+\newcommand{\loss}{\mathcal{L}}
+\newcommand{\fim}{\mathcal{I}}
+\newcommand{\manifold}{\mathcal{M}}
+\newcommand{\eps}{\varepsilon}
+\newcommand{\inner}[2]{\langle #1,#2\rangle}
+\newcommand{\norm}[1]{\left\lVert #1\right\rVert}
+\newcommand{\transpose}{\mathsf{T}}
+\newcommand{\jac}{J}
+\newcommand{\eye}{I}
+
+\begin{document}
+\maketitle
+{\small
+  \noindent\textbf{Reading motive}\\
+  这篇笔记想把你给的 MIT 线性代数、ODE、LTI、数值计算、信息论/信息几何材料，和 Transtrum--Qiu 的 MBAM/QSP 文章接成一条连续的学习路线。The guiding claim is that MBAM is not an isolated trick: it is what happens when matrix sensitivity, dynamical systems, numerical conditioning, and information geometry finally meet.\hspace*{\fill}[spine]
+
+  \vspace{5pt}
+  \noindent\textbf{Audience}\\
+  读者可以没有完整上过 6.S087、18.03、18.031、18.335 或 6.441，但需要愿意慢慢把 ``matrix'' 理解成局部线性化，把 ``ODE'' 理解成 state map，把 ``Fisher information'' 理解成 model manifold 上的 metric。\hspace*{\fill}[from zero]
+
+  \vspace{5pt}
+  \noindent\textbf{Style}\\
+  This is a synthesis note rather than an excerpt.  It keeps the dec41/pdf2htmlEX layout, uses the same notation discipline as the Population PK note, and is meant to become a living mathematical backbone for later QSP and MBAM reading notes.\hspace*{\fill}[workflow]
+}
+
+\tableofcontents
+
+\section{Notation and source map}
+
+\subsection{Objects before formulas}
+
+The first rule is the same as in the Population PK note: write down the mathematical object before manipulating it.  In this note,
+\[
+  \vect{x}\in\R^n
+  \quad\text{is a state or vector,}\qquad
+  \param\in\R^p
+  \quad\text{is a parameter vector,}
+\]
+\[
+  \mat{A}:\R^n\to\R^m
+  \quad\text{is a linear map,}\qquad
+  \vect{y}(\param)\in\R^m
+  \quad\text{is a model prediction.}
+\]
+Random variables use sans-serif, for example \(\rv{x}\), while observed values use ordinary type, \(x\).  Parameters in classical fitting are ordinary unknowns, \(\param\).  If a fully Bayesian model treats them as random, I write \(\rtheta\).
+
+\begin{notation}
+  Vectors and matrices are bold.  Linear maps are not merely arrays of numbers; arrays are coordinate representations of maps.  This distinction matters when we later ask which parameter combinations are identifiable independently of coordinates.
+\end{notation}
+
+\subsection{The source packet}
+
+The materials you supplied form a natural ladder:
+
+\begin{center}
+\begin{tabularx}{0.96\textwidth}{@{}lXr@{}}
+\toprule
+Block & Source role & Pages \\
+\midrule
+6.S087 Matrix Tricks & probability review, covariance, matrix identities, matrix calculus, Gaussian algebra & 49 \\
+Matrix Cookbook & derivative identities and matrix reference grammar & 72 \\
+18.03 Differential Equations & modeling by rates, linear/nonlinear ODEs, qualitative behavior & 239 \\
+18.031 LTI Systems & exponentials, poles, transfer functions, convolution, step/delta response & 97 \\
+18.335 Numerical Computing & finite precision, conditioning, direct/iterative methods, eigenvalue algorithms & 729 \\
+18.337 Julia Computing & random matrices, fast multipole ideas, parallel prefix, computation as structure & 160+ \\
+6.441 Information Theory & divergence, mutual information, local Fisher geometry, information projection & 294 \\
+MBAM and CRISP papers & model manifolds, sloppiness, geodesic boundaries, QSP fit-for-purpose reduction & 88 \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+The exact page counts are less important than the conceptual order.  The early notes teach how to compute.  The later notes teach why computation becomes geometry.
+
+\section{The main arc}
+
+\subsection{One sentence}
+
+The whole path can be compressed into one sentence:
+\begin{quote}
+  A complex mechanistic model is a map from parameters to predictions; linear algebra studies the local derivative of that map, ODE/LTI theory gives its dynamical form, numerical analysis tells us when the derivative is trustworthy, information geometry turns the derivative into a metric, and MBAM follows that metric to simplify the model without losing the predictions we care about.
+\end{quote}
+
+This sentence is dense, so the note expands it slowly.
+
+\subsection{Why MBAM sits at the end}
+
+MBAM feels advanced because it presupposes many languages at once:
+\[
+  \text{model}
+  \quad\longrightarrow\quad
+  \text{predictions}
+  \quad\longrightarrow\quad
+  \text{sensitivity matrix}
+  \quad\longrightarrow\quad
+  \text{metric}
+  \quad\longrightarrow\quad
+  \text{geodesic}
+  \quad\longrightarrow\quad
+  \text{limiting approximation}.
+\]
+Each arrow is a course by itself.  Matrix tricks explain the sensitivity matrix.  ODE and LTI explain what a mechanistic model is.  Numerical linear algebra explains why small singular values should make us cautious.  Information theory explains why Fisher information is not arbitrary.  MBAM then turns all of this into a model-reduction workflow.
+
+\section{Vectors and linear maps}
+
+\subsection{Coordinates are not the object}
+
+A vector \(\vect{x}\in\R^n\) can be written as a column of numbers, but the deeper object is displacement, state, coefficient list, or perturbation.  A matrix \(\mat{A}\in\R^{m\times n}\) represents a linear map:
+\[
+  \vect{x}\mapsto \mat{A}\vect{x}.
+\]
+The key property is superposition:
+\[
+  \mat{A}(a\vect{x}+b\vect{z})
+  =
+  a\mat{A}\vect{x}+b\mat{A}\vect{z}.
+\]
+This is the first reason linear algebra keeps returning in nonlinear modeling: every smooth nonlinear model becomes linear after zooming in far enough.
+
+\subsection{Four spaces}
+
+For a matrix \(\mat{A}\), the four fundamental spaces are:
+\[
+  \range(\mat{A}),\quad
+  \nullsp(\mat{A}),\quad
+  \range(\mat{A}^{\transpose}),\quad
+  \nullsp(\mat{A}^{\transpose}).
+\]
+In least squares, the residual \(\vect{r}=\vect{b}-\mat{A}\widehat{\vect{x}}\) is orthogonal to the column space:
+\[
+  \mat{A}^{\transpose}\vect{r}=0.
+\]
+This innocent equation is already a prototype for parameter estimation.  Later, \(\mat{A}\) becomes the Jacobian \(\jac=\partial \vect{y}/\partial\param\), and the normal equation becomes
+\[
+  \jac^{\transpose}\vect{r}=0.
+\]
+
+\begin{remark}
+  Parameter fitting is geometry before it is statistics: it asks for the point on a prediction surface closest to the data.
+\end{remark}
+
+\section{Norms, projections, and SVD}
+
+\subsection{Norms encode what matters}
+
+A norm measures size:
+\[
+  \norm{\vect{x}}_2=\sqrt{\vect{x}^{\transpose}\vect{x}},
+  \qquad
+  \norm{\vect{x}}_{\mat{W}}^2=\vect{x}^{\transpose}\mat{W}\vect{x}.
+\]
+The weighted norm is crucial.  If two experimental measurements have different uncertainty, the model should not treat their errors equally.  A residual vector \(\vect{r}\) with covariance \(\Sigma\) naturally uses
+\[
+  \norm{\vect{r}}_{\Sigma^{-1}}^2
+  =
+  \vect{r}^{\transpose}\Sigma^{-1}\vect{r}.
+\]
+This is the least-squares version of likelihood geometry.
+
+\subsection{The singular value decomposition}
+
+The SVD writes
+\[
+  \mat{A}
+  =
+  \mat{U}\Sigma\mat{V}^{\transpose}.
+\]
+The right singular vectors \(\vect{v}_j\) are input directions.  The left singular vectors \(\vect{u}_j\) are output directions.  The singular values \(\sigma_j\) say how much \(\mat{A}\) stretches:
+\[
+  \mat{A}\vect{v}_j=\sigma_j\vect{u}_j.
+\]
+When \(\sigma_j\) is tiny, a large input motion produces almost no output motion.  In parameter estimation, that means a parameter combination is weakly visible to the data.
+
+\subsection{Projection as compression}
+
+If \(\mat{U}_k\) contains the first \(k\) left singular vectors, then
+\[
+  \mat{P}_k=\mat{U}_k\mat{U}_k^{\transpose}
+\]
+projects onto a low-dimensional output space.  This is the algebraic ancestor of model reduction: if most output variation lies in a few directions, we should ask whether the full model is carrying more complexity than the prediction task requires.
+
+\section{Matrix calculus as local modeling}
+
+\subsection{Jacobians}
+
+Let a model make predictions
+\[
+  \vect{y}(\param)
+  =
+  (y_1(\param),\ldots,y_m(\param))^{\transpose}.
+\]
+The Jacobian is
+\[
+  \jac(\param)
+  =
+  \pd{\vect{y}}{\param}
+  =
+  \begin{bmatrix}
+    \pd{y_1}{\theta_1} & \cdots & \pd{y_1}{\theta_p}\\
+    \vdots & & \vdots\\
+    \pd{y_m}{\theta_1} & \cdots & \pd{y_m}{\theta_p}
+  \end{bmatrix}.
+\]
+Locally,
+\[
+  \vect{y}(\param+\delta\param)
+  \approx
+  \vect{y}(\param)+\jac(\param)\delta\param.
+\]
+This is the central bridge from nonlinear science to linear algebra.
+
+\subsection{Gradient, Hessian, Gauss--Newton}
+
+For least squares,
+\[
+  \loss(\param)
+  =
+  \frac{1}{2}\norm{\vect{r}(\param)}^2,
+  \qquad
+  \vect{r}(\param)=\vect{y}(\param)-\vect{d}.
+\]
+The gradient is
+\[
+  \nabla\loss(\param)
+  =
+  \jac(\param)^{\transpose}\vect{r}(\param).
+\]
+The Hessian has two kinds of terms:
+\[
+  \nabla^2\loss
+  =
+  \jac^{\transpose}\jac
+  +
+  \sum_{m=1}^M r_m\nabla^2 y_m.
+\]
+Near a good fit, residuals are small, so the Gauss--Newton approximation uses
+\[
+  \nabla^2\loss
+  \approx
+  \jac^{\transpose}\jac.
+\]
+This approximation is also the deterministic least-squares form of the Fisher information matrix.
+
+\section{ODEs as state maps}
+
+\subsection{Modeling by rates}
+
+An ODE writes instantaneous change as a function of current conditions:
+\[
+  \ddt \vect{x}(t)
+  =
+  \vect{f}(\vect{x}(t),u(t),\param),
+  \qquad
+  \vect{x}(0)=\vect{x}_0(\param).
+\]
+In pharmacology and systems biology, \(\vect{x}\) may contain concentrations, receptor occupancies, signaling states, or disease states.  The model prediction is rarely the full state.  Usually,
+\[
+  \vect{y}(\param)
+  =
+  \mat{H}\vect{x}(t_{1:M};\param)
+\]
+or some nonlinear observation map of sampled states.
+
+\subsection{The flow map}
+
+The ODE defines a flow:
+\[
+  \Phi_t(\vect{x}_0,\param)=\vect{x}(t;\vect{x}_0,\param).
+\]
+Then a dynamic model is still a map from parameters to predictions:
+\[
+  \param
+  \longmapsto
+  \vect{y}(\param).
+\]
+The fact that this map is produced by solving differential equations changes the computation, but not the geometry.  We can still ask for \(\jac=\partial\vect{y}/\partial\param\), singular values, residuals, and parameter combinations.
+
+\subsection{Sensitivity equations}
+
+For each parameter \(\theta_k\), define a sensitivity vector
+\[
+  \vect{s}_k(t)=\pd{\vect{x}(t)}{\theta_k}.
+\]
+Differentiating the ODE gives
+\[
+  \ddt \vect{s}_k
+  =
+  \pd{\vect{f}}{\vect{x}}\vect{s}_k
+  +
+  \pd{\vect{f}}{\theta_k}.
+\]
+So the Jacobian of a dynamical model is itself generated by an ODE.  This is why ODE, matrix calculus, and numerical analysis cannot be separated in MBAM.
+
+\section{LTI systems}
+
+\subsection{Exponentials and eigenmodes}
+
+An LTI state-space model has the form
+\[
+  \dot{\vect{x}}=\mat{A}\vect{x}+\mat{B}\vect{u},
+  \qquad
+  \vect{y}=\mat{C}\vect{x}+\mat{D}\vect{u}.
+\]
+With no input,
+\[
+  \vect{x}(t)=e^{\mat{A}t}\vect{x}(0).
+\]
+If \(\mat{A}\vect{v}=\lambda\vect{v}\), then the mode \(\vect{v}\) evolves like \(e^{\lambda t}\).  Poles and eigenvalues are therefore time-scale statements:
+\[
+  \operatorname{Re}\lambda<0
+  \quad\text{means decay,}\qquad
+  |\operatorname{Re}\lambda|^{-1}
+  \quad\text{is a characteristic time scale.}
+\]
+
+\subsection{Convolution and impulse response}
+
+For zero initial condition, the output of an LTI system is a convolution:
+\[
+  y(t)
+  =
+  (h*u)(t)
+  =
+  \int_0^t h(t-\tau)u(\tau)\,\dd\tau.
+\]
+The impulse response \(h(t)\) is the system's fingerprint in time.  In the Laplace domain,
+\[
+  Y(s)=H(s)U(s).
+\]
+The transfer function \(H(s)\) turns differential equations into algebraic structure.  This is why 18.031 is so important for MBAM: simplification often means discovering that some poles, zeros, or pathways have little effect on the predictions of interest.
+
+\subsection{A pole is a behavioral scale}
+
+Suppose
+\[
+  H(s)=\frac{b}{(s+\alpha)(s+\beta)}.
+\]
+If \(\beta\gg\alpha\), the mode \(e^{-\beta t}\) decays very fast.  For observations taken after that fast transient,
+\[
+  H(s)
+  \approx
+  \frac{b/\beta}{s+\alpha}.
+\]
+This is already a boundary approximation: one time scale has gone to infinity, leaving an effective parameter \(b/\beta\).
+
+\section{Numerical linear algebra}
+
+\subsection{Conditioning}
+
+The condition number of a nonsingular matrix is
+\[
+  \kappa_2(\mat{A})
+  =
+  \norm{\mat{A}}_2\norm{\mat{A}^{-1}}_2
+  =
+  \frac{\sigma_{\max}}{\sigma_{\min}}.
+\]
+If \(\kappa\) is large, small data perturbations can create large solution perturbations.  In parameter estimation, a large condition number of \(\jac^{\transpose}\jac\) means the model has directions that the data barely sees.
+
+\begin{warning}
+  Ill-conditioning is not only a numerical nuisance.  In mechanistic modeling it is often a scientific signal: the model's predictions do not depend strongly on some parameter combinations.
+\end{warning}
+
+\subsection{Residual versus error}
+
+For a linear system \(\mat{A}\vect{x}=\vect{b}\), the residual is
+\[
+  \vect{r}=\vect{b}-\mat{A}\widehat{\vect{x}}.
+\]
+The error is
+\[
+  \vect{e}=\vect{x}-\widehat{\vect{x}}.
+\]
+A small residual does not guarantee a small error when the problem is ill-conditioned.  This distinction reappears in nonlinear model fitting: a model may fit observed data well while leaving many parameter directions unresolved.
+
+\subsection{QR, SVD, and least squares}
+
+QR solves least squares stably by orthogonalizing columns:
+\[
+  \mat{A}=\mat{Q}\mat{R}.
+\]
+SVD is more diagnostic:
+\[
+  \widehat{\vect{x}}
+  =
+  \sum_{\sigma_j>0}
+  \frac{\vect{u}_j^{\transpose}\vect{b}}{\sigma_j}\vect{v}_j.
+\]
+Tiny \(\sigma_j\) amplify noise.  Truncated SVD removes directions that cannot be supported by the data.  This is a linear version of fit-for-purpose reduction.
+
+\section{Iterative methods and computation}
+
+\subsection{Krylov thinking}
+
+Large systems are often solved without forming all matrices explicitly.  Krylov methods build subspaces
+\[
+  \mathcal{K}_k(\mat{A},\vect{r}_0)
+  =
+  \spanop\{\vect{r}_0,\mat{A}\vect{r}_0,\ldots,\mat{A}^{k-1}\vect{r}_0\}.
+\]
+Conjugate gradient solves symmetric positive definite systems by choosing search directions that are conjugate under the \(\mat{A}\)-inner product.
+
+The moral for modeling is simple: computation often exploits the fact that useful information lives in a much smaller subspace than the formal dimension suggests.
+
+\subsection{Preconditioning}
+
+A preconditioner \(\mat{M}\) changes the geometry of the linear system:
+\[
+  \mat{M}^{-1}\mat{A}\vect{x}=\mat{M}^{-1}\vect{b}.
+\]
+Good preconditioning clusters eigenvalues and reduces effective anisotropy.  In parameter inference, reparameterization and nondimensionalization play an analogous role.  Bad coordinates can make a model look harder than it is; good coordinates expose the meaningful combinations.
+
+\subsection{Parallel prefix as a small metaphor}
+
+The parallel prefix operation computes cumulative structure using associativity.  The reason it matters here is not the particular algorithm, but the mental habit:
+\[
+  \text{global computation}
+  \quad\text{can be reorganized through algebraic structure.}
+\]
+QSP models are often large not because every piece is equally important, but because the raw representation has not yet exposed the correct structure.
+
+\section{Information and geometry}
+
+\subsection{Divergence}
+
+Information theory begins with comparing probability laws.  The Kullback--Leibler divergence is
+\[
+  \KL(P\|Q)
+  =
+  \E_P\left[\log\frac{p(\rv{x})}{q(\rv{x})}\right].
+\]
+It is not symmetric and not a distance, but it measures distinguishability.  In modeling, two parameter values \(\param\) and \(\param+\delta\param\) are close if the probability laws they induce are hard to distinguish.
+
+\subsection{Local behavior and Fisher information}
+
+For a parametric family \(p(x\mid\param)\), the local expansion is
+\[
+  \KL\!\left(p(\cdot\mid\param)\,\middle\|\,p(\cdot\mid\param+\delta\param)\right)
+  =
+  \frac{1}{2}
+  \delta\param^{\transpose}
+  \fim(\param)
+  \delta\param
+  +
+  o(\norm{\delta\param}^2),
+\]
+where
+\[
+  \fim_{ij}(\param)
+  =
+  \E_\param\left[
+    \pd{\log p(\rv{x}\mid\param)}{\theta_i}
+    \pd{\log p(\rv{x}\mid\param)}{\theta_j}
+  \right].
+\]
+Thus Fisher information is a metric tensor: it says how parameter displacements translate into distinguishable changes in predictions.
+
+\subsection{Least squares as Fisher geometry}
+
+If observations are Gaussian with independent standard deviations \(\sigma_m\),
+\[
+  d_m=y_m(\param)+\sigma_m\eps_m,
+  \qquad
+  \eps_m\sim\mathcal{N}(0,1),
+\]
+then
+\[
+  \fim(\param)=\jac(\param)^{\transpose}\jac(\param),
+  \qquad
+  J_{mi}=\frac{1}{\sigma_m}\pd{y_m}{\theta_i}.
+\]
+This is the exact bridge from numerical least squares to information geometry.
+
+\section{Parameter estimation and sloppiness}
+
+\subsection{The residual map}
+
+Define the scaled residual map
+\[
+  \vect{r}(\param)
+  =
+  \begin{bmatrix}
+    (y_1(\param)-d_1)/\sigma_1\\
+    \vdots\\
+    (y_M(\param)-d_M)/\sigma_M
+  \end{bmatrix}.
+\]
+Fitting minimizes
+\[
+  \frac{1}{2}\norm{\vect{r}(\param)}^2.
+\]
+The Jacobian of \(\vect{r}\) determines the local geometry of the fitting problem.  Its singular values tell us which parameter combinations are visible.
+
+\subsection{Sloppy spectra}
+
+A sloppy model has Fisher eigenvalues spread across many orders of magnitude:
+\[
+  \lambda_1\gg \lambda_2\gg\cdots\gg\lambda_p.
+\]
+The eigenvectors with large eigenvalues are stiff directions: predictions change quickly.  Eigenvectors with tiny eigenvalues are sloppy directions: parameters can move a lot while predictions barely change.
+
+\begin{remark}
+  Sloppiness does not mean the model is useless.  Often it means the model makes robust predictions even though many microscopic parameters remain uncertain.
+\end{remark}
+
+\subsection{Identifiable combinations}
+
+An identifiable parameter may not be a single named rate constant.  It may be a combination:
+\[
+  \phi
+  =
+  \frac{k_{\mathrm{cat}}E_0}{K_M},
+  \qquad
+  \tau
+  =
+  \frac{1}{k_{\mathrm{slow}}},
+  \qquad
+  \rho
+  =
+  \frac{k_1}{k_2}.
+\]
+This is why matrix derivatives and model structure must be read together.  Linear algebra finds a direction; scientific interpretation turns it into a mechanism.
+
+\section{The model manifold}
+
+\subsection{Prediction space}
+
+Fix a set of quantities of interest:
+\[
+  \qoi=\{y_1,\ldots,y_M\}.
+\]
+The model maps parameter values into prediction space:
+\[
+  \param\in\R^p
+  \longmapsto
+  \vect{y}(\param)\in\R^M.
+\]
+The image of this map is the model manifold:
+\[
+  \manifold
+  =
+  \{\vect{y}(\param):\param\in\Theta\}.
+\]
+The model manifold is not the space of mechanisms.  It is the space of behaviors the mechanism can produce under the chosen query.
+
+\subsection{Hyper-ribbon intuition}
+
+Many mechanistic models produce model manifolds shaped like hyper-ribbons: long in a few directions, thin in many others.  The long directions correspond to behavior that can vary substantially.  The thin directions correspond to parameter changes that create tiny changes in the quantities of interest.
+
+\begin{center}
+\begin{tikzpicture}[scale=0.92]
+  \draw[->] (-0.3,0) -- (7,0) node[right] {prediction 1};
+  \draw[->] (0,-0.2) -- (0,3.2) node[above] {prediction 2};
+  \draw[thick,blue!70] plot[smooth,tension=0.8] coordinates {(0.5,0.5) (1.5,1.5) (3.1,1.95) (5.0,2.05) (6.2,2.55)};
+  \draw[blue!35,line width=7pt,opacity=0.35] plot[smooth,tension=0.8] coordinates {(0.5,0.5) (1.5,1.5) (3.1,1.95) (5.0,2.05) (6.2,2.55)};
+  \node[align=left] at (4.6,0.75) {thin directions:\\nearly irrelevant};
+  \draw[->,gray] (4.4,0.95) -- (4.0,1.9);
+  \node[align=left] at (2.1,2.65) {long direction:\\dominant behavior};
+\end{tikzpicture}
+\end{center}
+
+\subsection{Boundaries as approximations}
+
+If a manifold is thin, its boundary may be a good lower-dimensional approximation.  Algebraically, boundaries often correspond to limits:
+\[
+  k\to 0,\qquad
+  k\to\infty,\qquad
+  \frac{k_1}{k_2}\to K,\qquad
+  \tau_{\mathrm{fast}}\to 0.
+\]
+Scientifically, these limits are familiar: irreversible reactions, equilibrium approximations, quasi-steady state approximations, continuum limits, thermodynamic limits, and fast-mode elimination.
+
+\section{MBAM}
+
+\subsection{The algorithm}
+
+The Manifold Boundary Approximation Method can be summarized as:
+\begin{enumerate}[leftmargin=2em]
+  \item Choose the quantities of interest \(\qoi\).
+  \item Compute the Fisher information \(\fim(\param)\).
+  \item Find the least informative eigenvector.
+  \item Follow a geodesic in that direction until the model manifold reaches a boundary.
+  \item Identify the limiting approximation in the original equations.
+  \item Replace the full model by the boundary model and refit.
+  \item Repeat until the model is simple enough for the scientific question.
+\end{enumerate}
+
+The important point is that MBAM removes parameter combinations, not merely named parameters.
+
+\subsection{Geodesic equation}
+
+On a manifold with metric \(g_{ij}\), a geodesic satisfies
+\[
+  \ddot{\theta}^i+\Gamma^i_{jk}\dot{\theta}^j\dot{\theta}^k=0.
+\]
+Here \(g_{ij}\) is the Fisher metric.  The geodesic starts in the least sensitive direction.  As it approaches a boundary, the limiting form often becomes interpretable: one rate goes to zero, two rates go to infinity with fixed ratio, a fast variable equilibrates, or two modes merge.
+
+\begin{remark}
+  The geodesic is a numerical flashlight.  It does not itself explain the biology; it shows where to look in the equations for the simplifying limit.
+\end{remark}
+
+\subsection{Why this is not black-box reduction}
+
+Many reduction methods produce a smaller system that predicts well but is hard to interpret.  MBAM tries to preserve mechanistic meaning by taking limits inside the original model.  The reduced model remains expressed in terms of original mechanisms or combinations of them.
+
+That is why MBAM is attractive for QSP: a regulatory or pharmacological model must not only predict.  It must explain what biological simplification has been made.
+
+\section{Worked examples}
+
+\subsection{Sum of exponentials}
+
+Consider
+\[
+  y(t;\param)
+  =
+  \sum_{j=1}^N A_j e^{-\lambda_j t}.
+\]
+If one rate is much faster than all observed sampling times,
+\[
+  \lambda_j\to\infty,
+  \qquad
+  A_j e^{-\lambda_j t}\approx 0
+  \quad(t>0).
+\]
+If one rate is much slower than the experiment,
+\[
+  \lambda_j\to 0,
+  \qquad
+  A_j e^{-\lambda_j t}\approx A_j.
+\]
+If two rates merge,
+\[
+  A_1e^{-\lambda t}+A_2e^{-\lambda t}
+  =
+  (A_1+A_2)e^{-\lambda t}.
+\]
+These are manifold boundaries with simple physical meaning: unobserved fast decay, constant slow background, and merged modes.
+
+\subsection{Michaelis--Menten}
+
+The enzyme scheme
+\[
+  E+S
+  \xrightleftharpoons[k_r]{k_f}
+  C
+  \xrightarrow{k_c}
+  E+P
+\]
+has a boundary where \(k_f,k_r\to\infty\) with \(K_d=k_r/k_f\) fixed.  The fast binding step equilibrates:
+\[
+  C\approx \frac{E S}{K_d}.
+\]
+Using conservation of enzyme, the product rate becomes
+\[
+  \ddt P
+  =
+  \frac{k_c E_0 S}{K_d+S}.
+\]
+MBAM recovers this familiar approximation geometrically: the data cannot distinguish the two fast rates separately, only their effective combination.
+
+\subsection{An LTI reduction}
+
+Suppose an LTI model contains a fast pole \(-\beta\) and a slow pole \(-\alpha\), with \(\beta\gg\alpha\).  If the query ignores very early transients, then the fast mode is a thin direction in prediction space.  A boundary approximation removes it:
+\[
+  e^{-\beta t}\to 0
+  \quad\text{on the query window.}
+\]
+The reduced model is not universally equivalent to the full model.  It is equivalent relative to the quantities of interest.  This phrase, relative to the quantities of interest, is the heartbeat of MBAM.
+
+\section{QSP and CRISP}
+
+\subsection{QSP as query-driven modeling}
+
+QSP models become large because they collect plausible mechanisms.  But a decision rarely needs every mechanism at full resolution.  A toxicology query, a dose-selection query, and a target-discovery query may require different reduced models.
+
+Let training data be \(\data\) and future quantities of interest be \(\qoi\).  The modeling problem is not merely
+\[
+  \text{fit }\data.
+\]
+It is
+\[
+  \text{extract from }\data
+  \text{ the information needed for }\qoi.
+\]
+This is the conceptual bridge from information geometry to QSP workflow.
+
+\subsection{CRISP language}
+
+The CRISP idea can be read as:
+\[
+  \text{comprehensive model}
+  \longrightarrow
+  \text{calibrated model}
+  \longrightarrow
+  \text{query-specific active manifold}
+  \longrightarrow
+  \text{fit-for-purpose reduced model}.
+\]
+The reduction is contextual.  It is not saying the removed mechanism is false.  It is saying the mechanism is irrelevant to the specified prediction at the specified precision.
+
+\subsection{Mechanistic control knobs}
+
+The best reduced model does more than save computation.  It identifies control knobs:
+\[
+  \phi_1(\param),\ldots,\phi_k(\param)
+\]
+such that the quantities of interest depend mainly on \(\phi\), not on all microscopic parameters.  In systems biology, these combinations may correspond to time-scale ratios, saturation constants, feedback strengths, or pathway capacities.
+
+\input{matrix-ode-lti-mbam-worked}
+
+\section{A self-study route}
+
+\subsection{The order I would read}
+
+I would not start with MBAM directly.  I would read in this order:
+\begin{enumerate}[leftmargin=2em]
+  \item 6.S087 probability and matrix tricks: random variables, covariance, gradients, Jacobians.
+  \item Matrix Cookbook: identities as a reference, not as a book to memorize.
+  \item 18.03: ODE modeling, units, linearization, qualitative behavior.
+  \item 18.031: LTI systems, convolution, transfer functions, poles.
+  \item 18.335: conditioning, residual/error distinction, QR/SVD, iterative methods.
+  \item 6.441: divergence, local Fisher geometry, information projection.
+  \item MBAM papers: model manifold, geodesics, boundary limits.
+  \item QSP CRISP paper: how these ideas become a workflow for pharmacological models.
+\end{enumerate}
+
+\subsection{A reading checklist for any model}
+
+When reading a QSP or systems biology model, ask:
+\begin{enumerate}[leftmargin=2em]
+  \item What are the states \(\vect{x}\)?
+  \item What are the parameters \(\param\)?
+  \item What are the quantities of interest \(\qoi\)?
+  \item What is the prediction map \(\param\mapsto\vect{y}(\param)\)?
+  \item How is \(\jac=\partial\vect{y}/\partial\param\) computed?
+  \item What are the large and small singular directions?
+  \item Which small directions correspond to interpretable limits?
+  \item Does the reduced model preserve the prediction task, or only the training data?
+  \item What mechanistic combinations survive as control knobs?
+\end{enumerate}
+
+\section{Connection back to pharmacology}
+
+\subsection{Why this belongs next to PK/PD}
+
+Population PK taught us that individual parameters are latent and inferred through a hierarchical model.  MBAM teaches a complementary lesson: mechanistic parameters may be too detailed for the prediction task, and the meaningful objects may be combinations living on a lower-dimensional manifold.
+
+In PK/PD terms:
+\[
+  \text{rich mechanism}
+  \longrightarrow
+  \text{prediction map}
+  \longrightarrow
+  \text{active combinations}
+  \longrightarrow
+  \text{decision-ready reduced model}.
+\]
+This is exactly what we want when moving from detailed QSP to dosing, target discovery, biomarker selection, or trial design.
+
+\subsection{The one-sentence memory hook}
+
+\begin{quote}
+  MBAM is numerical linear algebra plus information geometry applied to mechanistic dynamical models: it follows the least identifiable direction until the equations reveal a scientifically meaningful limiting approximation.
+\end{quote}
+
+\subsection{Working conclusion}
+
+Linear algebra teaches how maps stretch directions.  ODE teaches how biological mechanisms generate maps over time.  LTI theory teaches modes, poles, convolution, and time scales.  Numerical analysis teaches which computations and inverse problems are trustworthy.  Information geometry teaches that distinguishability is a metric.  MBAM combines these lessons into a practical question:
+\begin{quote}
+  Which parts of this mechanistic model are truly needed for this prediction?
+\end{quote}
+
+That question is small enough to compute and large enough to guide QSP.
+
+\end{document}

@@ -1,5 +1,29 @@
 [
   {
+    "slug": "matrix-ode-lti-mbam",
+    "date": "2026-05-10",
+    "title": "From Matrix Tricks to MBAM",
+    "category": "Mathematical Modeling Foundations",
+    "year": "2026",
+    "paper": "MIT 6.S087, 18.03, 18.031, 18.335, 18.337, 6.441; Transtrum and Qiu MBAM/CRISP notes",
+    "citationKey": "matrixOdeLtiMbam2026",
+    "tex": "2026-05-10-matrix-ode-lti-mbam.tex",
+    "pdf": "2026-05-10-matrix-ode-lti-mbam.pdf",
+    "tags": ["linear algebra", "ODE", "LTI systems", "numerical linear algebra", "information geometry", "MBAM", "QSP"],
+    "summary": "一篇把矩阵技巧、ODE/LTI、数值线性代数、信息几何和 MBAM/QSP reduction 接成一条自学路线的长笔记。",
+    "questions": [
+      "为什么 MBAM 可以看成矩阵敏感性、ODE 动力系统、数值条件数和 Fisher 信息几何的交汇点？",
+      "模型流形、Fisher information、sloppiness 和 geodesic boundary 分别对应什么数学对象？",
+      "如何从复杂 QSP 模型中读出对特定预测真正重要的 mechanistic control knobs？"
+    ],
+    "model": "\\theta\\mapsto y(\\theta),\\quad \\mathcal{I}(\\theta)=J(\\theta)^T J(\\theta)",
+    "takeaways": [
+      "矩阵的奇异值告诉我们局部哪些参数方向会改变预测，哪些方向几乎不可见。",
+      "ODE/LTI 模型的模式、极点和时间尺度给 MBAM 的边界极限提供物理解释。",
+      "MBAM 的核心不是随便删参数，而是沿 Fisher metric 的弱方向找到有机制意义的 limiting approximation。"
+    ]
+  },
+  {
     "slug": "population-pk-bayesian-inference",
     "date": "2026-05-09",
     "title": "Population PK as Bayesian Inference",

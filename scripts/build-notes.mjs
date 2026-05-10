@@ -476,6 +476,10 @@ function readPageSize(html) {
   return { width: width || 455, height: height || 640 };
 }
 
+function bodyInnerHtml(html) {
+  return html.match(/<body[^>]*>([\s\S]*?)<\/body>/i)?.[1] || html;
+}
+
 function convertPages(note, pdf) {
   const out = path.join(buildDir, "native-html", note.slug, "pages");
   rmSync(path.dirname(out), { recursive: true, force: true });
@@ -575,7 +579,7 @@ function writeNoteSite(note, pages, sections, pdf) {
       section.missing = true;
       continue;
     }
-    const html = sectionHtml(note, routed, index, readFileSync(page.html, "utf8"), page);
+    const html = sectionHtml(note, routed, index, bodyInnerHtml(readFileSync(page.html, "utf8")), page);
     writeFileSync(path.join(dir, section.html), html);
     writeFileSync(path.join(dir, section.id), html);
   }
