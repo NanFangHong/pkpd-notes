@@ -49,7 +49,7 @@ This is not a literature review.  A literature review would place many papers si
   \text{6.008} & \text{asks} & \text{What probability model are we even talking about?}\\
   \text{6.437} & \text{asks} & \text{What inference, decision, or approximation follows from that model?}\\
   \text{Lavielle} & \text{asks} & \text{How is this hierarchy represented, estimated, diagnosed, and used?}\\
-  \text{NONMEM} & \text{asks} & \text{How does this object appear in a historical pharmacometric syntax?}
+  \textit{NONMEM} & \text{asks} & \text{How does this object appear in a historical pharmacometric syntax?}
   \end{array}
 \]
 When the four rows disagree, the note slows down.  For example, an EBE in NONMEM syntax may look like a subject's true clearance.  But from the 6.437 view it is a posterior summary under a loss function or approximation.  From Lavielle's view it is the estimation of an individual parameter conditional on an estimated population model.  From 6.008's view it is a random variable transformed after conditioning.  These are not pedantic distinctions.  They decide whether we can interpret a covariate effect, trust a dose adjustment, or compare two models.
@@ -82,9 +82,9 @@ In 6.008, an event is a subset of the sample space.  In PopPK, this sounds abstr
   \qquad
   A_2=\{\tilde C_{\max}>C_{\mathrm{tox}}\},
   \qquad
-  A_3=\{\mathrm{AUC}_{0,\tau}\in[L,U]\}.
+  A_3=\{\textit{AUC}_{0,\tau}\in[L,U]\}.
 \]
-These are not decorative.  They are what dosing decisions are often about.  A model that estimates \(CL_i\) well but cannot answer \(P(A_2\mid y_i)\) may be less useful than a model with slightly rougher parameter estimates but better predictive calibration in the clinically relevant tail.
+These are not decorative.  They are what dosing decisions are often about.  A model that estimates \(\textit{CL}_i\) well but cannot answer \(P(A_2\mid y_i)\) may be less useful than a model with slightly rougher parameter estimates but better predictive calibration in the clinically relevant tail.
 
 This is why the 6.008 language should come before software.  If the event has not been named, the analysis cannot know what probability matters.  The event may be exposure-based, response-based, toxicity-based, adherence-based, or survival-based.  Each event changes the target of inference.
 
@@ -92,13 +92,13 @@ This is why the 6.008 language should come before software.  If the event has no
 
 A probability law is a commitment about variation.  In a simple one-compartment model, one might write
 \[
-  y_{ij}=f(t_{ij};CL_i,V_i,u_i)+\varepsilon_{ij},
+  y_{ij}=f(t_{ij};\textit{CL}_i,V_i,u_i)+\varepsilon_{ij},
   \qquad
   \varepsilon_{ij}\sim\Normal(0,\sigma^2).
 \]
 This commits to additive Gaussian residual error on the concentration scale.  If instead we write
 \[
-  \log y_{ij}=\log f(t_{ij};CL_i,V_i,u_i)+\varepsilon_{ij},
+  \log y_{ij}=\log f(t_{ij};\textit{CL}_i,V_i,u_i)+\varepsilon_{ij},
   \qquad
   \varepsilon_{ij}\sim\Normal(0,\sigma^2),
 \]
@@ -141,29 +141,29 @@ This equation is the cleanest way to understand shrinkage.  If \(y_i\) is rich, 
 
 6.008 treats a random variable as a function from outcomes to numbers.  In PopPK, that function is often a pharmacological summary:
 \[
-  \mathrm{AUC}_i=\frac{D_i}{CL_i},
+  \textit{AUC}_i=\frac{D_i}{\textit{CL}_i},
   \qquad
   t_{1/2,i}=\frac{\log 2}{k_i},
   \qquad
   C_{\max,i}=\max_t C_i(t).
 \]
-Once \(CL_i\), \(k_i\), or the whole curve \(C_i(t)\) is uncertain, these summaries are uncertain too.  The habit is therefore:
+Once \(\textit{CL}_i\), \(k_i\), or the whole curve \(C_i(t)\) is uncertain, these summaries are uncertain too.  The habit is therefore:
 \[
   \text{do not only report a transformed point estimate; transform the uncertainty.}
 \]
-The posterior distribution of \(CL_i\) induces a posterior distribution of \(\mathrm{AUC}_i\).  The posterior predictive distribution of future concentrations induces probabilities of clinical target attainment.  This is where the random-variable language becomes directly useful.
+The posterior distribution of \(\textit{CL}_i\) induces a posterior distribution of \(\textit{AUC}_i\).  The posterior predictive distribution of future concentrations induces probabilities of clinical target attainment.  This is where the random-variable language becomes directly useful.
 
 \subsection{Expectations are summaries, not reality}
 
 An expectation is often useful:
 \[
-  \E(\mathrm{AUC}_i\mid y_i)
+  \E(\textit{AUC}_i\mid y_i)
   =
-  \int \frac{D_i}{CL_i}p(CL_i\mid y_i)\,\dd CL_i.
+  \int \frac{D_i}{\textit{CL}_i}p(\textit{CL}_i\mid y_i)\,\dd \textit{CL}_i.
 \]
-But the expectation is not the same as the whole posterior distribution.  In asymmetric or safety-critical problems, the upper tail may matter more than the mean.  A dosing rule based on \(\E(\mathrm{AUC}_i\mid y_i)\) may be inferior to a rule based on
+But the expectation is not the same as the whole posterior distribution.  In asymmetric or safety-critical problems, the upper tail may matter more than the mean.  A dosing rule based on \(\E(\textit{AUC}_i\mid y_i)\) may be inferior to a rule based on
 \[
-  P(\mathrm{AUC}_i>U\mid y_i)
+  P(\textit{AUC}_i>U\mid y_i)
 \]
 if toxicity risk is the central concern.  This is where 6.008 expectation leads naturally into 6.437 decision theory.
 
@@ -270,7 +270,7 @@ or a joint latent disease model might be needed.  Ignoring this can bias estimat
 
 \subsection{The graph as a reading tool}
 
-When reading a paper, redraw the graph before judging the model.  If the paper says ``renal function was a significant covariate on clearance,'' draw \(c_i\to CL_i\).  If the paper says ``inter-occasion variability was included on bioavailability,'' draw an occasion-level random effect below the subject-level random effect.  If the paper says ``BLQ data were handled with M3,'' draw the censoring event as part of the observation mechanism.
+When reading a paper, redraw the graph before judging the model.  If the paper says ``renal function was a significant covariate on clearance,'' draw \(c_i\to \textit{CL}_i\).  If the paper says ``inter-occasion variability was included on bioavailability,'' draw an occasion-level random effect below the subject-level random effect.  If the paper says ``BLQ data were handled with M3,'' draw the censoring event as part of the observation mechanism.
 
 This is not busywork.  It reveals whether a claim is about the structural model, the residual model, the covariate model, the sampling process, or the decision rule.
 
@@ -293,7 +293,7 @@ Lavielle's separation of description, representation, and implementation is a po
 
 \begin{itemize}[leftmargin=2em]
   \item The \term{description} is the scientific story: clearance varies between individuals; body weight may explain part of that variation; concentration is measured with assay noise.
-  \item The \term{representation} is the mathematical probability law: \(CL_i=CL_{\pop}(WT_i/70)^\beta\exp(\eta_{CL,i})\), \(\eta_i\sim\Normal(0,\Omega)\), and an observation density.
+  \item The \term{representation} is the mathematical probability law: \(\textit{CL}_i=\textit{CL}_{\pop}(\textit{WT}_i/70)^\beta\exp(\eta_{\textit{CL},i})\), \(\eta_i\sim\Normal(0,\Omega)\), and an observation density.
   \item The \term{implementation} is the computational form: NONMEM control stream, Mlxtran project, Stan program, Monolix task, or a custom likelihood.
 \end{itemize}
 
@@ -359,13 +359,13 @@ If residuals show time trend, the structural model may be missing dynamics.  If 
 
 The individual parameter model says how people differ.  A common form is
 \[
-  \log CL_i
+  \log \textit{CL}_i
   =
-  \log CL_{\pop}
-  +\beta_{WT}\log(WT_i/70)
-  +\eta_{CL,i},
+  \log \textit{CL}_{\pop}
+  +\beta_{\textit{WT}}\log(\textit{WT}_i/70)
+  +\eta_{\textit{CL},i},
   \qquad
-  \eta_{CL,i}\sim\Normal(0,\omega_{CL}^2).
+  \eta_{\textit{CL},i}\sim\Normal(0,\omega_{\textit{CL}}^2).
 \]
 This is not only a regression.  It is a probability distribution for individual clearance.  The covariate term explains systematic variability; the random effect represents remaining between-subject variability.  The log transform ensures positivity and often makes multiplicative biological variability more plausible.
 
@@ -381,7 +381,7 @@ Confusing these questions is common.  A covariate may have a statistically visib
 
 A covariate model is often written as if it explains biology:
 \[
-  CL_i=CL_{\pop}(WT_i/70)^{\beta}\exp(\eta_i).
+  \textit{CL}_i=\textit{CL}_{\pop}(\textit{WT}_i/70)^{\beta}\exp(\eta_i).
 \]
 But the coefficient \(\beta\) is causal only under additional assumptions about design, confounding, measurement, and biology.  In observational PopPK datasets, covariates can be proxies.  Renal function, age, weight, disease severity, dose history, and comedications may be entangled.
 
@@ -391,9 +391,9 @@ The Bayesian reading is cautious: the covariate model changes \(p(\psi_i\mid c_i
 
 Sometimes a subject's parameter changes across occasions:
 \[
-  \log CL_{ik}
+  \log \textit{CL}_{ik}
   =
-  \log CL_{\pop}
+  \log \textit{CL}_{\pop}
   +\eta_{i}
   +\kappa_{ik},
 \]
@@ -411,7 +411,7 @@ The structural PK model maps parameters and design to predictions:
 \]
 For a one-compartment IV bolus model,
 \[
-  C_i(t)=\frac{D_i}{V_i}\exp\left(-\frac{CL_i}{V_i}t\right).
+  C_i(t)=\frac{D_i}{V_i}\exp\left(-\frac{\textit{CL}_i}{V_i}t\right).
 \]
 For extravascular dosing with first-order absorption, the formula is more complicated, and for many systems the prediction is obtained by solving ODEs.  But the inferential role is the same: \(f\) is the deterministic forward map inside the stochastic observation law.
 
@@ -427,9 +427,9 @@ This is where \(u_i\) matters.  Doses and sampling times are not administrative 
 
 PK/PD modeling introduces another forward layer:
 \[
-  \psi_i^{PK}\longrightarrow C_i(t),
+  \psi_i^{\textit{PK}}\longrightarrow C_i(t),
   \qquad
-  \psi_i^{PD}\longrightarrow R_i(t),
+  \psi_i^{\textit{PD}}\longrightarrow R_i(t),
   \qquad
   C_i(t)\longrightarrow R_i(t).
 \]
@@ -534,24 +534,24 @@ The algorithm is not fully Bayesian unless \(\theta\) also receives a prior and 
 
 NONMEM's notation can be translated:
 \[
-  \theta \leftrightarrow \text{THETA},
+  \theta \leftrightarrow \textit{THETA},
   \qquad
-  \eta_i \leftrightarrow \text{ETA},
+  \eta_i \leftrightarrow \textit{ETA},
   \qquad
-  \varepsilon_{ij} \leftrightarrow \text{EPSILON},
+  \varepsilon_{ij} \leftrightarrow \textit{EPSILON},
 \]
 \[
-  \Omega \leftrightarrow \text{OMEGA},
+  \Omega \leftrightarrow \textit{OMEGA},
   \qquad
-  \Sigma \leftrightarrow \text{SIGMA}.
+  \Sigma \leftrightarrow \textit{SIGMA}.
 \]
 A line such as
 \[
-  CL_i=TVCL\exp(\eta_{CL,i})
+  \textit{CL}_i=\textit{TVCL}\exp(\eta_{\textit{CL},i})
 \]
 is not just code.  It is a distributional statement:
 \[
-  \log CL_i\sim\Normal(\log TVCL,\omega_{CL}^2).
+  \log \textit{CL}_i\sim\Normal(\log \textit{TVCL},\omega_{\textit{CL}}^2).
 \]
 This translation makes NONMEM less mysterious.  It is a compact language for hierarchical probability models.
 
@@ -640,7 +640,7 @@ An indirect response model goes further by modeling production and loss:
 \[
   \frac{\dd R(t)}{\dd t}
   =
-  k_{\mathrm{in}}\left(1-\frac{I_{\max}C(t)}{IC_{50}+C(t)}\right)
+  k_{\mathrm{in}}\left(1-\frac{I_{\max}C(t)}{\textit{IC}_{50}+C(t)}\right)
   -
   k_{\mathrm{out}}R(t).
 \]
@@ -671,7 +671,7 @@ The advantage is conceptual completeness.  All uncertainty can be represented in
 
 Many pharmacometric workflows are hybrid:
 \[
-  \widehat\theta_{\mathrm{ML}}
+  \widehat\theta_{\textit{ML}}
   \quad\text{for population estimation,}
   \qquad
   p_{\widehat\theta}(\psi_i\mid y_i)

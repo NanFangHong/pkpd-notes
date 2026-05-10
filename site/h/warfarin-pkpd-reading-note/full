@@ -19,7 +19,7 @@
   const DEFAULT_SCALE=1.860433;
   function pageId(n){return 'pf'+Number(n).toString(16);}
   function detail(v){try{return v?JSON.parse(v):null;}catch{return null;}}
-  function target(href){if(!href||!href.startsWith('#pf'))return null;const direct=href.slice(1);if(document.getElementById(direct))return direct;const n=Number.parseInt(direct.slice(2),16);const id=Number.isFinite(n)?pageId(n):null;return id&&document.getElementById(id)?id:null;}
+  function target(href){if(!href||!href.startsWith('#pf'))return null;const direct=href.slice(1);if(document.getElementById(direct))return direct;const raw=direct.slice(2);const hex=Number.parseInt(raw,16);let id=Number.isFinite(hex)?pageId(hex):null;if(id&&document.getElementById(id))return id;const dec=/^[0-9]+$/.test(raw)?Number.parseInt(raw,10):NaN;id=Number.isFinite(dec)?pageId(dec):null;return id&&document.getElementById(id)?id:null;}
   function jump(href,detailText,scaleValue){const d=detail(detailText);const id=d&&Number.isFinite(Number(d[0]))?pageId(d[0]):target(href);const el=id&&document.getElementById(id);if(!el)return;const r=el.getBoundingClientRect();let top=window.scrollY+r.top;const pdfY=d&&typeof d[3]==='number'?d[3]:null;const scale=Number.isFinite(Number(scaleValue))?Number(scaleValue):DEFAULT_SCALE;const sourceHeight=Number(el.dataset.pageHeight)||r.height;if(pdfY!==null)top+=Math.max(0,Math.min(r.height-1,sourceHeight-pdfY*scale));window.scrollTo({top,left:0,behavior:'auto'});history.replaceState(null,'','#'+id);}
   window.addEventListener('message',(event)=>{const data=event.data||{};if(data.type==='pdf2htmlEX:jump')jump(data.href,data.detail,data.scale);});
   window.addEventListener('hashchange',()=>jump(window.location.hash,null,DEFAULT_SCALE));
