@@ -1,58 +1,61 @@
 <!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>UF PHA 6125 Lesson 1: Drug Development and Fundamental PK/PD</title><style>html,body{margin:0;padding:0;background:#f7f7f5;color:#141414}body{font-family:Georgia,"Times New Roman",serif;line-height:1.48}#main{max-width:900px;margin:0 auto;padding:48px 28px 72px;background:#fff;min-height:100vh;box-sizing:border-box}a{color:#064f83;text-decoration:none}a:hover{text-decoration:underline}h1{font-weight:normal;border-bottom:1px solid #d6d6d2;padding-bottom:.35rem;margin-top:0}.toc-note{color:#4d4d4d;max-width:680px}.disp-toc{padding-left:1.15rem}.disp-toc li{margin:.18rem 0}.subsection{margin-left:1.45rem}.math-title{white-space:nowrap}</style></head>
-<body><div id="main"><h1>UF PHA 6125 Lesson 1: Drug Development and Fundamental PK/PD</h1><p>2026, UF PHA 6125 Module 1A/1B slides and transcripts; FDA/ICH guidance; MIDD and dose-selection literature</p><p class="toc-note">This is an HTML version of the notes generated with pdf2htmlEX. You can either view all sections in a single page, or access individual sections below.</p><h2>Contents</h2><ul class="disp-toc"><li><a href="full.html">V Full version</a></li><li><a href="1.html">1 The Whole Lesson in One Picture</a></li>
-<li class="subsection"><a href="1_1.html">1.1 The dose–exposure–response–decision chain</a></li>
-<li class="subsection"><a href="1_2.html">1.2 Why this belongs at the beginning</a></li>
-<li><a href="2.html">2 1A: Drug Development as Sequential Learning</a></li>
-<li class="subsection"><a href="2_1.html">2.1 Clinical phases are decision points</a></li>
-<li class="subsection"><a href="2_2.html">2.2 Learning versus confirming</a></li>
-<li class="subsection"><a href="2_3.html">2.3 Model-based drug development</a></li>
-<li><a href="3.html">3 Attrition, POM/POC, and the Dose-Selection Problem</a></li>
-<li class="subsection"><a href="3_1.html">3.1 Clinical attrition is still the background pressure</a></li>
-<li class="subsection"><a href="3_2.html">3.2 Cost estimates should be handled carefully</a></li>
-<li class="subsection"><a href="3_3.html">3.3 Proof of mechanism and proof of concept</a></li>
-<li class="subsection"><a href="3_4.html">3.4 The dose is a strategic position on two curves</a></li>
-<li class="subsection"><a href="3_5.html">3.5 Dose selection can delay approval</a></li>
-<li><a href="4.html">4 The Label Is the Final Knowledge Product</a></li>
-<li class="subsection"><a href="4_1.html">4.1 Why labeling appears in Lesson 1</a></li>
-<li class="subsection"><a href="4_2.html">4.2 A label statement is a compressed model</a></li>
-<li><a href="5.html">5 1B: PK Begins with LADME</a></li>
-<li class="subsection"><a href="5_1.html">5.1 LADME as a causal sequence</a></li>
-<li class="subsection"><a href="5_2.html">5.2 A PK experiment</a></li>
-<li><a href="6.html">6 Clearance</a></li>
-<li class="subsection"><a href="6_1.html">6.1 Why clearance has units of volume per time</a></li>
-<li class="subsection"><a href="6_2.html">6.2 Clearance is usually additive</a></li>
-<li class="subsection"><a href="6_3.html">6.3 Organ clearance and extraction</a></li>
-<li class="subsection"><a href="6_4.html">6.4 Blood, plasma, and unbound clearance</a></li>
-<li><a href="7.html">7 Volume, Half-Life, Bioavailability, and Absorption</a></li>
-<li class="subsection"><a href="7_1.html">7.1 Apparent volume of distribution</a></li>
-<li class="subsection"><a href="7_2.html">7.2 Half-life is secondary</a></li>
-<li class="subsection"><a href="7_3.html">7.3 Bioavailability</a></li>
-<li class="subsection"><a href="7_4.html">7.4 AUC and the trapezoidal rule</a></li>
-<li class="subsection"><a href="7_5.html">7.5 Absorption rate</a></li>
-<li><a href="8.html">8 PD Parameters and Empirical Models</a></li>
-<li class="subsection"><a href="8_1.html">8.1 Effect, efficacy, and baseline</a></li>
-<li class="subsection"><a href="8_2.html">8.2 The sigmoid Emax model</a></li>
-<li class="subsection"><a href="8_3.html">8.3 A small model table</a></li>
-<li class="subsection"><a href="8_4.html">8.4 When Emax is not enough</a></li>
-<li><a href="9.html">9 Time Delays and Rate-Limiting Steps</a></li>
-<li class="subsection"><a href="9_1.html">9.1 Counter-clockwise hysteresis</a></li>
-<li class="subsection"><a href="9_2.html">9.2 Turnover models</a></li>
-<li class="subsection"><a href="9_3.html">9.3 The rate-limiting-step question</a></li>
-<li><a href="10.html">10 Case Study: SC-75416 and Acute Pain</a></li>
-<li class="subsection"><a href="10_1.html">10.1 What the naive read would conclude</a></li>
-<li class="subsection"><a href="10_2.html">10.2 What the model did</a></li>
-<li><a href="11.html">11 Modern Regulatory Frame</a></li>
-<li class="subsection"><a href="11_1.html">11.1 Exposure-response guidance</a></li>
-<li class="subsection"><a href="11_2.html">11.2 Population PK guidance</a></li>
-<li class="subsection"><a href="11_3.html">11.3 ICH M15: question of interest</a></li>
-<li><a href="12.html">12 A Worked Mini-Example</a></li>
-<li class="subsection"><a href="12_1.html">12.1 A single IV bolus</a></li>
-<li class="subsection"><a href="12_2.html">12.2 Adding a PD model</a></li>
-<li class="subsection"><a href="12_3.html">12.3 Adding absorption</a></li>
-<li><a href="13.html">13 How to Study This Module</a></li>
-<li class="subsection"><a href="13_1.html">13.1 What to memorize</a></li>
-<li class="subsection"><a href="13_2.html">13.2 What not to memorize blindly</a></li>
-<li class="subsection"><a href="13_3.html">13.3 A personal checklist</a></li>
-<li><a href="14.html">14 Summary</a></li>
-<li class="subsection"><a href="14_1.html">14.1 One paragraph</a></li></ul></div></body></html>
+<title>UF PHA 6125 Module 1: Drug Development and Fundamental PK/PD</title><style>html,body{margin:0;padding:0;background:#f7f7f5;color:#141414}body{font-family:Georgia,"Times New Roman",serif;line-height:1.48}#main{max-width:900px;margin:0 auto;padding:48px 28px 72px;background:#fff;min-height:100vh;box-sizing:border-box}a{color:#064f83;text-decoration:none}a:hover{text-decoration:underline}h1{font-weight:normal;border-bottom:1px solid #d6d6d2;padding-bottom:.35rem;margin-top:0}.toc-note{color:#4d4d4d;max-width:680px}.disp-toc{padding-left:1.15rem}.disp-toc li{margin:.18rem 0}.subsection{margin-left:1.45rem}.math-title{white-space:nowrap}</style></head>
+<body><div id="main"><h1>UF PHA 6125 Module 1: Drug Development and Fundamental PK/PD</h1><p>2026, UF PHA 6125 Module 1A/1B slides and transcripts; FDA/ICH guidance; MIDD and dose-selection literature</p><p class="toc-note">This is an HTML version of the notes generated with pdf2htmlEX. You can either view all sections in a single page, or access individual sections below.</p><h2>Contents</h2><ul class="disp-toc"><li><a href="full.html">V Full version</a></li><li><a href="1.html">1 Module Overview: Why Development Needs PK/PD</a></li>
+<li class="subsection"><a href="1_1.html">1.1 The two official module promises</a></li>
+<li class="subsection"><a href="1_2.html">1.2 The module as a single argument</a></li>
+<li><a href="2.html">2 The Whole Module in One Picture</a></li>
+<li class="subsection"><a href="2_1.html">2.1 The dose–exposure–response–decision chain</a></li>
+<li class="subsection"><a href="2_2.html">2.2 Why this belongs at the beginning</a></li>
+<li><a href="3.html">3 1A: Drug Development as Sequential Learning</a></li>
+<li class="subsection"><a href="3_1.html">3.1 Clinical phases are decision points</a></li>
+<li class="subsection"><a href="3_2.html">3.2 Learning versus confirming</a></li>
+<li class="subsection"><a href="3_3.html">3.3 Model-based drug development</a></li>
+<li><a href="4.html">4 Attrition, POM/POC, and the Dose-Selection Problem</a></li>
+<li class="subsection"><a href="4_1.html">4.1 Clinical attrition is still the background pressure</a></li>
+<li class="subsection"><a href="4_2.html">4.2 Cost estimates should be handled carefully</a></li>
+<li class="subsection"><a href="4_3.html">4.3 Proof of mechanism and proof of concept</a></li>
+<li class="subsection"><a href="4_4.html">4.4 The dose is a strategic position on two curves</a></li>
+<li class="subsection"><a href="4_5.html">4.5 Dose selection can delay approval</a></li>
+<li><a href="5.html">5 The Label Is the Final Knowledge Product</a></li>
+<li class="subsection"><a href="5_1.html">5.1 Why labeling appears in Module 1</a></li>
+<li class="subsection"><a href="5_2.html">5.2 A label statement is a compressed model</a></li>
+<li><a href="6.html">6 1B: PK Begins with LADME</a></li>
+<li class="subsection"><a href="6_1.html">6.1 LADME as a causal sequence</a></li>
+<li class="subsection"><a href="6_2.html">6.2 A PK experiment</a></li>
+<li><a href="7.html">7 Clearance</a></li>
+<li class="subsection"><a href="7_1.html">7.1 Why clearance has units of volume per time</a></li>
+<li class="subsection"><a href="7_2.html">7.2 Clearance is usually additive</a></li>
+<li class="subsection"><a href="7_3.html">7.3 Organ clearance and extraction</a></li>
+<li class="subsection"><a href="7_4.html">7.4 Blood, plasma, and unbound clearance</a></li>
+<li><a href="8.html">8 Volume, Half-Life, Bioavailability, and Absorption</a></li>
+<li class="subsection"><a href="8_1.html">8.1 Apparent volume of distribution</a></li>
+<li class="subsection"><a href="8_2.html">8.2 Half-life is secondary</a></li>
+<li class="subsection"><a href="8_3.html">8.3 Bioavailability</a></li>
+<li class="subsection"><a href="8_4.html">8.4 AUC and the trapezoidal rule</a></li>
+<li class="subsection"><a href="8_5.html">8.5 Absorption rate</a></li>
+<li><a href="9.html">9 PD Parameters and Empirical Models</a></li>
+<li class="subsection"><a href="9_1.html">9.1 Effect, efficacy, and baseline</a></li>
+<li class="subsection"><a href="9_2.html">9.2 The sigmoid Emax model</a></li>
+<li class="subsection"><a href="9_3.html">9.3 A small model table</a></li>
+<li class="subsection"><a href="9_4.html">9.4 When Emax is not enough</a></li>
+<li><a href="10.html">10 Time Delays and Rate-Limiting Steps</a></li>
+<li class="subsection"><a href="10_1.html">10.1 Counter-clockwise hysteresis</a></li>
+<li class="subsection"><a href="10_2.html">10.2 Turnover models</a></li>
+<li class="subsection"><a href="10_3.html">10.3 The rate-limiting-step question</a></li>
+<li><a href="11.html">11 Case Study: SC-75416 and Acute Pain</a></li>
+<li class="subsection"><a href="11_1.html">11.1 What the naive read would conclude</a></li>
+<li class="subsection"><a href="11_2.html">11.2 What the model did</a></li>
+<li><a href="12.html">12 Modern Regulatory Frame</a></li>
+<li class="subsection"><a href="12_1.html">12.1 Exposure-response guidance</a></li>
+<li class="subsection"><a href="12_2.html">12.2 Population PK guidance</a></li>
+<li class="subsection"><a href="12_3.html">12.3 ICH M15: question of interest</a></li>
+<li><a href="13.html">13 A Worked Mini-Example</a></li>
+<li class="subsection"><a href="13_1.html">13.1 A single IV bolus</a></li>
+<li class="subsection"><a href="13_2.html">13.2 Adding a PD model</a></li>
+<li class="subsection"><a href="13_3.html">13.3 Adding absorption</a></li>
+<li><a href="14.html">14 How to Study This Module</a></li>
+<li class="subsection"><a href="14_1.html">14.1 What to memorize</a></li>
+<li class="subsection"><a href="14_2.html">14.2 What not to memorize blindly</a></li>
+<li class="subsection"><a href="14_3.html">14.3 A personal checklist</a></li>
+<li><a href="15.html">15 Summary</a></li>
+<li class="subsection"><a href="15_1.html">15.1 One paragraph</a></li></ul></div></body></html>

@@ -1,11 +1,11 @@
 \documentclass[a4paper]{article}
 
 \def\npart {UF PHA 6125}
-\def\nterm {Lesson 1A/1B}
+\def\nterm {Module 1A/1B}
 \def\nyear {2026}
 \def\nlecturer {Lalonde and Cristofoletti; FDA/ICH updates}
 \def\ncourse {Drug Development and Fundamental PK/PD}
-\def\ncoursehead {Lesson 1 PK/PD}
+\def\ncoursehead {Module 1 PK/PD}
 \def\nauthor {NanFangHong}
 
 \input{header}
@@ -61,7 +61,7 @@
 \maketitle
 {\small
   \noindent\textbf{Reading motive}\\
-  这是 UF PHA 6125 的第一课笔记。Lesson 1A 讲 drug development process 以及为什么 \PK{}/\PD{} 是 drug development 的核心语言；Lesson 1B 讲 clearance, apparent volume of distribution, half-life, bioavailability, \Emax, \ECfifty, Hill factor, and the \PKPD{} link。我的目标不是复述课件，而是把它改写成一篇可以从零自学的笔记：先建立 decision-making spine，再进入公式、例子和 regulatory update。\par\hfill[course note]
+  这是 UF PHA 6125 的 Module 1 笔记。Module 1A 讲 drug development process 以及为什么 \PK{}/\PD{} 是 drug development 的核心语言；Module 1B 讲 clearance, apparent volume of distribution, half-life, bioavailability, \Emax, \ECfifty, Hill factor, and the \PKPD{} link。我的目标不是复述课件，而是把它改写成一篇可以从零自学的笔记：先建立 decision-making spine，再进入公式、例子和 regulatory update。\par\hfill[course note]
 
   \vspace{5pt}
   \noindent\textbf{Reader}\\
@@ -74,11 +74,40 @@
 
 \tableofcontents
 
-\section{The Whole Lesson in One Picture}
+\section{Module Overview: Why Development Needs PK/PD}
+
+\subsection{The two official module promises}
+
+The module overview is useful because it states the course logic more sharply than a list of parameter definitions. Module 1A is titled \emph{Overview of the drug development process. Importance of Pharmacokinetics \& Pharmacodynamics}. Its promise is that drug development is long, selective, and wasteful: a new drug may take more than ten years from discovery to approval; many thousands of candidates can be screened or tested for every approved drug; and a central development problem is selecting candidates and doses with desirable \PK{} and \PD{} behavior.
+
+Module 1B is titled \emph{Fundamental concepts and basic PK (and PD) parameters}. Its promise is more foundational: \PK{} is the traditional language for ``what the body does to drug'', and \PD{} is the language for ``what the drug does to the body''. The lecture then uses clearance, volume, absorption, and empirical \PD{} models as the vocabulary needed for the later modules.
+
+Put together, the two parts say something stronger than either one says alone:
+\begin{quote}
+\itshape
+Drug development succeeds or fails through quantitative exposure--response decisions.
+\end{quote}
+Module 1A explains \emph{why} these decisions matter; Module 1B explains \emph{how} we begin to quantify them. This is why the note starts from decisions, then moves into parameters. A parameter such as \CL{} is not introduced merely because it is a textbook definition. It is introduced because it controls exposure, and exposure is one of the few quantitative bridges between dose, patient variability, response, safety, and the eventual drug label.
+
+\subsection{The module as a single argument}
+
+The course overview also helps prevent a common beginner mistake: treating drug development and basic \PK{} as separate topics. They are not separate. The development question is:
+\begin{quote}
+\itshape
+Can this molecule become a useful medicine, at a defensible dose, in a defined population?
+\end{quote}
+The \PKPD{} question is:
+\begin{quote}
+\itshape
+How does dose become exposure, how does exposure become response, and how uncertain is that chain?
+\end{quote}
+The first question needs the second question in order to become operational. Without \PKPD, ``right dose for the right patient'' becomes a slogan; with \PKPD, it becomes a model-based learning problem involving candidate selection, first-in-human dose selection, dose escalation, dose-ranging, covariate adjustment, labeling, and post-approval refinement.
+
+\section{The Whole Module in One Picture}
 
 \subsection{The dose--exposure--response--decision chain}
 
-Lesson 1 的主线可以压缩成一个 chain:
+Module 1 的主线可以压缩成一个 chain:
 \[
   \begin{gathered}
     \text{dose regimen}
@@ -121,7 +150,7 @@ Lesson 1 的主线可以压缩成一个 chain:
   \draw[->, dashed] (varpd) -- (pd);
 \end{tikzpicture}
 }
-\captionof{figure}{Lesson 1 的最小工作图。A dose becomes defensible only after exposure, response, uncertainty, and benefit--risk have been connected.}
+\captionof{figure}{Module 1 的最小工作图。A dose becomes defensible only after exposure, response, uncertainty, and benefit--risk have been connected.}
 \end{center}
 
 This is also an inference problem. Before a trial, exposure and response are random quantities:
@@ -235,7 +264,7 @@ Learning is about estimating a function; confirming is about testing a claim.
   \node[noteLabel, text width=3.7cm] at (9.4,1.05) {pivotal endpoint\\ plus subgroup learning};
 \end{tikzpicture}
 }
-\captionof{figure}{A redrawn learn/confirm map based on the Lesson 1A slides. Phase 3 confirms the primary claim, but still learns dose adjustment and variability.}
+\captionof{figure}{A redrawn learn/confirm map based on the Module 1A slides. Phase 3 confirms the primary claim, but still learns dose adjustment and variability.}
 \end{center}
 
 \begin{remark}
@@ -400,7 +429,7 @@ The practical rule from the lecture is worth preserving:
 
 \section{The Label Is the Final Knowledge Product}
 
-\subsection{Why labeling appears in Lesson 1}
+\subsection{Why labeling appears in Module 1}
 
 The first slide example of prescribing information is not decorative. It tells us where clinical pharmacology knowledge ends up. FDA's clinical pharmacology labeling guidance states that section 12 contains Mechanism of Action, Pharmacodynamics, and Pharmacokinetics, with Microbiology and Pharmacogenomics subsections when appropriate \cite{fda2016clinicalPharmLabel}. But \PKPD{} also informs other label sections:
 \begin{itemize}[leftmargin=2em]
@@ -911,7 +940,7 @@ FDA's exposure--response guidance recommends using exposure--response informatio
   \rightarrow
   \text{dose recommendation}.
 \]
-This is precisely the Lesson 1 diagram.
+This is precisely the Module 1 diagram.
 
 \subsection{Population PK guidance}
 
@@ -1002,7 +1031,7 @@ For every future PHA 6125 case, I will ask:
 
 \subsection{One paragraph}
 
-Lesson 1 says that \PKPD{} is the quantitative language by which drug development turns uncertain biological experiments into decisions. Phase 1 learns exposure and tolerability; Phase 2 learns mechanism, concept, and dose response; Phase 3 confirms benefit--risk while still learning variability and dose adjustment; labels compress this knowledge for prescribers. The fundamental parameters are not isolated formulas: \CL{} controls exposure, \Vd{} connects amount to concentration, half-life combines \CL{} and \Vd, \Fbio{} and \(\ka\) determine systemic input, and \PD{} models translate concentration into response. The hard cases are exactly where the translation is delayed or indirect. That is where \PKPD{} becomes more than vocabulary: it becomes the method for asking the right question before the program makes an expensive decision.
+Module 1 says that \PKPD{} is the quantitative language by which drug development turns uncertain biological experiments into decisions. Phase 1 learns exposure and tolerability; Phase 2 learns mechanism, concept, and dose response; Phase 3 confirms benefit--risk while still learning variability and dose adjustment; labels compress this knowledge for prescribers. The fundamental parameters are not isolated formulas: \CL{} controls exposure, \Vd{} connects amount to concentration, half-life combines \CL{} and \Vd, \Fbio{} and \(\ka\) determine systemic input, and \PD{} models translate concentration into response. The hard cases are exactly where the translation is delayed or indirect. That is where \PKPD{} becomes more than vocabulary: it becomes the method for asking the right question before the program makes an expensive decision.
 
 \bibliographystyle{plain}
 \bibliography{../refs/pharmacology}

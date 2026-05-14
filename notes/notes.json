@@ -2,7 +2,7 @@
   {
     "slug": "uf-pha6125-lesson-1-drug-development-pkpd",
     "date": "2026-05-14",
-    "title": "UF PHA 6125 Lesson 1: Drug Development and Fundamental PK/PD",
+    "title": "UF PHA 6125 Module 1: Drug Development and Fundamental PK/PD",
     "category": "PK/PD Foundations",
     "year": "2026",
     "paper": "UF PHA 6125 Module 1A/1B slides and transcripts; FDA/ICH guidance; MIDD and dose-selection literature",
@@ -10,7 +10,7 @@
     "tex": "2026-05-14-uf-pha6125-lesson-1-drug-development-pkpd.tex",
     "pdf": "2026-05-14-uf-pha6125-lesson-1-drug-development-pkpd.pdf",
     "tags": ["PHA 6125", "drug development", "PK/PD", "clinical pharmacology", "dose selection", "MIDD", "clearance", "Emax"],
-    "summary": "UF PHA 6125 第一课的中英混排长笔记：把 drug development phases、learning versus confirming、attrition、dose selection、labeling、LADME、clearance、volume、half-life、bioavailability、absorption rate、Emax/EC50/Hill 和 PK/PD delays 接成一条 decision-making spine，并补入 FDA/ICH 2026 视角。",
+    "summary": "UF PHA 6125 Module 1 的中英混排长笔记：把 drug development phases、learning versus confirming、attrition、dose selection、labeling、LADME、clearance、volume、half-life、bioavailability、absorption rate、Emax/EC50/Hill 和 PK/PD delays 接成一条 decision-making spine，并补入 FDA/ICH 2026 视角。",
     "questions": [
       "为什么 Phase 1/2/3 不只是时间顺序，而是一连串 learn/confirm decision points？",
       "PK/PD 如何把 dose selection 从 pairwise testing 转成 exposure-response learning？",
