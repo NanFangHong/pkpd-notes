@@ -30,6 +30,7 @@
 \newcommand{\CLp}{\ensuremath{\pksym{CL}_{p}}}
 \newcommand{\CLu}{\ensuremath{\pksym{CL}_{u}}}
 \newcommand{\CLint}{\ensuremath{\pksym{CL}_{\pklab{int}}}}
+\newcommand{\CLbile}{\ensuremath{\pksym{CL}_{\pklab{bile}}}}
 \newcommand{\Vd}{\ensuremath{\pksym{V}_d}}
 \newcommand{\Vss}{\ensuremath{\pksym{V}_{ss}}}
 \newcommand{\AUC}{\ensuremath{\pksym{AUC}}}
@@ -157,12 +158,12 @@ If the denominator is not understood, the numerator cannot be interpreted. A low
 \begin{center}
 \resizebox{0.98\textwidth}{!}{%
 \begin{tikzpicture}[node distance=0.48cm and 0.65cm]
-  \node[orangeBox, text width=2.35cm] (lumen) {GI lumen\\ dose/formulation\\ dissolution};
+  \node[orangeBox, text width=2.35cm] (lumen) {GI lumen\\ dose\\ formulation\\ dissolution};
   \node[orangeBox, text width=2.25cm, right=of lumen] (enterocyte) {Enterocyte\\ permeability\\ \Pgp{}, \PEPT{}\\ gut metabolism};
   \node[blueBox, text width=2.20cm, right=of enterocyte] (portal) {Portal vein\\ \(\Fa\Fg\)};
-  \node[redBox, text width=2.25cm, right=of portal] (liver) {Liver\\ \(\Qh,\fu,\CLint\)\\ metabolism/bile};
+  \node[redBox, text width=2.25cm, right=of portal] (liver) {Liver\\ \(\Qh,\fu,\CLint\)\\ metabolism\\ bile};
   \node[blueBox, text width=2.25cm, right=of liver] (plasma) {Systemic plasma\\ \(C_p,\Cu,\AUC\)};
-  \node[greenBox, text width=2.25cm, below=1.05cm of plasma] (tissue) {Tissues\\ \(K_p,\Vss,\fd\)\\ binding/targets};
+  \node[greenBox, text width=2.25cm, below=1.05cm of plasma] (tissue) {Tissues\\ \(K_p,\Vss,\fd\)\\ binding\\ targets};
   \node[purpleBox, text width=2.20cm, above=1.05cm of plasma] (kidney) {Kidney\\ \(\GFR\)\\ secretion\\ reabsorption};
 
   \draw[noteArrow] (lumen) -- node[above,noteLabel]{\(\Fa\)} (enterocyte);
@@ -194,13 +195,27 @@ The same molecule can be described by several concentrations. Confusing these is
   =
   \CLu C_u.
 \]
-The rate is physical. The clearance value depends on the concentration used as reference. This is why Rowland/Tozer repeatedly distinguishes plasma clearance, blood clearance, and unbound clearance \cite{rowlandTozer2019ClinicalPKPD}. When estimating organ extraction, the denominator should be blood flow and blood concentration, not plasma flow and plasma concentration:
+The rate is physical. The clearance value depends on the concentration used as reference. This is why Rowland/Tozer repeatedly distinguishes plasma clearance, blood clearance, and unbound clearance \cite{rowlandTozer2019ClinicalPKPD}. A clearance name is therefore a coordinate system. We should know the organ, the process, and the reference fluid:
+\[
+\begin{array}{lll}
+  \text{organ:} & \CLH,\ \CLR,\ \CLbile, & \text{liver, kidney, bile;}\\[2pt]
+  \text{process:} & \CL_{\pklab{met}},\ \CL_{\pklab{sec}},\ \CL_{\pklab{fil}}, & \text{metabolism, secretion, filtration;}\\[2pt]
+  \text{fluid:} & \CLp,\ \CLB,\ \CLu, & \text{plasma, blood, unbound plasma water.}
+\end{array}
+\]
+The warning is simple: the organ name and process name are not synonyms. In casual speech, ``hepatic clearance'' often means hepatic metabolic plasma clearance. But liver can also excrete drug into bile, and kidney can metabolize drug.
+
+When estimating organ extraction, the denominator should be blood flow and blood concentration, not plasma flow and plasma concentration:
 \[
   \CLB = Q\,E,
   \qquad
   E=\frac{\Cin-\Cout}{\Cin}.
 \]
-The symbol \(\CL\) is therefore incomplete unless we know whether it is plasma-based, blood-based, unbound, renal, hepatic, systemic, or apparent after oral dosing.
+If only plasma clearance is reported, a blood clearance can be obtained from the plasma-to-blood concentration ratio:
+\[
+  \CLB = \CLp\frac{C_p}{C_b}.
+\]
+This correction is not decorative. A drug with a high plasma clearance may still have a low hepatic extraction ratio if much of the drug resides in plasma rather than whole blood, or if the plasma-to-blood ratio is unusual because of red-cell partitioning or plasma-protein binding. The symbol \(\CL\) is therefore incomplete unless we know whether it is plasma-based, blood-based, unbound, renal, hepatic, biliary, systemic, or apparent after oral dosing.
 
 \section[2A: Renal and Hepatic Clearance]{2A: Clearance}
 
@@ -249,6 +264,28 @@ The Module 2A objectives ask for first-order and zero-order elimination. These a
 \end{itemize}
 
 The clinical point is that a dose increase can be harmless under linear elimination and dangerous under saturable elimination. The parameter \(\AUC\) no longer scales linearly with dose once \(\CL\) becomes concentration-dependent.
+
+\subsection{Intrinsic clearance lives inside the cell}
+
+Clearance is measured outside the organ, usually from plasma or blood data. But elimination occurs at a cellular site: an enzyme, transporter, or excretory surface. Rowland/Tozer use \(\CLint\) for this intrinsic eliminating activity. Conceptually,
+\[
+  \text{rate of elimination}
+  =
+  \CLint\,C_{u,\pklab{cell}},
+\]
+where \(C_{u,\pklab{cell}}\) is the unbound concentration available to the intracellular enzyme or transporter. If several primary hepatic pathways operate in parallel, intrinsic clearance is additive:
+\[
+  \CLint
+  =
+  \sum_j \CL_{\pklab{int},j}
+  =
+  \CL_{\pklab{int,met}}
+  +
+  \CL_{\pklab{int,ex}}
+  +
+  \cdots.
+\]
+This sounds like a small notational detail, but it is a conceptual guardrail. Plasma concentration is what we measure; intracellular unbound concentration is often what the eliminating machinery sees. The two are close only if binding equilibrium, membrane permeation, and transport are fast enough relative to blood transit through the organ.
 
 \subsection{Mass balance across an organ}
 
@@ -317,6 +354,30 @@ Renal clearance decomposes into three processes:
   -
   \text{reabsorption}.
 \]
+Rowland/Tozer's Chapter 5 makes the bookkeeping slightly more precise. Filtration and secretion add drug to the tubular lumen; reabsorption removes some fraction of that luminal drug back into blood. If \(F_R\) denotes the fraction reabsorbed from the lumen, then
+\[
+  \text{rate of urinary excretion}
+  =
+  (1-F_R)
+  \left(
+    \text{rate of filtration}
+    +
+    \text{rate of secretion}
+  \right),
+\]
+and, after dividing by plasma concentration,
+\[
+  \CLR
+  =
+  (1-F_R)
+  \left(
+    \CL_{\pklab{fil}}
+    +
+    \CL_{\pklab{sec}}
+  \right).
+\]
+This form is helpful because it reminds us that \(\CLR\) is a net result. A drug can be filtered, secreted, and reabsorbed at the same time; the measured clearance only tells us which influence wins.
+
 Only unbound drug is freely filtered at the glomerulus, so filtration clearance is
 \[
   \CL_{\pklab{filtration}}
@@ -365,7 +426,9 @@ This diagnostic rule is one of the highest-yield pieces of renal \PK{}.
 
 Passive reabsorption depends on whether drug is unionized and membrane-permeable in the tubular lumen. Weak bases become more ionized at low pH and are therefore less reabsorbed; their renal clearance can increase when urine becomes acidic. Weak acids become more ionized at high pH and are therefore less reabsorbed; their renal clearance can increase when urine is alkalinized. This is the logic behind urine alkalinization for some weak-acid overdoses.
 
-Urine flow matters most when reabsorption is substantial. If a compound is hardly reabsorbed, forcing more urine cannot remove what was not returning anyway. If a compound is extensively reabsorbed, faster flow can reduce residence time for passive back-diffusion, increasing excretion \cite{rowlandTozer2019ClinicalPKPD}.
+The Chapter 5 refinement is that pH sensitivity has boundaries. A nonpolar weak base is most likely to show marked pH-sensitive renal clearance when its \(pK_a\) is roughly \(7\)--\(12\): acid urine traps it in ionized form and reduces reabsorption. A nonpolar weak acid is most likely to show pH-sensitive renal clearance when its \(pK_a\) is roughly \(3\)--\(7.5\): alkaline urine traps it in ionized form. Outside these ranges, the drug may be essentially always ionized or always unionized over physiologic urine pH. And if the unionized molecule is still very polar, pH manipulation may not create much passive reabsorption in the first place.
+
+Urine flow matters most when reabsorption is substantial. If a compound is hardly reabsorbed, forcing more urine cannot remove what was not returning anyway. If a compound is extensively reabsorbed, faster flow can reduce residence time for passive back-diffusion, increasing excretion \cite{rowlandTozer2019ClinicalPKPD}. Forced diuresis is therefore not a general detoxification lever. It is most rational when renal excretion is, or can become, a major elimination route and when tubular reabsorption is normally large. If metabolism is the dominant route and the renal pathway is tiny, even a large fold-increase in \(\CLR\) may barely move total \(\CL\).
 
 \subsection{Hepatic clearance: blood flow, binding, intrinsic clearance}
 
@@ -418,6 +481,12 @@ Clinical warning & Oral bioavailability may be low and variable due to first pas
 \captionof{table}{The high/low extraction distinction is not a label to memorize. It predicts which physiological perturbation matters.}
 \end{center}
 
+\subsection{Access to the hepatocyte can be the bottleneck}
+
+The well-stirred model is a superb memory aid, but Chapter 5 is careful about its hidden access assumption. It treats the unbound drug at the eliminating site as if it is readily supplied from blood. For many small lipophilic drugs, this is a reasonable first approximation. For more polar or larger molecules, the basolateral hepatocyte membrane and uptake transporters can become rate-limiting.
+
+This matters for modern \PBPK{} thinking. A low hepatic extraction ratio does not always mean that enzyme capacity is intrinsically low. It may mean that drug reaches the enzyme or canalicular transporter slowly. In that case, a change in uptake transport, disease-related transporter expression, competing endogenous compounds, or a transporter-mediated \DDI{} can change observed hepatic clearance even when the metabolic enzyme itself is unchanged. This is the same intuition that makes Jeong/Jusko's \(\fd\) useful later: the effective contact between blood and eliminating tissue may be less than full perfusion.
+
 \subsection{Phase I, Phase II, and transporters}
 
 The course transcript frames biotransformation as chemical conversion of parent drug into a different molecule. A simple teaching split is:
@@ -430,6 +499,23 @@ This split is useful but incomplete unless transport is included. Hepatic cleara
 \itshape
 Which concentration drives elimination, and what barrier separates measured plasma from the eliminating site?
 \end{quote}
+
+\subsection{Biliary clearance and enterohepatic cycling}
+
+The course overview lists excretion into bile alongside urine, saliva, body fluids, and milk. The Rowland/Tozer Chapter 5 expansion is worth making explicit because biliary excretion sits halfway between clearance, distribution, metabolism, transport, and absorption.
+
+Biliary clearance can be written as
+\[
+  \CLbile
+  =
+  Q_{\pklab{bile}}
+  \frac{C_{\pklab{bile}}}{C_p},
+\]
+where \(Q_{\pklab{bile}}\) is bile flow. Bile flow is small, roughly \(0.5\)--\(0.8\ \pklab{mL/min}\), so a drug whose bile concentration is similar to plasma concentration has small biliary clearance. But active canalicular secretion can concentrate drug or metabolite in bile; if the bile-to-plasma concentration ratio is very high, biliary clearance can become clinically meaningful.
+
+The structural hints are useful but imperfect. Biliary excretion is more likely for polar compounds, actively transported compounds, and molecules or conjugates with molecular weight above roughly \(350\ \pklab{g/mol}\). Glucuronide conjugates often fit this pattern: they are polar, ionized, and large enough to be secreted efficiently into bile.
+
+Enterohepatic cycling should not be confused with elimination. If drug or a glucuronide metabolite is secreted into bile, reaches the intestine, is converted back to parent drug by gut enzymes, and is reabsorbed, the molecule has cycled through a distribution loop. It becomes elimination only to the extent that drug or metabolite finally leaves the body in feces. This is why biliary obstruction can change half-life in different directions depending on whether the bile-intestine loop was part of the apparent distribution space or an actual route of loss.
 
 \subsection{Induction and inhibition}
 
@@ -694,6 +780,34 @@ A concentration--time curve is not one parameter. Different parts of the curve r
 \end{itemize}
 The same \(\AUC\) can hide very different early exposure; the same \(\Cmax\) can occur with different total exposure.
 
+\subsection{Primary and secondary pharmacokinetic parameters}
+
+One of the cleanest teaching moves in Rowland/Tozer Chapter 5 is to separate parameters closer to physiology from quantities derived from them. For Module 2, a useful working classification is:
+\begin{itemize}[leftmargin=2em]
+  \item \textbf{Primary disposition parameters}: \(\CLH,\ \CLR,\ \Vd,\ \Vss\).
+  \item \textbf{Physiological drivers}: \(Q,\ \fu,\ \fub,\ \CLint,\ \GFR\), transport, binding, permeability, urine pH, and urine flow.
+  \item \textbf{Secondary parameters or observations}: \(t_{1/2},\ \kel,\ f_e,\ \AUC,\ \Cmax,\ \Tmax\).
+\end{itemize}
+This distinction prevents a common interpretive reversal. A half-life does not cause clearance; half-life follows from clearance and distribution:
+\[
+  t_{1/2}
+  =
+  \frac{\log 2\,\Vd}{\CL}.
+\]
+Similarly, after an IV dose under linear conditions,
+\[
+  \AUC=\frac{D}{\CL},
+  \qquad
+  f_e=\frac{\CLR}{\CL}.
+\]
+After an oral dose,
+\[
+  \AUC=\frac{\Fbio D}{\CL}
+  =
+  \frac{\Fa\Fg\Fh D}{\CL}.
+\]
+So when \(\AUC\) changes, the mechanistic question is not ``what happened to \(\AUC\)?'' but which upstream determinant changed: dose, \(\Fa\), \(\Fg\), \(\Fh\), or systemic \(\CL\).
+
 \subsection{One oral dose, many possible explanations}
 
 Suppose a patient has unexpectedly low oral \(\AUC\). Module 2 gives a differential diagnosis:
@@ -726,6 +840,7 @@ Food increases \(\AUC\) & Solubilization, bile/lipid effects, formulation depend
 \(\CLR>\fu\GFR\) & Net tubular secretion & Transporter inhibition/competition, renal \DDI. \\
 \(\CLR<\fu\GFR\) & Net reabsorption & Urine pH, urine flow, lipophilicity, pKa. \\
 High \(\CLH\approx\Qh\) & High extraction, flow-limited systemic clearance & First-pass, hepatic blood flow, route dependence. \\
+High bile-to-plasma ratio & Active biliary secretion & Canalicular transporters, glucuronides, fecal recovery, enterohepatic cycling. \\
 Large \(\Vd\) & Tissue binding/partitioning or low plasma concentration & Lipophilicity, tissue \(K_p\), lysosomal trapping, RBC partition. \\
 Total concentration changes but response does not & Protein binding shift with stable unbound exposure & Measure or model unbound concentration. \\
 \bottomrule
@@ -808,6 +923,11 @@ Memorize these:
   E=\frac{\Cin-\Cout}{\Cin}.
 \]
 \[
+  \CLB=\CLp\frac{C_p}{C_b},
+  \qquad
+  \CLu=\frac{\CLp}{\fu}.
+\]
+\[
 \begin{aligned}
   \CL_{\pklab{filtration}}&=\fu\GFR,\\
   \CLR>\fu\GFR&\Rightarrow\text{secretion},\\
@@ -820,6 +940,13 @@ Memorize these:
   \frac{\Qh\fub\CLint}{\Qh+\fub\CLint},
   \qquad
   \Fbio=\Fa\Fg\Fh.
+\]
+\[
+  \CLbile
+  =
+  Q_{\pklab{bile}}\frac{C_{\pklab{bile}}}{C_p},
+  \qquad
+  t_{1/2}=\frac{\log 2\,\Vd}{\CL}.
 \]
 \[
   \Vd=\frac{A_{\pklab{body}}}{C_p},
@@ -836,11 +963,14 @@ Do not say ``high protein binding means low clearance'' without asking extractio
 For every Module 2 problem, I will ask:
 \begin{itemize}[leftmargin=2em]
   \item Which concentration is referenced: plasma, blood, or unbound?
+  \item If I am estimating extraction, have I converted plasma clearance to blood clearance?
   \item Is the observation about rate, extent, or both?
-  \item Is clearance renal, hepatic, biliary, metabolic, or total?
+  \item Is clearance renal, hepatic, biliary, metabolic, excretory, or total?
   \item Is the drug high extraction or low extraction in the relevant organ?
+  \item Is access to the eliminating site limited by permeability or transport?
   \item Does protein binding change total concentration, unbound concentration, clearance, distribution, or several of these at once?
   \item Is oral exposure limited by \(\Fa\), \(\Fg\), \(\Fh\), or systemic \(\CL\)?
+  \item Is bile a route of loss, or is enterohepatic cycling returning drug to the system?
   \item Are transporters or permeability barriers between measured concentration and the eliminating site?
   \item Would the label need renal impairment, hepatic impairment, food-effect, DDI, or dose-adjustment language?
 \end{itemize}
@@ -849,7 +979,7 @@ For every Module 2 problem, I will ask:
 
 \subsection{One paragraph}
 
-Module 2 turns \ADME{} from a mnemonic into a coupled physiological model. Clearance is the proportionality between concentration and elimination rate, but its value depends on the reference concentration and organ mechanism. Renal clearance is filtration plus secretion minus reabsorption, with \(\fu\GFR\) as the filtration benchmark. Hepatic clearance is shaped by blood flow, unbound fraction, intrinsic clearance, transport, and first pass, with high- and low-extraction drugs responding differently to induction, inhibition, binding, and flow. Distribution determines how amount becomes measured concentration, while protein binding separates total and unbound concentration. Absorption determines rate and extent of systemic input through dissolution, permeability, transporters, transit, food, gut metabolism, and hepatic first pass. Jeong and Jusko's \(\fd\) update reminds us that the classical equations are limiting cases: drug must physically reach tissues and eliminating cells before intrinsic clearance can matter. This is the conceptual spine for interpreting \(\AUC\), \(\Cmax\), \(\Tmax\), organ impairment, food effects, and \DDI{} in later modules.
+Module 2 turns \ADME{} from a mnemonic into a coupled physiological model. Clearance is the proportionality between concentration and elimination rate, but its value depends on the reference concentration, organ, and process: plasma, blood, unbound, renal, hepatic, biliary, metabolic, or excretory. Renal clearance is filtered plus secreted drug that escapes reabsorption, with \(\fu\GFR\) as the filtration benchmark and urine pH/flow mattering mainly when passive reabsorption is important. Hepatic clearance is shaped by blood flow, unbound fraction, intrinsic clearance, access to hepatocytes, transport, biliary secretion, and first pass. Distribution determines how amount becomes measured concentration, while protein binding separates total and unbound concentration. Absorption determines rate and extent of systemic input through dissolution, permeability, transporters, transit, food, gut metabolism, and hepatic first pass. Rowland/Tozer's primary-versus-secondary parameter distinction keeps the causality straight: half-life, \(\AUC\), and \(f_e\) follow from upstream physiological parameters. Jeong and Jusko's \(\fd\) update reminds us that the classical equations are limiting cases: drug must physically reach tissues and eliminating cells before intrinsic clearance can matter. This is the conceptual spine for interpreting \(\AUC\), \(\Cmax\), \(\Tmax\), organ impairment, food effects, and \DDI{} in later modules.
 
 \bibliographystyle{plain}
 \bibliography{../refs/pharmacology}
