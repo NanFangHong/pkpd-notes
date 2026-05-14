@@ -1,5 +1,34 @@
 [
   {
+    "slug": "bmeg671-lectures-1-3-compartmental-modeling",
+    "date": "2026-05-15",
+    "title": "UD BMEG 671 Lectures 1-3: Compartmental Modeling Foundations",
+    "category": "Mathematical Modeling Foundations",
+    "year": "2026",
+    "paper": "UD BMEG/ELEG 471/671 Fall 2025 syllabus; Lectures 1-2 slides and transcripts; MATLAB live scripts; DiStefano textbook; FDA/ICH/ASME/SBML/SimBiology updates",
+    "citationKey": "bmeg671Lecture1Slides2025",
+    "tex": "2026-05-15-bmeg671-lectures-1-3-compartmental-modeling.tex",
+    "pdf": "2026-05-15-bmeg671-lectures-1-3-compartmental-modeling.pdf",
+    "tags": ["BMEG 671", "compartmental modeling", "ODE", "MATLAB", "SimBiology", "model verification", "model validation", "two-compartment model", "nonlinear elimination", "SIR"],
+    "summary": "UD BMEG/ELEG 471/671 前三次课的中英混排长笔记：把 compartment, state, input, output, mass balance, unit checking, impulse/step input, one- and two-compartment ODEs, MATLAB solver pattern, butyrate bone-formation exercise, nonlinear saturation, SIR, verification/validation and model credibility 接成一条可自学的建模脊柱。",
+    "questions": [
+      "如何从一个 biomedical story 选择 compartments, species, states, inputs and outputs?",
+      "为什么 impulse input 应该作为 initial condition 处理，而 step input 应该留在 ODE right-hand side?",
+      "两室线性模型的符号、单位、矩阵形式和 steady state 如何互相校验?",
+      "非线性饱和消除为什么会让 steady state 从 IR/k 变成有 capacity 条件的问题?",
+      "verification, validation, credibility 和 question of interest 在课程项目里分别意味着什么?"
+    ],
+    "model": "\\dot q=f(q,u,\\theta,t),\\quad y=g(q,\\theta,t)",
+    "takeaways": [
+      "Compartment 是建模抽象，不是解剖事实；state 是会随时间变的量，output 才是实验真正测到的量。",
+      "Mass balance 的加减号、单位一致性和 internal transfer 的成对出现，是跑仿真前最重要的 verification。",
+      "Impulse dose 改初值，step input 改右端项；混淆二者等于模拟了另一个实验。",
+      "Two-compartment model 已经包含后来 controllability、observability、identifiability 和 output map 的种子。",
+      "Nonlinear saturation 的关键是 capacity：当 input rate 接近或超过最大消除能力，线性稳态直觉会失效。",
+      "模型可信度不是抽象美德，而是相对于 question of interest 和 decision consequence 的证据链。"
+    ]
+  },
+  {
     "slug": "uf-pha6125-module-2-adme-clearance-distribution-absorption",
     "date": "2026-05-15",
     "title": "UF PHA 6125 Module 2: Clearance, Distribution, and Absorption",
