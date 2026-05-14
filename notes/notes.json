@@ -29,6 +29,37 @@
     ]
   },
   {
+    "slug": "uf-pha6125-module-3-noncompartmental-pk",
+    "date": "2026-05-15",
+    "title": "UF PHA 6125 Module 3: Non-Compartmental PK",
+    "category": "PK/PD Foundations",
+    "year": "2026",
+    "paper": "UF PHA 6125 Module 3 slides and transcript; FDA/ICH BA/BE guidance; DiStefano NCA perspective",
+    "citationKey": "ufPha6125Module3Nca2022",
+    "tex": "2026-05-15-uf-pha6125-module-3-noncompartmental-pk.tex",
+    "pdf": "2026-05-15-uf-pha6125-module-3-noncompartmental-pk.pdf",
+    "tags": ["PHA 6125", "NCA", "AUC", "Cmax", "Tmax", "lambda z", "half-life", "bioavailability", "bioequivalence", "non-parametric superposition"],
+    "summary": "UF PHA 6125 Module 3 的中英混排长笔记：把 non-compartmental analysis 写成从 concentration-time curve 到 AUC、Cmax、Tmax、lambda_z、half-life、CL/F、Vz/F、AUMC、MRT、bioavailability、bioequivalence、dose proportionality 和 non-parametric superposition 的一条推理链，并补入 FDA/ICH 2026 视角。",
+    "questions": [
+      "为什么 NCA 是 curve geometry 加 terminal exponential assumptions，而不是完全 model-free？",
+      "AUC0-last 的数值积分和 AUClast-infinity 的外推分别依赖什么假设？",
+      "linear trapezoidal、log trapezoidal、linear-up/log-down 的区别在哪里？",
+      "如何选择 terminal slope，并为什么 R^2 不是充分证据？",
+      "为什么 oral NCA 只能给 CL/F 和 Vz/F，而不能单独识别 CL 与 F？",
+      "bioequivalence 为什么用 AUC、Cmax 的 geometric mean ratio 和 90% CI？",
+      "non-parametric superposition 为什么能从 single-dose curve 推 steady state？"
+    ],
+    "model": "AUC_0-inf = AUC_0-tlast + C_last/lambda_z, t_1/2 = log(2)/lambda_z, CL = Dose/AUC, CL/F = Dose/AUC, V_z = CL/lambda_z, MRT = AUMC/AUC",
+    "takeaways": [
+      "Cmax、Tmax、Clast、Tlast 是直接读数；AUC 和 AUMC 是曲线几何；lambda_z 是 terminal semi-log regression 的结果。",
+      "NCA 的 full AUC 由 observed interpolation 与 terminal extrapolation 两部分组成，extrapolated fraction 越大，对假设越敏感。",
+      "Log trapezoidal 适合正值且下降的近似 mono-exponential 区间；上升段通常用 linear trapezoid。",
+      "Half-life、CL/F、Vz/F 都依赖 terminal slope 或 AUC，因此必须视觉检查 terminal phase 与单位。",
+      "BE 的常用判据不是点估计接近 1，而是 log-transformed AUC/Cmax 的 test/reference geometric mean ratio 的 90% CI 落在 0.80-1.25。",
+      "NCA 是进入 compartmental/population PK 的第一层地图：先描述曲线，再决定是否需要机制模型解释曲线。"
+    ]
+  },
+  {
     "slug": "uf-pha6125-module-2-adme-clearance-distribution-absorption",
     "date": "2026-05-15",
     "title": "UF PHA 6125 Module 2: Clearance, Distribution, and Absorption",
