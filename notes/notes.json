@@ -10,7 +10,7 @@
     "tex": "2026-05-15-bmeg671-module-1-compartmental-modeling-foundations.tex",
     "pdf": "2026-05-15-bmeg671-module-1-compartmental-modeling-foundations.pdf",
     "tags": ["BMEG 671", "compartmental modeling", "ODE", "MATLAB", "SimBiology", "model verification", "model validation", "two-compartment model", "nonlinear elimination", "SIR"],
-    "summary": "UD BMEG/ELEG 471/671 Module 1 的中英混排长笔记：把 compartment, state, input, output, mass balance, unit checking, impulse/step input, one- and two-compartment ODEs, MATLAB solver pattern, butyrate bone-formation exercise, nonlinear saturation, SIR, verification/validation and model credibility 接成一条可自学的建模脊柱。",
+    "summary": "UD BMEG/ELEG 471/671 Module 1 的中英混排长笔记：把 compartment, state, input, output, mass balance, unit checking, impulse/step input, one- and two-compartment ODEs, MATLAB live-script reading, butyrate bone-formation exercise, nonlinear saturation, SIR, verification/validation and model credibility 接成一条可自学的建模脊柱。",
     "questions": [
       "如何从一个 biomedical story 选择 compartments, species, states, inputs and outputs?",
       "为什么 impulse input 应该作为 initial condition 处理，而 step input 应该留在 ODE right-hand side?",
@@ -22,8 +22,9 @@
     "takeaways": [
       "Compartment 是建模抽象，不是解剖事实；state 是会随时间变的量，output 才是实验真正测到的量。",
       "Mass balance 的加减号、单位一致性和 internal transfer 的成对出现，是跑仿真前最重要的 verification。",
-      "Impulse dose 改初值，step input 改右端项；混淆二者等于模拟了另一个实验。",
+      "Impulse dose 改初值，step input 改右端项；课堂 MATLAB 代码正是在训练这个实验编码习惯。",
       "Two-compartment model 已经包含后来 controllability、observability、identifiability 和 output map 的种子。",
+      "读 live script 时要逐行追问 state-vector order、gain/loss signs、parameter passing、input location 和 verification oracle。",
       "Nonlinear saturation 的关键是 capacity：当 input rate 接近或超过最大消除能力，线性稳态直觉会失效。",
       "模型可信度不是抽象美德，而是相对于 question of interest 和 decision consequence 的证据链。"
     ]
@@ -39,7 +40,7 @@
     "tex": "2026-05-15-bmeg671-module-2-nonlinear-systems-stability-dosing.tex",
     "pdf": "2026-05-15-bmeg671-module-2-nonlinear-systems-stability-dosing.pdf",
     "tags": ["BMEG 671", "nonlinear systems", "SimBiology", "linearization", "observability", "controllability", "mass action", "Michaelis-Menten", "Hill kinetics", "logistic growth", "Lyapunov stability", "positive invariance", "limit cycles", "virus-host dynamics", "dosing"],
-    "summary": "UD BMEG/ELEG 471/671 Module 2 的中英混排长笔记：把 SimBiology model grammar, nonlinear linearization, observability, controllability, kinetic rate laws, stationary points, Lyapunov stability, positive invariance, limit cycles, MATLAB parameter scans, virus-host dynamics and vaccine dosing workflow 接成一条从 ODE syntax 到 scientific judgment 的建模主线。",
+    "summary": "UD BMEG/ELEG 471/671 Module 2 的中英混排长笔记：把 SimBiology model grammar, nonlinear linearization, observability, controllability, kinetic rate laws, stationary points, Lyapunov stability, positive invariance, limit cycles, MATLAB live-script workflows, virus-host dynamics and vaccine dosing workflow 接成一条从 ODE syntax 到 scientific judgment 的建模主线。",
     "questions": [
       "为什么 nonlinear biomedical ODE 需要先问 observability、controllability 和 local linearization?",
       "如何用 Jacobian、trace/determinant 和 eigenvalues 判断 stationary point 的局部稳定性?",
@@ -52,9 +53,10 @@
     "takeaways": [
       "SimBiology 不是只负责画图；它逼迫模型显式声明 species、reactions、rate laws、units、doses 和 outputs。",
       "Linearization 把 nonlinear ODE 在 operating point 附近变成局部线性系统，因此 observability、controllability 和 eigenvalue stability 才有入口。",
-      "Michaelis-Menten 的核心是 capacity：input 接近最大消除能力时，linear steady-state intuition 会失效。",
+      "Michaelis-Menten 的核心是 capacity：课堂代码通过扫描 IR 明确展示 input 接近最大消除能力时 linear steady-state intuition 会失效。",
       "Lyapunov first method 的价值在于处理 Jacobian 为零或 eigenvalue test inconclusive 的情况。",
       "Positive invariance 不等于稳定，但对浓度、细胞数、病毒量这类非负状态是模型有效性的底线。",
+      "Limit-cycle、fox-rabbit、virus-host 和 stability-scan 脚本共同示范：多初值、符号 Jacobian、eigenvalue 和参数范围扫描比单条仿真曲线更有解释力。",
       "Repeated dosing 可以手写 piecewise MATLAB simulation，也可以用 SimBiology dose object；成熟 workflow 是让两者编码同一个实验并互相校验。"
     ]
   },

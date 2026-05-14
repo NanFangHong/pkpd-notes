@@ -53,7 +53,7 @@
 \newcommand{\Bblood}{B_2}
 \newcommand{\unitstep}{\mathbf{1}(t)}
 \newcommand{\dirac}{\delta(t)}
-\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\code}[1]{\texttt{\detokenize{#1}}}
 
 \definecolor{bmegblue}{HTML}{114B7A}
 \definecolor{bmegteal}{HTML}{178F88}
@@ -435,6 +435,30 @@ For an IV infusion with central amount \(q\), concentration \(C=q/V\), and elimi
 \]
 This is the familiar pharmacokinetic steady-state relationship. Again, the course's simple ODE is already a real drug-development tool: it tells us how a maintenance infusion rate maps to target concentration.
 
+\subsection{Step-input code pattern}
+
+The corresponding live script should be read as a miniature experiment. The input rate is not hidden in the initial condition; it lives inside the right-hand side:
+\begin{verbatim}
+t = 0:0.1:10;
+k = 1;
+IR = 1;
+qi = 0;
+soln = ode45(@(t,y) ODEs(t,y), t, qi);
+q_sol = deval(soln,t,1);
+q_ss = IR/k;
+\end{verbatim}
+with
+\begin{verbatim}
+function derivVector = ODEs(t,y)
+  k = 1;
+  IR = 1;
+  q = y(1);
+  dqdt = IR - k*q;
+  derivVector = [dqdt]';
+end
+\end{verbatim}
+This tiny difference from the impulse script is the whole modeling lesson. An impulse dose changes \(q(0)\). A sustained infusion changes \(\dot q\) for as long as the infusion is active. If the code and the intended experiment disagree here, every later plot may look smooth and still be answering the wrong question.
+
 \section{The MATLAB Pattern}
 
 \subsection{Why code appears so early}
@@ -456,6 +480,24 @@ function derivVector = ODEs(t,y)
 end
 \end{verbatim}
 The solver does not care what the states mean. It receives a vector and returns a derivative vector. The meaning is carried by our naming, equations, and documentation.
+
+\subsection{Parameter passing and reusable code}
+
+The first-week scripts deliberately hard-code simple parameters inside \code{ODEs}. That makes the classroom algebra easy to see. As soon as the same model is scanned over doses, rates, or patient values, the safer habit is to pass parameters through a closure:
+\begin{verbatim}
+theta = [k, IR];
+odeFunc = @(t,y) ODEs(t,y,theta);
+soln = ode45(odeFunc, t, qi);
+
+function derivVector = ODEs(t,y,theta)
+  k = theta(1);
+  IR = theta(2);
+  q = y(1);
+  dqdt = IR - k*q;
+  derivVector = [dqdt]';
+end
+\end{verbatim}
+This is not software decoration. It separates model structure from the experiment being run. Later vaccine and stability scripts use exactly this idea: the ODE function encodes mechanism, while the outer script changes inputs, parameters, initial conditions, or time windows.
 
 \subsection{Impulse versus step in code}
 
@@ -545,6 +587,20 @@ In matrix form:
 \]
 
 Notice the diagonal terms are negative sums of all first-order exits from that compartment. The off-diagonal terms are gains from the other compartment. This pattern generalizes to large compartmental systems.
+
+\subsection{Two-compartment code as a sign audit}
+
+The two-compartment live script is especially useful because each code line can be checked against one arrow in the diagram:
+\begin{verbatim}
+q1 = y(1);
+q2 = y(2);
+dq1dt = -(k01+k21)*q1 + k12*q2 + IR1;
+dq2dt =  k21*q1 - (k02+k12)*q2 + IR2;
+derivVector = [dq1dt,dq2dt]';
+\end{verbatim}
+The diagonal loss terms \(-(k_{01}+k_{21})q_1\) and \(-(k_{02}+k_{12})q_2\) are the easiest place to make a sign error. The transfer \(k_{21}q_1\) must appear once as a loss from compartment 1 and once as a gain to compartment 2. The transfer \(k_{12}q_2\) must do the opposite. In practice I would mark the diagram and code with the same colors before trusting a simulation.
+
+The script's input reversal exercise is also a code-level identifiability lesson. Changing \code{IR1} and \code{IR2} changes which state receives external mass. If symmetric parameters and symmetric inputs make the curves overlap, the overlap is not a numerical accident; it is a structural property of the model.
 
 \subsection{Steady state for the in-class parameters}
 
@@ -705,6 +761,22 @@ This exists as a positive finite steady state only when
 \]
 If input rate approaches capacity, \(q^*\) grows sharply. If input rate exceeds capacity, no finite steady state exists; the amount keeps rising. This is the mathematical version of the lecture's qualitative statement that high input can overwhelm elimination.
 
+\subsection{Code scan for capacity stress testing}
+
+The nonlinear live script turns the algebra into a stress test by changing the input rate while keeping \(C\) and \(K\) fixed \cite{bmeg671MatlabNonlinearStability2025}:
+\begin{verbatim}
+IRs = [0.01 0.02 1 2.5 5];
+C = 1;
+K = 1;
+
+function derivVector = ODEs(t,y,IR,C,K)
+  q = y(1);
+  dqdt = IR - C*q/(K+q);
+  derivVector = [dqdt]';
+end
+\end{verbatim}
+The pedagogical point is that \code{IRs} is not just a plotting convenience. It asks whether the qualitative behavior is stable across experimental regimes. For \(\IRate<C\), trajectories can settle. For \(\IRate\ge C\), the code should show continued growth, because the modeled system has no finite positive steady state. If a numerical plot appears to ``plateau'' in that regime, it is a warning to inspect the time horizon, axis scaling, solver tolerances, or equation implementation.
+
 \subsection{Why this matters pharmacologically}
 
 Linear models are forgiving: doubling input doubles steady state. Saturable models are not. Near capacity, a small increase in dose can produce a large increase in exposure. This is why nonlinear elimination is not just a mathematical curiosity; it is a safety issue. Classic examples in pharmacokinetics include saturable metabolism, saturable transport, and target-mediated drug disposition.
@@ -740,6 +812,23 @@ The SIR model appears in Lecture 3 as another compartmental system:
   \end{aligned}
 \]
 Here \(S\), \(I\), and \(R\) are susceptible, infected, and recovered populations or fractions. The infection term \(\beta SI\) is nonlinear because it depends on contact between susceptible and infected individuals.
+
+\subsection{SIR code pattern}
+
+The SIR live script uses the same state-vector grammar as the \PK{} scripts:
+\begin{verbatim}
+S = y(1);
+I = y(2);
+R = y(3);
+
+dSdt = -beta*S*I;
+dIdt =  beta*S*I - a*I;
+dRdt =  a*I;
+derivVector = [dSdt,dIdt,dRdt]';
+\end{verbatim}
+This is where code becomes a mass-balance proof. The term \(\beta SI\) disappears from \(S\) and appears in \(I\); the term \(aI\) disappears from \(I\) and appears in \(R\). Adding the three code lines should give zero, just as adding the equations gives conservation. A reader can therefore verify the script before thinking about epidemiology.
+
+The code also makes the nonlinear leap visible. In the one-compartment model, every flow was proportional to one state. Here infection is proportional to a product of two states. That product is the doorway to thresholds, local linearization, and stability analysis in Module 2.
 
 \subsection{Conservation}
 

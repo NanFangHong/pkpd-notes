@@ -50,7 +50,7 @@
 \newcommand{\SIR}{\ensuremath{\pksym{SIR}}}
 \newcommand{\AUC}{\ensuremath{\pksym{AUC}}}
 \newcommand{\CL}{\ensuremath{\pksym{CL}}}
-\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\code}[1]{\texttt{\detokenize{#1}}}
 \newcommand{\Vmax}{V_{\max}}
 \newcommand{\Km}{K_m}
 
@@ -144,6 +144,21 @@ Linear models are the cleanest possible classroom entrance. But real biomedical 
 \end{itemize}
 The course therefore does not treat nonlinearity as advanced ornament. It is the normal state of biomedical modeling.
 
+\subsection{How to read the uploaded code}
+
+The \MATLAB{} and \SimBio{} files for this module should be read as model specifications, not as after-class accessories. Each file teaches a distinct modeling move:
+\begin{itemize}[leftmargin=2em]
+  \item \code{SIR model.mlx}: nonlinear mass-action transfer and state-vector ordering.
+  \item \code{Single_compartment_step_input_non_linear.mlx}: capacity-limited elimination under different input rates.
+  \item \code{Two_compartment_step_input_non_linear.mlx}: nonlinear transfer embedded inside a two-state balance.
+  \item \code{Limit cycle model.mlx}: time plot versus phase portrait and initial-condition tests.
+  \item \code{fox-rabbit.mlx}: Lotka--Volterra-style closed orbits versus attracting cycles.
+  \item \code{Stability_parameter_ranges.mlx}: symbolic stationary points, Jacobian, eigenvalues, and parameter scans.
+  \item \code{Standard virus-host dynamic model.mlx}: infection threshold analysis through symbolic linearization.
+  \item \code{Vaccine model with dose.mlx}: piecewise dosing and state carry-over between simulation segments.
+\end{itemize}
+The reader should therefore ask of every snippet: what are the states, where is the input, which terms are gains or losses, what is being scanned, and what qualitative behavior would falsify my interpretation?
+
 \section{SimBiology as Equation Grammar}
 
 \subsection{What a graphical model builder is really checking}
@@ -163,6 +178,22 @@ The Sep 8 lecture uses \SIR{} to show how a familiar epidemic story becomes a mo
   \end{aligned}
 \]
 The reaction \(S+I\to 2I\) is second order in the state variables. If \(S\) and \(I\) are amounts or concentrations, \(\beta\) must carry reciprocal amount per time units. If \(S\) and \(I\) are fractions of a normalized population, the unit bookkeeping changes. This is why the transcript repeatedly warns that dimension and unit are not the same thing \cite{bmeg671TranscriptsSep08to262025}.
+
+\subsection{The SIR script as a bridge}
+
+The plain \MATLAB{} SIR script is the bridge between hand-written equations and the \SimBio{} project:
+\begin{verbatim}
+beta = 0.9;
+a = 0.1;
+S = y(1);
+I = y(2);
+R = y(3);
+dSdt = -beta*S*I;
+dIdt =  beta*S*I - a*I;
+dRdt =  a*I;
+derivVector = [dSdt,dIdt,dRdt]';
+\end{verbatim}
+This code is valuable because it makes the reaction grammar inspectable. The infection flux is a loss from \(S\) and a gain to \(I\). The recovery flux is a loss from \(I\) and a gain to \(R\). If the same model is rebuilt in \SimBio{}, those gains and losses should reappear as reactions and rate laws, not as a visually pleasing but different mechanism.
 
 \subsection{The same diagram can hide different equations}
 
@@ -442,6 +473,22 @@ to compare low-input and high-input regimes \cite{bmeg671MatlabNonlinearStabilit
   q^\ast=\frac{\pksym{IR}\,K}{C-\pksym{IR}}.
 \]
 As \(\pksym{IR}\) approaches \(C\), the steady state grows sharply. If \(\pksym{IR}\ge C\), the input overwhelms maximal elimination and no finite steady state exists in this simple model. That is the pharmacological meaning of capacity.
+
+The single-compartment nonlinear script expresses that question directly:
+\begin{verbatim}
+IRs = [0.01 0.02 1 2.5 5];
+C = 1;
+K = 1;
+dqdt = IR - C*q/(K+q);
+\end{verbatim}
+The vector \code{IRs} is the experimental design. Low values test the near-linear region. Values near or above \(C\) test whether the model's capacity limit has real consequences.
+
+The two-compartment nonlinear script then places a saturable term inside a transfer model:
+\begin{verbatim}
+dq1dt = -(k01 + C/(K+q1))*q1 + k12*q2 + u1;
+dq2dt =  (C/(K+q1))*q1 - (k02+k12)*q2;
+\end{verbatim}
+This is subtle. The factor \(C/(K+q_1)\) is state-dependent, so the effective transfer rate from compartment 1 changes with \(q_1\). At low \(q_1\), the transfer resembles first order. At high \(q_1\), the total transfer \(Cq_1/(K+q_1)\) approaches \(C\). Thus the same diagram as a linear two-compartment model can encode very different dose dependence.
 
 \subsection{Hill functions}
 
@@ -825,6 +872,20 @@ The first plot shows oscillation over time. The second plot is a phase portrait.
 
 Different initial conditions converge to the same unit circle, except the exact origin, which is a stationary point. In practice, exact unstable stationary points are fragile; a tiny perturbation moves away. That is another reminder that simulation initial conditions and biological initial conditions are not the same thing.
 
+The live script makes this test concrete:
+\begin{verbatim}
+t = 0:0.1:100;
+qi = [10,10];
+[t,x] = ode15s(@(t,y) ODEs(t,y), t, qi);
+plot(t,x);        % time courses
+plot(x(:,1),x(:,2));  % phase portrait
+
+qi1 = [10,1];  qi2 = [1,10];
+qi3 = [-10,-1]; qi4 = [-1,-10];
+qi5 = [0.1,0.1]; qi6 = [0,0];
+\end{verbatim}
+The important design choice is the list of \code{qi} values. A single trajectory can show an oscillation; multiple initial conditions show whether the oscillation attracts a region of state space. The exact origin is included on purpose because it is the exceptional stationary point.
+
 \subsection{Fox-rabbit dynamics are not the same kind of limit cycle}
 
 The lecture then compares the classic prey-predator form:
@@ -839,6 +900,15 @@ Depending on whether \(f\) denotes foxes and \(r\) rabbits, the signs are a matt
   f^\ast=\frac{c}{d},\qquad r^\ast=\frac{b}{a}.
 \]
 Classical Lotka--Volterra systems can generate closed orbits whose amplitude depends on initial condition. That is not the same as an attracting limit cycle. A true attracting limit cycle pulls a range of initial conditions toward the same closed trajectory. This distinction matters in \QSP{} and disease modeling: repeated oscillation on a plot does not automatically mean robust biological rhythm.
+
+The \code{fox-rabbit.mlx} script is therefore best read as a contrast case:
+\begin{verbatim}
+dfdt = a*r*f - b*f;
+drdt = c*r - d*r*f;
+a = 0.1; b = 0.4; c = 1.1; d = 0.4;
+qi = [10,10];
+\end{verbatim}
+Changing \code{qi} changes the orbit size in the classical Lotka--Volterra geometry. That is precisely why the earlier unit-circle example is stronger as an attracting-cycle example.
 
 \section{Parameter Ranges and Stability Maps}
 
@@ -855,6 +925,23 @@ The stability live scripts show a useful \MATLAB{} pattern:
   \item scan parameters and record whether \(\max\operatorname{Re}\lambda<0\).
 \end{enumerate}
 Mathematically this is simply the local stability theorem. Computationally it becomes a map from parameter space to qualitative behavior.
+
+The core code skeleton is short enough to keep in mind:
+\begin{verbatim}
+syms f r a b c d
+df = a*r*f - b*f;
+dr = c*r - d*r*f;
+solution = solve(df==0, dr==0, [f;r]);
+A = jacobian([df;dr],[f;r]);
+
+ds = 0:0.01:1;
+for i = 1:length(ds)
+  d = ds(i);
+  eig_value = double(subs(eig(A)));
+  stables(i) = max(real(eig_value)) < 0;
+end
+\end{verbatim}
+The line \code{max(real(eig_value)) < 0} is the computational form of local asymptotic stability. The scan does not merely make a pretty figure; it asks whether a qualitative conclusion survives parameter uncertainty.
 
 \subsection{Why a parameter scan is more than a plot}
 
@@ -890,6 +977,18 @@ Here \(x\) is uninfected target cells, \(y\) infected cells, and \(v\) free viru
 \end{tabularx}
 \end{center}
 The \MATLAB{} script uses symbolic algebra to solve stationary points, compute the Jacobian, and evaluate eigenvalues under numerical parameter values \cite{bmeg671MatlabNonlinearStability2025}.
+
+The uploaded script encodes the workflow transparently:
+\begin{verbatim}
+syms x y v lambda d beta a k w
+dx = lambda - d*x - beta*v*x;
+dy = beta*v*x - a*y;
+dv = k*y - w*v;
+solution = solve(dx==0,dy==0,dv==0,[x;y;v]);
+A = jacobian([dx;dy;dv],[x;y;v]);
+eig(A_at_equilibrium)
+\end{verbatim}
+The scientific discipline is in the order. First write the mechanism, then solve for possible operating points, then linearize, then interpret eigenvalues. If we jump directly to simulation, we may miss a threshold or unstable equilibrium that explains why the simulation behaves the way it does.
 
 \subsection{Disease-free and infected equilibria}
 
@@ -946,6 +1045,31 @@ The final state of one segment becomes the initial condition of the next. In cod
   \vect q_{\mathrm{next},0}=\vect x_{\mathrm{previous}}(\text{end},:).
 \]
 This is not a numerical trick. It is the mathematical statement that ODE trajectories are continuous across a dose interval unless the dose is modeled as an impulse.
+
+The vaccine live script makes the carry-over explicit:
+\begin{verbatim}
+theta = [da,lambda,db,e];
+qi = [0,1];
+
+[t1,x1] = ode15s(@(t,y) ODEs(t,y,theta,0), t_before, qi);
+qi = x1(end,:);
+[t2,x2] = ode15s(@(t,y) ODEs(t,y,theta,1), t_dose, qi);
+qi = x2(end,:);
+[t3,x3] = ode15s(@(t,y) ODEs(t,y,theta,0), t_after, qi);
+x = [x1;x2;x3];
+\end{verbatim}
+and the right-hand side is:
+\begin{verbatim}
+function derivVector = ODEs(t,y,theta,u)
+  da = theta(1); lambda = theta(2);
+  db = theta(3); e = theta(4);
+  a = y(1); b = y(2);
+  dadt = -da*a + u;
+  dbdt = lambda - db*b + e*a*b;
+  derivVector = [dadt,dbdt]';
+end
+\end{verbatim}
+This is the cleanest example in the module of separating mechanism from regimen. The same \code{ODEs} function is used before, during, and after dosing; only \(u\) and the initial condition change.
 
 \begin{center}
 \resizebox{0.9\textwidth}{!}{%
