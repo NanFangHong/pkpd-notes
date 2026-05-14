@@ -43,6 +43,7 @@
 \usepackage{tabularx}
 \usepackage{tikz}
 \usepackage{xcolor}
+\usepackage{xurl}
 \usepackage{xeCJK}
 
 \IfFontExistsTF{Latin Modern Roman}{
@@ -61,7 +62,7 @@
   }
 }
 
-\usepackage[hidelinks,unicode]{hyperref}
+\usepackage[hidelinks,unicode,breaklinks=true]{hyperref}
 \hypersetup{
   pdfauthor={\nauthor},
   pdfsubject={\npart\ - \ncourse},
@@ -100,7 +101,7 @@
 
 \newcommand{\dd}{\mathop{}\!\mathrm{d}}
 \newcommand{\Emax}{E_{\max}}
-\newcommand{\pksym}[1]{\mathit{#1}}
+\newcommand{\pksym}[1]{\ifmmode\text{\textit{#1}}\else\textit{#1}\fi}
 \newcommand{\pklab}[1]{\mathrm{#1}}
 \newcommand{\ECfifty}{\pksym{EC}_{50}}
 \newcommand{\term}[1]{\emph{#1}}

@@ -1,5 +1,31 @@
 [
   {
+    "slug": "uf-pha6125-lesson-1-drug-development-pkpd",
+    "date": "2026-05-14",
+    "title": "UF PHA 6125 Lesson 1: Drug Development and Fundamental PK/PD",
+    "category": "PK/PD Foundations",
+    "year": "2026",
+    "paper": "UF PHA 6125 Module 1A/1B slides and transcripts; FDA/ICH guidance; MIDD and dose-selection literature",
+    "citationKey": "ufPha6125Lesson1A2020",
+    "tex": "2026-05-14-uf-pha6125-lesson-1-drug-development-pkpd.tex",
+    "pdf": "2026-05-14-uf-pha6125-lesson-1-drug-development-pkpd.pdf",
+    "tags": ["PHA 6125", "drug development", "PK/PD", "clinical pharmacology", "dose selection", "MIDD", "clearance", "Emax"],
+    "summary": "UF PHA 6125 第一课的中英混排长笔记：把 drug development phases、learning versus confirming、attrition、dose selection、labeling、LADME、clearance、volume、half-life、bioavailability、absorption rate、Emax/EC50/Hill 和 PK/PD delays 接成一条 decision-making spine，并补入 FDA/ICH 2026 视角。",
+    "questions": [
+      "为什么 Phase 1/2/3 不只是时间顺序，而是一连串 learn/confirm decision points？",
+      "PK/PD 如何把 dose selection 从 pairwise testing 转成 exposure-response learning？",
+      "CL、Vd、half-life、F、ka、Emax、EC50 和 Hill factor 在开发决策里分别控制什么？",
+      "为什么 concentration-response delay 会迫使我们从 direct effect model 走向 effect compartment、turnover 和 mechanism-based PD？"
+    ],
+    "model": "dose -> exposure -> response -> decision",
+    "takeaways": [
+      "PK/PD 是 drug development 的决策语言，不只是参数定义。",
+      "Phase 2b 的核心任务是学习 dose-response curve，而不是把每个 dose arm 都当作 confirmatory mini-trial。",
+      "Clearance 控制 exposure，Vd 连接 amount 与 concentration，half-life 是 CL 和 Vd 的混合后果。",
+      "Response delay 的关键问题是 rate-limiting step 在哪里。"
+    ]
+  },
+  {
     "slug": "matrix-ode-lti-mbam",
     "date": "2026-05-10",
     "title": "From Matrix Tricks to MBAM",
