@@ -1,0 +1,464 @@
+\section{Expanded Atlas I: Reading a PK Curve}
+
+\subsection{The first pass: draw before calculating}
+
+The first skill in clinical pharmacokinetics is visual. Before calculating \(\pkAUC\), \(\pkCL\), or \(t_{1/2}\), draw the curve and label five regions: input, peak, distribution, terminal decline, and unobserved tail. The curve is a narrative. A sharp rise says input is fast relative to elimination. A slow rise says absorption or infusion dominates. A sharp early drop after IV bolus may be distribution. A straight terminal semi-log line says one exponential mode is dominating the measured window.
+
+The most useful first-pass questions are:
+\begin{enumerate}[leftmargin=2em]
+  \item Where is input still happening?
+  \item Which part is safe to treat as terminal?
+  \item Does the route make the terminal slope interpretable as elimination?
+  \item Are the sampling times dense enough around \(\pkCmax\)?
+  \item Is the tail large enough that extrapolation could dominate \(\pkAUC\)?
+\end{enumerate}
+These questions prevent numerical summaries from pretending to be more certain than the design permits.
+
+\subsection{Slope, height, area, moment}
+
+The SHAM habit is a useful bridge between NCA and model-based thinking:
+\[
+  \text{slope}\quad
+  \text{height}\quad
+  \text{area}\quad
+  \text{moment}.
+\]
+Slope asks about rates. Height asks about scale. Area asks about total exposure. Moment asks about residence time and timing. For an IV bolus one-compartment model:
+\[
+  C(t)=\frac{\pksym{Dose}}{\pkV}e^{-(\pkCL/\pkV)t}.
+\]
+The height at time zero is controlled by dose and volume. The slope is controlled by \(\pkCL/\pkV\). The area is controlled by dose and clearance. The moment combines exposure and time, giving \(\pkMRT=\pkV/\pkCL\) in the simplest case.
+
+\subsection{A minimal curve reading protocol}
+
+For any profile, run this protocol:
+\begin{enumerate}[leftmargin=2em]
+  \item Identify route and input duration.
+  \item Confirm dose, units, matrix, and sampling clock.
+  \item Mark \(\pkCmax,\pkTmax,C_{\pklab{last}},t_{\pklab{last}}\).
+  \item Inspect terminal phase on a semi-log plot.
+  \item Estimate \(\lambda_z\) only after visual inspection.
+  \item Compute \(\pkAUC\) and extrapolated fraction.
+  \item Ask which clinical target uses \(\pkAUC,\pkCmax,\pkCtrough\), time above threshold, or response.
+\end{enumerate}
+This protocol is intentionally slow. Speed without this map is how one obtains precise but wrong PK.
+
+\section{Expanded Atlas II: Units, Signs, and Sanity Checks}
+
+\subsection{Units are part of the equation}
+
+Every PK equation should survive unit inspection. If \(A\) is amount and \(C\) is concentration,
+\[
+  C=\frac{A}{\pkV}
+\]
+requires \(\pkV\) to have volume units. If \(\pkCL\) has volume per time and \(C\) has amount per volume, then \(\pkCL C\) has amount per time, which can appear as an elimination rate. This is not bookkeeping trivia. Many modeling mistakes are unit mistakes disguised as biology.
+
+For infusion,
+\[
+  \frac{\dd A}{\dd t}=R_0-\pkCL C
+  =
+  R_0-\frac{\pkCL}{\pkV}A.
+\]
+Both terms must be amount per time. If \(R_0\) is entered in \(\pksym{mg/h}\) but \(\pkCL\) is in \(\pksym{L/day}\), the model may run and still be nonsense.
+
+\subsection{Signs reveal mass balance}
+
+Internal transfers cancel globally. In a two-compartment model, movement from central to peripheral is a loss for central and a gain for peripheral:
+\[
+  -Q C_c
+  \quad \text{in central},
+  \qquad
+  +Q C_c
+  \quad \text{in peripheral}.
+\]
+The same term should not have the same sign in both compartments unless mass is being created or destroyed. Elimination terms should be negative from the drug amount equations. Input terms should be positive unless modeling removal or dialysis.
+
+\subsection{Numerical sanity before inference}
+
+Before fitting, simulate easy cases:
+\begin{itemize}[leftmargin=2em]
+  \item zero dose should give zero drug concentration unless baseline drug exists;
+  \item zero clearance should prevent elimination;
+  \item larger dose should raise concentration under linear PK;
+  \item larger clearance should lower \(\pkAUC\);
+  \item larger volume should lower initial IV bolus concentration and lengthen half-life if clearance is fixed.
+\end{itemize}
+These checks are simple, but they catch sign errors, unit errors, wrong compartment dosing, wrong output scaling, and bad initial conditions.
+
+\section{Expanded Atlas III: Absorption as a Sequence of Losses}
+
+\subsection{The oral dose is a chain}
+
+An oral dose must dissolve, survive the lumen, cross the gut wall, escape efflux and gut metabolism, pass through portal circulation, survive hepatic extraction, and then enter systemic blood. The factorization
+\[
+  \pkF=F_aF_GF_H
+\]
+is a thinking tool. It says oral exposure is not one event. It is a sequence of barriers.
+
+A low \(\pkF\) therefore has many possible explanations. A formulation problem might reduce \(F_a\). A food effect might delay gastric emptying or change solubility. A transporter inducer might reduce net absorption. A CYP3A inducer might reduce \(F_G\) or increase systemic clearance. A high-extraction liver drug might have low \(F_H\). One observed \(\pkAUC\) ratio rarely identifies which link failed without additional evidence.
+
+\subsection{Food, milk, tea, and transporters}
+
+Classic teaching examples are valuable because they show mechanisms rather than names. Milk can reduce absorption of certain drugs by chelation. Food can delay or enhance absorption depending on dissolution, gastric emptying, bile secretion, and transporter effects. Green tea reducing nadolol exposure points toward transporter-mediated absorption. The general lesson is:
+\[
+  \text{extravascular PK is formulation + physiology + transport + first pass + systemic clearance}.
+\]
+If the terminal slope is unchanged but \(\pkCmax\) and \(\pkAUC\) fall, absorption or bioavailability is suspicious. If terminal slope changes too, systemic clearance or distribution may also be involved.
+
+\subsection{A diagnostic table}
+
+\begin{center}
+\begin{tabularx}{0.96\textwidth}{@{}lX@{}}
+\toprule
+Observation & Plausible first hypotheses \\
+\midrule
+Lower \(\pkCmax\), similar \(\pkAUC\) & slower absorption, delayed gastric emptying, extended release. \\
+Lower \(\pkCmax\), lower \(\pkAUC\), similar terminal slope & reduced extent of absorption or first-pass availability. \\
+Same \(\pkCmax\), lower \(\pkAUC\) & faster elimination, altered late exposure, sampling issue. \\
+Later \(\pkTmax\), similar \(\pkAUC\) & absorption delay without major extent loss. \\
+Terminal slope after oral much slower than IV & possible flip-flop kinetics or depot input. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\section{Expanded Atlas IV: Distribution, Binding, and Free Drug}
+
+\subsection{Three concentrations}
+
+Many clinical arguments become clearer when we separate total plasma concentration, unbound plasma concentration, and tissue/effect-site concentration:
+\[
+  C_{\pklab{total}},
+  \qquad
+  C_u=f_uC_{\pklab{total}},
+  \qquad
+  C_{\pklab{site}}.
+\]
+Assays often report total plasma concentration. Enzymes, transporters, and receptors may respond to unbound concentration. The effect site may not equilibrate instantly with plasma. A protein binding change can therefore alter interpretation even when total concentrations appear reassuring.
+
+\subsection{The free drug principle and its limits}
+
+The free drug principle says unbound drug is generally available for distribution, clearance, and receptor binding. But clinical inference needs caution. If binding decreases, total concentration may fall because unbound clearance increases, while unbound concentration may change little at steady state for some low-extraction drugs. For other drugs, unbound exposure changes meaningfully. The question is not whether free drug matters. The question is which quantity is controlled and which quantity is observed.
+
+\subsection{Distribution is often the hidden delay}
+
+Suppose a drug has rapid plasma decline but slow tissue equilibration. Early plasma samples may overstate elimination if distribution is not modeled. Conversely, a peripheral site of action may show delayed effect even when plasma concentration falls. The two-compartment model is the first mathematical language for this:
+\[
+  C_p(t)=Ae^{-\alpha t}+Be^{-\beta t}.
+\]
+The early \(\alpha\) phase often reflects distribution. The terminal \(\beta\) phase reflects the slowest coupled process observable in plasma. Clinical interpretation requires knowing which part of the curve is being used for which decision.
+
+\section{Expanded Atlas V: Hepatic Clearance and First Pass}
+
+\subsection{The liver as a flow-capacity-binding system}
+
+The well-stirred model
+\[
+  \pkCL_H=\frac{Q_H f_u \pkCL_{\pklab{int}}}{Q_H+f_u \pkCL_{\pklab{int}}}
+\]
+compresses three controls: blood flow, unbound fraction, and intrinsic metabolic capacity. This one equation explains several clinical patterns. For high-extraction drugs, clearance is flow-limited and first-pass extraction can be high. For low-extraction drugs, clearance is more sensitive to \(f_u\pkCL_{\pklab{int}}\). Enzyme inhibition matters most when the inhibited pathway carries a substantial fraction of clearance.
+
+\figureWellStirred
+
+\subsection{First pass and route dependence}
+
+For an oral drug,
+\[
+  F_H=1-E_H.
+\]
+If \(E_H\) is high, oral bioavailability can be low even when absorption across the gut wall is complete. The same drug given IV bypasses first pass. Therefore oral and IV exposure comparisons can separate systemic clearance from bioavailability:
+\[
+  \pkF
+  =
+  \frac{\pkAUC_{\pklab{oral}}/\pksym{Dose}_{\pklab{oral}}}
+       {\pkAUC_{\pklab{IV}}/\pksym{Dose}_{\pklab{IV}}}.
+\]
+This equation is simple but powerful because it compares dose-normalized exposure across routes.
+
+\subsection{DDI logic}
+
+For CYP3A-mediated interactions, the question is not only whether the perpetrator inhibits CYP3A. The question is how much of the victim drug's clearance or first-pass loss depends on CYP3A. A strong inhibitor can have small effect if \(f_m\) is small. A moderate inhibitor can have large effect if the pathway dominates. The same logic applies to induction, transporter inhibition, and combined enzyme-transporter interactions.
+
+\section{Expanded Atlas VI: Renal Clearance and Urine Data}
+
+\subsection{Filtration, secretion, reabsorption}
+
+Renal clearance combines filtration, secretion, and reabsorption:
+\[
+  \pkCL_R
+  =
+  f_u\pksym{GFR}
+  +
+  \pkCL_{\pklab{secretion}}
+  -
+  \pkCL_{\pklab{reabsorption}}.
+\]
+If \(\pkCL_R\approx f_u\pksym{GFR}\), filtration is plausible. If \(\pkCL_R>f_u\pksym{GFR}\), active secretion is suggested. If \(\pkCL_R<f_u\pksym{GFR}\), reabsorption or incomplete urinary recovery is suggested. Urine pH matters mainly when passive reabsorption of ionizable drug is important.
+
+\figureRenalHandling
+
+\subsection{Amount excreted unchanged}
+
+The fraction excreted unchanged is
+\[
+  f_e=\frac{A_{e,\infty}}{\pksym{Dose}}.
+\]
+For IV dosing under linear PK,
+\[
+  f_e=\frac{\pkCL_R}{\pkCL}.
+\]
+This ratio helps decide whether renal impairment should affect exposure strongly. If renal clearance is a small fraction of total clearance, renal impairment may have limited parent-drug effect, though active metabolites or uremic transporter/enzyme changes may still matter.
+
+\subsection{Urine collection as an experiment}
+
+Urine data are only as good as the collection. Missing urine, wrong intervals, incomplete bladder emptying, and timing errors can distort renal clearance. The renal model includes patient behavior and nursing workflow. A beautifully fitted sigma-minus plot cannot repair a poor collection design.
+
+\section{Expanded Atlas VII: Dose Regimen Design}
+
+\subsection{A regimen is a control policy}
+
+A regimen is not just a dose and interval. It is a control policy under uncertainty:
+\[
+  a=(\pksym{Dose},\tau,\text{route},\text{duration},\text{monitoring rule},\text{hold rule}).
+\]
+The first design uses population expectations. Subsequent designs use observed response and concentrations. The regimen therefore evolves as information arrives.
+
+\subsection{Average, peak, trough, and fluctuation}
+
+For repeated dosing under linear PK,
+\[
+  \pkCavg=\frac{\pkF\,\pksym{Dose}}{\pkCL\tau}.
+\]
+Changing dose changes average exposure. Changing interval changes average exposure and fluctuation. For the same daily dose, shorter intervals usually reduce peak-trough swing; longer intervals increase swing. Whether this matters depends on the therapeutic target and toxicity mechanism.
+
+\subsection{A practical design sequence}
+
+One disciplined sequence is:
+\begin{enumerate}[leftmargin=2em]
+  \item choose target exposure or target concentration range;
+  \item estimate \(\pkCL\) for maintenance;
+  \item estimate \(\pkV\) for loading if rapid target achievement is needed;
+  \item choose interval from half-life, toxicity, convenience, and fluctuation tolerance;
+  \item simulate peak, trough, and AUC;
+  \item plan when to measure and how to update.
+\end{enumerate}
+This sequence is more robust than memorizing dose tables because it says why each part of the regimen exists.
+
+\section{Expanded Atlas VIII: Nonlinear Dose Adjustment}
+
+\subsection{Why linear intuition breaks}
+
+Linear PK gives
+\[
+  \pkAUC\propto \pksym{Dose}.
+\]
+Nonlinear PK breaks this proportionality. Near capacity limitation, the next dose increase can produce a disproportionate exposure increase. This is why nonlinear drugs demand humility. A patient can be stable at one dose and toxic after a small increase if the system is close to saturation.
+
+\subsection{The phenytoin denominator}
+
+At steady state,
+\[
+  C_{ss}
+  =
+  \frac{K_mR}{V_{\max}-R}.
+\]
+The denominator \(V_{\max}-R\) is the clinical warning. If \(R\) approaches \(V_{\max}\), concentration can rise steeply. The equation also explains why time to steady state is not fixed: apparent half-life lengthens as concentration approaches saturating ranges.
+
+\subsection{Nonlinearity versus time dependence}
+
+Some PK is nonlinear because rates depend on concentration. Some is time dependent because the system changes: autoinduction, autoinhibition, enzyme turnover, disease progression, or antibody formation. The observed data may show changing clearance over time. The model should not force all deviations into a concentration-dependent \(\pkCL(C)\) if biology suggests time-varying capacity.
+
+\section{Expanded Atlas IX: Special Populations as Mechanistic Perturbations}
+
+\subsection{Do not adjust by labels alone}
+
+Special populations are not magic categories. They are perturbations of mechanisms. Pediatrics perturbs size and maturation. Pregnancy perturbs volume, GFR, enzymes, transporters, plasma proteins, and blood flow. Obesity perturbs body composition and sometimes clearance. Renal disease perturbs filtration, secretion, binding, metabolites, and nonrenal pathways. Hepatic impairment perturbs flow, enzymes, transporters, shunting, bile, and synthesis.
+
+\subsection{The dose question changes by parameter}
+
+If the main change is \(\pkV\), loading dose changes. If the main change is \(\pkCL\), maintenance dose changes. If \(\pkF\) changes, oral and IV regimens diverge. If PD sensitivity changes, target exposure itself may change. A special-population dose recommendation therefore requires specifying which layer changed:
+\[
+  \pkV,\quad \pkCL,\quad \pkF,\quad \text{target},\quad \text{safety margin},\quad \text{monitoring uncertainty}.
+\]
+
+\subsection{Clinical covariates as imperfect measurements}
+
+Creatinine clearance, eGFR, Child--Pugh class, albumin, bilirubin, body weight, gestational age, and genotype are imperfect measurements of underlying physiology. A covariate model is useful not because the covariate is the mechanism itself, but because it carries information about the mechanism. Population modeling formalizes this imperfect translation.
+
+\section{Expanded Atlas X: Biologics and Modality-Specific PK}
+
+\subsection{Antibodies}
+
+Antibodies often have long half-lives because FcRn recycling protects them from degradation. Their distribution is limited by size, convection, binding, and tissue penetration. Their clearance can be linear through nonspecific catabolism and nonlinear through target-mediated pathways. The same antibody can show concentration-dependent clearance at low concentrations and approximately linear clearance at high concentrations.
+
+\subsection{ADCs}
+
+For ADCs, the analyte matters. Total antibody, conjugated antibody, antibody-conjugated payload, free payload, and metabolites can all tell different stories. A stable linker may reduce premature payload release but may also affect intracellular release. A high drug-antibody ratio may increase potency but alter clearance or aggregation. The PK problem is inseparable from chemistry and cell biology.
+
+\subsection{Oligonucleotides}
+
+Oligonucleotides have absorption, distribution, and PD features unlike classical small molecules. They can have rapid plasma decline but long tissue half-life. The relevant exposure may be tissue concentration or target RNA knockdown rather than plasma \(\pkAUC\). Chemical modification, GalNAc targeting, renal clearance, protein binding, and endosomal escape all become part of the PK/PD chain.
+
+\subsection{CAR-T and living drugs}
+
+CAR-T therapy makes the word pharmacokinetics metaphorical but still useful. The administered cells expand, traffic, kill, contract, and sometimes persist. Exposure may be cell count over time. Response depends on antigen, tumor burden, immune state, cytokines, and exhaustion. Dose starts a dynamical system rather than filling a compartment with passive molecules.
+
+\section{Expanded Atlas XI: Building a Population Model}
+
+\subsection{The structural model}
+
+Start with the forward map:
+\[
+  \hat y_{ij}=g(t_{ij},u_i,\psi_i).
+\]
+This could be a closed-form one-compartment equation, an ODE solution, a TMDD system, or a PBPK model. The structural model should be driven by the question and data richness. Sparse trough-only data cannot support the same structural ambition as dense Phase 1 profiles.
+
+\subsection{The statistical model}
+
+Next define variability:
+\[
+  \psi_i=h(c_i,\theta,\eta_i),
+  \qquad
+  \eta_i\sim\Normal(0,\Omega).
+\]
+Then define residual error:
+\[
+  y_{ij}=g(t_{ij},u_i,\psi_i)+\epsilon_{ij}
+  \quad \text{or}\quad
+  \log y_{ij}=\log g(t_{ij},u_i,\psi_i)+\epsilon_{ij}.
+\]
+Interindividual variability and residual variability answer different questions. A high \(\Omega\) says patients differ. A high \(\Sigma\) says observations mismatch predictions after accounting for individual parameters.
+
+\subsection{Covariate modeling}
+
+A covariate should be clinically plausible, statistically visible, and decision relevant. Weight on volume is plausible; renal function on renal clearance is plausible; genotype on metabolic clearance may be plausible. But the point is not to decorate the model with significant predictors. The point is to explain variability in a way that improves prediction or decisions.
+
+\subsection{Evaluation}
+
+Model evaluation should include goodness-of-fit plots, residual diagnostics, prediction-corrected VPC where needed, bootstrap or sampling uncertainty, shrinkage assessment, sensitivity to structural alternatives, and checks against the decision. A model can fit observed concentrations and still be poor for dose selection if it predicts future troughs badly.
+
+\section{Expanded Atlas XII: NONMEM Reading Notes}
+
+\subsection{Reading control streams}
+
+When reading NONMEM code, translate each block:
+\[
+  \begin{array}{lll}
+  \$\pklab{INPUT} &:& \text{data columns and meaning},\\
+  \$\pklab{PK} &:& \text{individual parameter construction},\\
+  \$\pklab{DES} &:& \text{ODE system, if present},\\
+  \$\pklab{ERROR} &:& \text{observation and residual error model},\\
+  \$\pklab{THETA} &:& \text{typical values and covariate effects},\\
+  \$\pklab{OMEGA} &:& \text{random effects variance},\\
+  \$\pklab{SIGMA} &:& \text{residual variance}.
+  \end{array}
+\]
+This translation turns code into the hierarchy \(p(y_i\given\psi_i)p(\psi_i\given c_i)\).
+
+\subsection{Shrinkage}
+
+Empirical Bayes estimates can shrink toward the population mean when individual data are sparse or noisy. Shrinkage is not inherently bad; it is a property of borrowing strength. But high shrinkage makes individual ETA-based diagnostics and covariate plots less informative. A model report should state when individual estimates are data-driven and when they are mostly population-driven.
+
+\subsection{VPC and PPC}
+
+Visual predictive checks compare observed data to simulated data from the fitted population model. They ask whether the model can reproduce central tendency and variability over time, dose, covariate, or bin. A posterior predictive check is the Bayesian cousin. Both are simulation-based humility: if the fitted model cannot simulate data like what was observed, the likelihood and parameters are not enough.
+
+\section{Expanded Atlas XIII: PBPK Credibility}
+
+\subsection{System and drug parameters}
+
+PBPK separates system parameters from drug parameters. System parameters include tissue volumes, blood flows, enzyme abundance, transporter expression, GFR, hematocrit, and demographics. Drug parameters include partition coefficients, permeability, intrinsic clearance, solubility, binding, transporter kinetics, and degradation. This separation enables virtual populations and extrapolation, but only if uncertainty is tracked.
+
+\subsection{Sensitivity}
+
+For a PBPK model, ask which parameters control the prediction:
+\[
+  S_k=\frac{\partial \log y}{\partial \log \theta_k}.
+\]
+If the decision depends on a parameter that is poorly measured and highly sensitive, the model needs either more evidence or more cautious claims. If a parameter is insensitive for the question, elaborate measurement may not be worth the effort.
+
+\subsection{Credibility statement}
+
+A PBPK report should state:
+\begin{enumerate}[leftmargin=2em]
+  \item question of interest;
+  \item context of use;
+  \item model structure;
+  \item data used for parameterization;
+  \item verification checks;
+  \item validation or qualification cases;
+  \item uncertainty and sensitivity;
+  \item decision consequence.
+\end{enumerate}
+This is as much scientific writing as computation.
+
+\section{Expanded Atlas XIV: PD, Delays, and Turnover}
+
+\subsection{Choosing among direct, effect-site, and turnover models}
+
+If response follows concentration immediately and reversibly, direct effect may be enough. If response lags because biophase concentration equilibrates slowly, use an effect compartment. If response lags because the biomarker is produced and lost over time, use an indirect response model. If response depends on cells, disease burden, immune feedback, or tolerance, a larger mechanism may be required.
+
+\subsection{Hysteresis}
+
+Plot effect versus concentration over time. Counterclockwise hysteresis often suggests delayed effect-site equilibration or response turnover. Clockwise hysteresis can suggest tolerance, feedback, depletion, or time-dependent sensitivity. Hysteresis is a visual symptom; the mechanism still needs pharmacological reasoning.
+
+\subsection{Indirect response time scale}
+
+For
+\[
+  \frac{\dd R}{\dd t}=k_{\pklab{in}}-k_{\pklab{out}}R,
+\]
+baseline is \(R_0=k_{\pklab{in}}/k_{\pklab{out}}\), and response half-life is \(\log 2/k_{\pklab{out}}\). If a drug inhibits production, response declines according to turnover. This explains why drug concentration can change quickly while biomarker response changes slowly.
+
+\section{Expanded Atlas XV: QSP as Organized Ambition}
+
+\subsection{When to escalate}
+
+Escalate from PK/PD to QSP when the scientific question requires interacting mechanisms: immune activation, tumor-immune dynamics, cytokine feedback, receptor trafficking, disease progression, combination therapy, resistance, or systems-level biomarkers. Do not escalate merely because a model is impressive. Complexity should buy decision-relevant structure.
+
+\subsection{State, parameter, observation, decision}
+
+Every QSP model should still be expressible as
+\[
+  \frac{\dd x}{\dd t}=f(x,u,\theta,t),
+  \qquad
+  y=g(x,\theta,t)+\epsilon,
+  \qquad
+  a=\delta(y,c).
+\]
+The state equation is not enough. Observations and decisions complete the model. A QSP model that cannot say what is observed and what decision it informs is a mechanistic diagram, not yet a clinical pharmacology tool.
+
+\subsection{Model reduction}
+
+Large systems often contain directions that barely affect the prediction of interest. Sensitivity analysis, sloppiness, MBAM-like thinking, and modular reduction ask which mechanisms are essential for the question. Reduction is not anti-mechanistic. It is the discipline of retaining the mechanisms that matter for the decision.
+
+\section{Expanded Atlas XVI: Study Problems}
+
+\subsection{Core problems}
+
+\begin{enumerate}[leftmargin=2em]
+  \item A drug has IV \(\pkAUC=40\ \pksym{mg\,h/L}\) after 200 mg. Estimate \(\pkCL\). If target \(\pkCavg\) is \(5\ \pksym{mg/L}\), what infusion rate is suggested?
+  \item A 500 mg oral dose gives \(\pkAUC=25\ \pksym{mg\,h/L}\). A 250 mg IV dose gives \(\pkAUC=50\ \pksym{mg\,h/L}\). Estimate absolute bioavailability.
+  \item A patient's trough is high but peak is acceptable. Which regimen changes reduce trough without increasing peak?
+  \item A drug's terminal slope after oral extended-release dosing is slower than after IV dosing. Explain two possible mechanisms.
+  \item For a low-extraction drug, predict the effect of doubling \(f_u\) on total clearance, total concentration, and unbound concentration at steady state. State assumptions.
+\end{enumerate}
+
+\subsection{Modeling problems}
+
+\begin{enumerate}[leftmargin=2em]
+  \item Write a one-compartment oral model with first-order absorption and first-order elimination. Identify state variables, parameters, input, and output.
+  \item Extend it to include an effect compartment. What new parameter appears, and what clinical pattern does it explain?
+  \item Write a lognormal population model for \(\pkCL\) with weight and creatinine clearance covariates.
+  \item Explain why sparse trough data may identify \(\pkCL\) better than \(\pkV\).
+  \item Design a VPC for a multiple-dose study with unequal sampling times.
+\end{enumerate}
+
+\subsection{Mechanistic problems}
+
+\begin{enumerate}[leftmargin=2em]
+  \item A monoclonal antibody shows nonlinear clearance at low dose but linear clearance at high dose. Sketch a TMDD explanation.
+  \item An ADC has discordant total antibody and free payload profiles. What mechanisms could explain the mismatch?
+  \item A biomarker response continues after plasma drug is gone. Compare active metabolite, effect-site delay, and indirect response explanations.
+  \item A PBPK model predicts a strong DDI driven by hepatic uptake transporter inhibition. What evidence would increase credibility?
+  \item A QSP model has 80 parameters. What would you inspect before trusting it for dose selection?
+\end{enumerate}

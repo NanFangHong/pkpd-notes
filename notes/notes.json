@@ -1,5 +1,33 @@
 [
   {
+    "slug": "ub-phc607608609-clinical-pkpd",
+    "date": "2026-05-15",
+    "title": "UB PHC 607/608/609: Clinical PK/PD as Dose Individualization",
+    "category": "Buffalo Classics",
+    "year": "2026",
+    "paper": "Guohua An Buffalo notebook exports: Essentials in Clinical Pharmacokinetics; Advanced Pharmacokinetics and Pharmacodynamics",
+    "citationKey": "an2025essentialsClinicalPK",
+    "tex": "2026-05-15-ub-phc607608609-clinical-pkpd.tex",
+    "pdf": "2026-05-15-ub-phc607608609-clinical-pkpd.pdf",
+    "tags": ["UB PHC 607", "UB PHC 608", "UB PHC 609", "clinical pharmacokinetics", "dose individualization", "biologics", "PBPK", "population PK", "NONMEM", "PK/PD", "QSP"],
+    "summary": "一卷原创整合笔记：以 Guohua An 两本 Buffalo notebook 的主题覆盖面为 topic map，把 PHC 607 的 concentration-time grammar、PHC 608 的 dose optimization/TDM/special populations、PHC 609 的 advanced PK/PD/PBPK/PopPK/NONMEM/TMDD/QSP 重写成从 dose 到 exposure、response、decision 的统一推理线。",
+    "questions": [
+      "为什么临床 PK/PD 的核心对象不是 dose 或 concentration，而是 decision under uncertainty?",
+      "如何把 clearance、volume、bioavailability、AUC、half-life 放进同一套 dose individualization 语言?",
+      "PHC 607、608、609 如何从 curve description 逐步走向 regimen design、population inference 和 mechanistic systems pharmacology?",
+      "经典 compartmental PK、TDM、NONMEM、PBPK、TMDD、PD 和 QSP 之间的共同结构是什么?",
+      "如何读 Buffalo notebook 而不把章节当成散点知识?"
+    ],
+    "model": "dose -> exposure -> response -> decision -> next dose",
+    "takeaways": [
+      "Loading dose is mainly a distribution question; maintenance dose is mainly a clearance question.",
+      "NCA is curve geometry plus terminal assumptions; it describes before it explains.",
+      "Nonlinear PK is often a capacity or time-varying-system clue, not a nuisance to smooth away.",
+      "Population PK turns sparse clinical observations into individual dose decisions by borrowing strength from a population hierarchy.",
+      "PBPK, TMDD, PD and QSP are not separate islands; they are progressively richer forward models embedded in observation and decision models."
+    ]
+  },
+  {
     "slug": "bmeg671-module-1-compartmental-modeling-foundations",
     "date": "2026-05-15",
     "title": "UD BMEG 671 Module 1: Compartmental Modeling Foundations",

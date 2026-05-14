@@ -1,0 +1,247 @@
+\definecolor{pkblue}{RGB}{43,103,160}
+\definecolor{pkred}{RGB}{176,69,69}
+\definecolor{pkgreen}{RGB}{70,138,96}
+\definecolor{pkamber}{RGB}{190,130,45}
+\definecolor{pklight}{RGB}{240,246,252}
+\definecolor{pklightred}{RGB}{252,242,240}
+\definecolor{pklightgreen}{RGB}{241,249,244}
+\definecolor{pklightamber}{RGB}{252,247,236}
+
+\tikzset{
+  pkbox/.style={draw=pkblue, thick, rounded corners=2pt, fill=pklight, align=center, inner sep=4pt},
+  pkboxred/.style={draw=pkred, thick, rounded corners=2pt, fill=pklightred, align=center, inner sep=4pt},
+  pkboxgreen/.style={draw=pkgreen, thick, rounded corners=2pt, fill=pklightgreen, align=center, inner sep=4pt},
+  pkboxamber/.style={draw=pkamber, thick, rounded corners=2pt, fill=pklightamber, align=center, inner sep=4pt},
+  pkcomp/.style={draw=pkblue, thick, circle, fill=pklight, align=center, minimum size=1.35cm, inner sep=2pt},
+  pkorgan/.style={draw=pkblue, thick, rounded corners=2pt, fill=pklight, align=center, minimum width=1.75cm, minimum height=.58cm},
+  pkarr/.style={-{Stealth[length=2.2mm]}, thick, draw=pkblue},
+  pkarrred/.style={-{Stealth[length=2.2mm]}, thick, draw=pkred},
+  pkarrgreen/.style={-{Stealth[length=2.2mm]}, thick, draw=pkgreen},
+  pkdash/.style={-{Stealth[length=2.2mm]}, thick, dashed, draw=pkamber}
+}
+
+\newcommand{\figureDecisionLoop}{
+\begin{center}
+\begin{tikzpicture}[node distance=1.45cm and 1.55cm, font=\small]
+  \node[pkbox] (diagnosis) {diagnosis\\drug choice};
+  \node[pkbox, below=of diagnosis, minimum width=5.1cm] (start) {initial regimen\\population expectation};
+  \node[pkboxgreen, below=of start, minimum width=4.1cm] (measure) {levels / biomarkers\\are measured};
+  \node[pkboxamber, below=of measure, minimum width=5.4cm] (model) {PK/PD model updates\\individual physiology};
+  \node[pkboxred, below=of model, minimum width=4.6cm] (change) {dose, interval, route\\or monitoring changes};
+  \draw[pkarr] (diagnosis) -- (start);
+  \draw[pkarr] (start) -- (measure);
+  \draw[pkarr] (measure) -- (model);
+  \draw[pkarr] (model) -- (change);
+  \draw[pkdash] (change.east) -- ++(1.0,0) |- node[pos=.25,right,align=left] {next\\decision} (measure.east);
+\end{tikzpicture}
+\captionof{figure}{A clinical PK/PD decision loop. This is an original redraw of the TDM workflow idea: diagnosis starts therapy, data update the model, and the next regimen is a decision under uncertainty.}
+\end{center}
+}
+
+\newcommand{\figureCompartmentFamily}{
+\begin{center}
+\begin{tikzpicture}[font=\small, x=1cm, y=1cm]
+  \node[pkcomp] (c1) at (0,0) {central};
+  \draw[pkarrred] (-1.15,1.0) node[left] {IV dose} to[bend left=20] (c1);
+  \draw[pkarr] (c1) -- ++(0,-1.25) node[below] {\(\pkCL\)};
+  \node at (0,-2.1) {1-compartment};
+
+  \node[pkcomp] (c2) at (4.0,0) {central};
+  \node[pkcomp] (p2) at (6.05,0) {peripheral};
+  \draw[pkarrred] (2.85,1.0) node[left] {IV dose} to[bend left=20] (c2);
+  \draw[pkarr] (c2) -- ++(0,-1.25) node[below] {\(\pkCL\)};
+  \draw[pkarr] (c2) -- node[above] {\(\pkQ\)} (p2);
+  \draw[pkarr] (p2) -- ++(0,-.62) -| node[pos=.25,below] {\(\pkQ\)} (c2);
+  \node at (5.0,-2.1) {2-compartment};
+
+  \node[pkcomp] (c3) at (9.9,0) {central};
+  \node[pkcomp] (p31) at (8.75,1.65) {periph.\\1};
+  \node[pkcomp] (p32) at (11.15,1.65) {periph.\\2};
+  \draw[pkarrred] (8.65,.75) node[left] {IV dose} to[bend left=18] (c3);
+  \draw[pkarr] (c3) -- ++(0,-1.25) node[below] {\(\pkCL\)};
+  \draw[pkarr] (c3) -- (p31);
+  \draw[pkarr] (p31) -- (c3);
+  \draw[pkarr] (c3) -- (p32);
+  \draw[pkarr] (p32) -- (c3);
+  \node at (9.9,-2.1) {3-compartment};
+\end{tikzpicture}
+\captionof{figure}{Compartmental models as mass-balance diagrams. The central compartment receives input and elimination; peripheral compartments add distribution time scales without adding systemic clearance unless explicitly modeled.}
+\end{center}
+}
+
+\newcommand{\figureAbsorptionBarriers}{
+\begin{center}
+\begin{tikzpicture}[font=\small, node distance=.7cm and 1.0cm]
+  \node[pkboxamber, minimum width=1.9cm] (dose) {oral\\dose};
+  \node[pkboxamber, right=of dose, minimum width=2.0cm] (lumen) {GI lumen\\dissolution};
+  \node[pkbox, right=of lumen, minimum width=2.0cm] (wall) {gut wall\\transport};
+  \node[pkboxgreen, right=of wall, minimum width=2.0cm] (portal) {portal\\vein};
+  \node[pkboxred, right=of portal, minimum width=2.0cm] (liver) {liver\\first pass};
+  \node[pkboxgreen, right=of liver, minimum width=2.1cm] (sys) {systemic\\blood};
+  \draw[pkarr] (dose) -- (lumen);
+  \draw[pkarr] (lumen) -- node[above] {\(F_a\)} (wall);
+  \draw[pkarr] (wall) -- node[above] {\(F_G\)} (portal);
+  \draw[pkarr] (portal) -- (liver);
+  \draw[pkarr] (liver) -- node[above] {\(F_H\)} (sys);
+  \draw[pkarrred] (lumen.south) -- ++(0,-.75) node[below] {fecal loss};
+  \draw[pkarrred] (wall.south) -- ++(0,-.75) node[below] {efflux / gut metabolism};
+  \draw[pkarrred] (liver.south) -- ++(0,-.75) node[below] {hepatic metabolism};
+  \node[below=.85cm of portal, align=center] {\(\pkF=F_aF_GF_H\)};
+\end{tikzpicture}
+\captionof{figure}{Oral bioavailability as a sequence of barriers. The figure abstracts the gut--portal--liver structure from the source notebooks into the factorization \(F=F_aF_GF_H\).}
+\end{center}
+}
+
+\newcommand{\figureAucTrapezoids}{
+\begin{center}
+\begin{tikzpicture}[font=\small, x=1cm, y=1cm]
+  \draw[->] (0,0) -- (8.2,0) node[right] {time};
+  \draw[->] (0,0) -- (0,3.4) node[above] {concentration};
+  \draw[thick, pkblue, smooth] plot coordinates {(0,0) (.65,2.2) (1.3,2.75) (2.0,2.25) (3.0,1.45) (4.1,.86) (5.4,.45) (6.6,.22)};
+  \foreach \x/\y in {.65/2.2,1.3/2.75,2.0/2.25,3.0/1.45,4.1/.86,5.4/.45,6.6/.22} {
+    \fill[pkblue] (\x,\y) circle (.045);
+    \draw[draw=pkamber, fill=pklightamber, opacity=.45] (\x,0) -- (\x,\y) -- ++(.001,0) -- (\x,0);
+  }
+  \draw[pkamber, thick] (.65,2.2) -- (1.3,2.75) -- (2.0,2.25) -- (3.0,1.45) -- (4.1,.86) -- (5.4,.45) -- (6.6,.22);
+  \fill[pklightamber, opacity=.55] (.65,0) -- (.65,2.2) -- (1.3,2.75) -- (2.0,2.25) -- (3.0,1.45) -- (4.1,.86) -- (5.4,.45) -- (6.6,.22) -- (6.6,0) -- cycle;
+  \draw[pkdash] (6.6,.22) -- (7.85,.05);
+  \node[align=center] at (3.8,2.85) {observed AUC:\\trapezoids};
+  \node[align=center] at (7.0,.75) {tail:\\\(C_{\pklab{last}}/\lambda_z\)};
+\end{tikzpicture}
+\captionof{figure}{NCA as curve geometry. The observed area is numerical geometry; the terminal tail is a model assumption about \(\lambda_z\).}
+\end{center}
+}
+
+\newcommand{\figureMultipleDosing}{
+\begin{center}
+\begin{tikzpicture}[font=\small, x=1cm, y=1cm]
+  \draw[->] (0,0) -- (9.1,0) node[right] {time};
+  \draw[->] (0,0) -- (0,3.3) node[above] {concentration};
+  \foreach \d in {0,1.5,3,4.5,6,7.5} {
+    \draw[pkblue, thick, smooth] plot coordinates {(\d,0.15) (\d+.2,2.1) (\d+.65,1.4) (\d+1.2,.8) (\d+1.5,.55)};
+    \draw[pkarrred] (\d,3.05) -- (\d,2.35);
+  }
+  \draw[pkgreen, very thick, smooth] plot coordinates {(0,.15) (.2,2.1) (.65,1.4) (1.5,2.65) (2.15,1.95) (3,2.95) (3.65,2.2) (4.5,3.05) (5.2,2.28) (6,3.1) (6.7,2.33) (7.5,3.12) (8.2,2.35) (9,1.75)};
+  \draw[dashed, pkamber, thick] (0,2.35) -- (9,2.35) node[right] {\(\pkCavg\)};
+  \draw[<->, thick, draw=pkred] (8.0,2.35) -- (8.0,3.08) node[midway,right] {fluctuation};
+  \node at (4.5,-.45) {same interval \(\tau\), accumulation toward a repeating steady-state pattern};
+\end{tikzpicture}
+\captionof{figure}{Multiple dosing by superposition. Repeated doses accumulate until the profile repeats; average exposure is clearance-controlled, while fluctuation is shaped by half-life and \(\tau\).}
+\end{center}
+}
+
+\newcommand{\figureWellStirred}{
+\begin{center}
+\begin{tikzpicture}[font=\small, node distance=1cm and 1.1cm]
+  \node[pkboxgreen, minimum width=2.1cm, minimum height=1.1cm] (res) {reservoir\\rest of body};
+  \node[pkboxred, right=3.0cm of res, minimum width=2.1cm, minimum height=1.1cm] (liv) {well-stirred\\liver};
+  \draw[pkarrred] (res.north east) -- node[above] {\(Q_H, C_{\pklab{in}}\)} (liv.north west);
+  \draw[pkarr] (liv.south west) -- node[below] {\(Q_H, C_{\pklab{out}}\)} (res.south east);
+  \draw[pkarrred] (liv) -- ++(0,-1.35) node[below,align=center] {metabolism\\\(f_u\pkCL_{\pklab{int}}\)};
+  \node[pkboxamber, above=1.1cm of res, minimum width=2.2cm] (input) {input\\\(R_0\)};
+  \draw[pkarr] (input) -- (res);
+  \node[below=1.85cm of liv, align=center] {\(\displaystyle \pkCL_H=\frac{Q_H f_u\pkCL_{\pklab{int}}}{Q_H+f_u\pkCL_{\pklab{int}}}\), \quad \(E_H=(C_{\pklab{in}}-C_{\pklab{out}})/C_{\pklab{in}}\)};
+\end{tikzpicture}
+\captionof{figure}{Well-stirred hepatic clearance. This redraw keeps the source figure's core idea: blood flow brings drug into a mixed liver space where intrinsic capacity and binding determine extraction.}
+\end{center}
+}
+
+\newcommand{\figureRenalHandling}{
+\begin{center}
+\begin{tikzpicture}[font=\small, node distance=.9cm and 1.15cm]
+  \node[pkboxgreen, minimum width=2.2cm] (blood) {renal blood\\unbound drug};
+  \node[pkbox, right=of blood, minimum width=2.2cm] (filtrate) {glomerular\\filtrate};
+  \node[pkboxamber, right=of filtrate, minimum width=2.2cm] (tubule) {tubule\\lumen};
+  \node[pkboxred, right=of tubule, minimum width=2.0cm] (urine) {urine\\\(A_e\)};
+  \draw[pkarr] (blood) -- node[above] {\(f_u\pksym{GFR}\)} (filtrate);
+  \draw[pkarr] (filtrate) -- (tubule);
+  \draw[pkarr] (tubule) -- (urine);
+  \draw[pkarrgreen] ([yshift=-.28cm]blood.south east) to[bend right=25] node[below] {secretion} ([yshift=-.28cm]tubule.south west);
+  \draw[pkarrred] ([yshift=.28cm]tubule.north west) to[bend left=25] node[above] {reabsorption} ([yshift=.28cm]blood.north east);
+  \node[below=.9cm of filtrate, align=center] {\(\pkCL_R \approx f_u\pksym{GFR}+\text{secretion}-\text{reabsorption}\)};
+\end{tikzpicture}
+\captionof{figure}{Renal clearance as filtration, secretion, and reabsorption. The drawing deliberately separates tubule lumen from blood so \(\pkCL_R\) can be read mechanistically.}
+\end{center}
+}
+
+\newcommand{\figureTMDD}{
+\begin{center}
+\begin{tikzpicture}[font=\small, node distance=1.0cm and 1.5cm]
+  \node[pkbox] (drug) {free drug\\\(D\)};
+  \node[pkboxgreen, right=of drug] (target) {target\\\(R\)};
+  \node[pkboxamber, below=1.15cm of target] (complex) {complex\\\(DR\)};
+  \draw[pkarr] (drug) -- node[above] {\(k_{\pklab{on}}\)} (target);
+  \draw[pkarr] (target) -- (complex);
+  \draw[pkarrgreen] (complex.west) to[bend left=18] node[left] {\(k_{\pklab{off}}\)} (drug.south);
+  \draw[pkarrred] (complex) -- ++(0,-1.05) node[below,align=center] {internalization\\or target-mediated loss};
+  \draw[pkarrred] (drug.south) -- ++(-.95,-.55) node[below,align=center] {linear\\clearance};
+  \draw[pkarrgreen] (target.north) -- ++(0,.95) node[above] {target turnover};
+\end{tikzpicture}
+\captionof{figure}{Target-mediated drug disposition. TMDD makes the pharmacological target part of the disposition model, so PK and PD become coupled rather than sequential.}
+\end{center}
+}
+
+\newcommand{\figurePopPKHierarchy}{
+\begin{center}
+\begin{tikzpicture}[font=\small, node distance=1.05cm and 1.35cm]
+  \node[pkboxamber] (theta) {population\\\(\theta,\Omega,\Sigma\)};
+  \node[pkboxgreen, below left=of theta] (cov) {covariates\\\(c_i\)};
+  \node[pkbox, below right=of theta] (eta) {random effects\\\(\eta_i\)};
+  \node[pkbox, below=2.0cm of theta] (psi) {individual parameters\\\(\psi_i=h(c_i,\theta,\eta_i)\)};
+  \node[pkboxred, below left=of psi] (dose) {dose/design\\\(u_i,t_{ij}\)};
+  \node[pkboxgreen, below right=of psi] (obs) {observations\\\(y_{ij}\)};
+  \draw[pkarr] (theta) -- (eta);
+  \draw[pkarr] (theta) -- (psi);
+  \draw[pkarr] (cov) -- (psi);
+  \draw[pkarr] (eta) -- (psi);
+  \draw[pkarr] (dose) -- (obs);
+  \draw[pkarr] (psi) -- (obs);
+  \node[draw=pkblue, dashed, rounded corners=5pt, fit=(cov)(eta)(psi)(dose)(obs), inner sep=9pt, label={[pkblue]below:subject \(i=1,\ldots,N\)}] {};
+\end{tikzpicture}
+\captionof{figure}{Population PK hierarchy. NONMEM, SAEM, and Bayesian TDM are different computational cultures around this same latent-individual-parameter graph.}
+\end{center}
+}
+
+\newcommand{\figurePBPK}{
+\begin{center}
+\begin{tikzpicture}[font=\scriptsize, x=1cm, y=.72cm]
+  \node[pkboxred, minimum width=1.7cm] (art) at (0,5) {arterial\\blood};
+  \node[pkbox, minimum width=1.7cm] (ven) at (0,0) {venous\\blood};
+  \node[pkorgan] (lung) at (3.0,5.0) {lung};
+  \node[pkorgan] (brain) at (3.0,4.1) {brain};
+  \node[pkorgan] (heart) at (3.0,3.2) {heart};
+  \node[pkorgan] (kidney) at (3.0,2.3) {kidney};
+  \node[pkorgan] (gut) at (3.0,1.4) {gut};
+  \node[pkorgan, minimum width=2.0cm] (liver) at (6.0,1.4) {liver\\metabolism};
+  \node[pkorgan] (fat) at (3.0,.5) {fat};
+  \node[pkorgan] (muscle) at (3.0,-.4) {muscle};
+  \draw[pkarrred] (art) -- (lung);
+  \foreach \o/\lab in {brain/\(Q_B\),heart/\(Q_H\),kidney/\(Q_K\),gut/\(Q_G\),fat/\(Q_F\),muscle/\(Q_M\)} {
+    \draw[pkarrred] (art.east) -- node[above,sloped] {\lab} (\o.west);
+    \draw[pkarr] (\o.west) -- (ven.east);
+  }
+  \draw[pkarrred] (gut) -- node[above] {portal} (liver);
+  \draw[pkarr] (liver) |- (ven.east);
+  \draw[pkarr] (ven) -- ++(-1,0) |- (art);
+\end{tikzpicture}
+\captionof{figure}{A stripped-down PBPK circulation. Whole-body PBPK replaces abstract compartments with blood-flow-connected organs, while still preserving mass balance and observation maps.}
+\end{center}
+}
+
+\newcommand{\figurePDDelays}{
+\begin{center}
+\begin{tikzpicture}[font=\small, node distance=.9cm and 1.2cm]
+  \node[pkbox] (cp) {plasma\\\(C_p(t)\)};
+  \node[pkboxgreen, right=of cp] (direct) {direct effect\\\(E(C_p)\)};
+  \draw[pkarr] (cp) -- (direct);
+  \node[pkboxamber, below=of cp] (ce) {effect site\\\(\dot C_e=k_{e0}(C_p-C_e)\)};
+  \node[pkboxgreen, right=of ce] (effect) {delayed effect\\\(E(C_e)\)};
+  \draw[pkarr] (cp) -- (ce);
+  \draw[pkarr] (ce) -- (effect);
+  \node[pkboxred, below=of ce, minimum width=3.1cm] (turn) {turnover response\\\(\dot R=k_{\pklab{in}}S(C)-k_{\pklab{out}}R\)};
+  \draw[pkarr] (cp) -- (turn);
+  \node[align=left, right=1.1cm of turn] {use when the response state\\has its own production/loss\\time scale};
+\end{tikzpicture}
+\captionof{figure}{Three PD delay grammars. Direct effect, effect compartment, and turnover models answer different reasons why response and plasma concentration may disconnect.}
+\end{center}
+}

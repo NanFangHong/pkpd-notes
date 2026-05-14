@@ -1,0 +1,1159 @@
+\documentclass[a4paper]{article}
+
+\def\npart {UB PHC 607/608/609}
+\def\nterm {Clinical pharmacokinetics and pharmacodynamics}
+\def\nyear {2026}
+\def\nlecturer {Guohua An's Buffalo notebooks, rewritten as an original study text}
+\def\ncourse {Clinical PK/PD as Dose Individualization}
+\def\ncoursehead {Clinical PK/PD}
+\def\nauthor {NanFangHong}
+
+\input{header}
+\usetikzlibrary{arrows.meta,fit,positioning}
+\input{ub-phc607608609-figures}
+\emergencystretch=2em
+\setcounter{tocdepth}{2}
+
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\logit}{logit}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Prob}{\mathbb{P}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Normal}{\mathcal{N}}
+\newcommand{\given}{\,|\,}
+\newcommand{\rv}[1]{\mathsf{#1}}
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\rtheta}{\boldsymbol{\theta}}
+\newcommand{\reta}{\boldsymbol{\eta}}
+\newcommand{\repsilon}{\boldsymbol{\epsilon}}
+\newcommand{\rpsi}{\boldsymbol{\psi}}
+\newcommand{\data}{\mathcal{D}}
+\newcommand{\loss}{\mathcal{L}}
+\newcommand{\pkCL}{\pksym{CL}}
+\newcommand{\pkV}{\pksym{V}}
+\newcommand{\pkVc}{\pksym{V}_{c}}
+\newcommand{\pkVss}{\pksym{V}_{ss}}
+\newcommand{\pkF}{\pksym{F}}
+\newcommand{\pkAUC}{\pksym{AUC}}
+\newcommand{\pkAUMC}{\pksym{AUMC}}
+\newcommand{\pkMRT}{\pksym{MRT}}
+\newcommand{\pkCmax}{C_{\max}}
+\newcommand{\pkTmax}{T_{\max}}
+\newcommand{\pkCss}{C_{ss}}
+\newcommand{\pkCavg}{C_{ss,\pklab{avg}}}
+\newcommand{\pkCtrough}{C_{\pklab{trough}}}
+\newcommand{\pkCpeak}{C_{\pklab{peak}}}
+\newcommand{\pkka}{k_a}
+\newcommand{\pkke}{k_e}
+\newcommand{\pkQ}{\pksym{Q}}
+\newcommand{\pkKm}{K_m}
+\newcommand{\pkVmax}{V_{\max}}
+\newcommand{\pkECfifty}{\pksym{EC}_{50}}
+\newcommand{\pkICfifty}{\pksym{IC}_{50}}
+\newcommand{\pkPD}{\pksym{PD}}
+\newcommand{\pkPK}{\pksym{PK}}
+\newcommand{\pkTMDD}{\pksym{TMDD}}
+\newcommand{\pkPBPK}{\pksym{PBPK}}
+\newcommand{\pkQSP}{\pksym{QSP}}
+\newcommand{\pkNONMEM}{\pksym{NONMEM}}
+
+\title{UB PHC 607/608/609 - Clinical PK/PD as Dose Individualization}
+
+\begin{document}
+\maketitle
+{\small
+  \noindent\textbf{Reading motive}\\
+  这份笔记把 Buffalo PHC 607/608/609 相关材料重写成一卷完整的自学文本。Guohua An 的两本 notebook 给出课程的覆盖面：clinical pharmacokinetics, dose optimization, biologics, advanced PK/PD, PBPK, population PK, NONMEM, pharmacodynamics, indirect response, and QSP \cite{an2025essentialsClinicalPK,an2025advancedPKPD}. 这里不做逐句改写，也不做替代教材式复制；我把它们当作 topic map，然后用我们前面形成的 dec41/pdf2htmlEX 风格写成一条原创推理线。\hspace*{\fill}[source map]
+
+  \vspace{5pt}
+  \noindent\textbf{Audience}\\
+  读者可以没有系统学过 PK/PD。全书从 dose, concentration, amount, clearance, volume, probability, and decision 开始，然后逐步走到 clinical dose adjustment, biologics, nonlinear kinetics, population PK, PBPK, PD, TMDD and QSP. 目标不是背参数，而是让读者知道一个临床剂量问题如何变成可计算、可解释、可质疑、可更新的模型问题。\hspace*{\fill}[from zero]
+
+  \vspace{5pt}
+  \noindent\textbf{Style}\\
+  中英文混排。中文负责逻辑铺垫和判断，英文保留药动药效、模型和软件语境里最自然的术语。符号沿用我们之前的规则：random variables 用 sans-serif，Greek random quantities 用 bold Greek，多字母 PK/PD 固定搭配在数学公式中用 text italic label，比如 \(\pkCL,\pkAUC,\pkPK,\pkPD,\pkPBPK,\pkQSP\)。\hspace*{\fill}[notation]
+}
+
+\tableofcontents
+
+\section{The Unifying Problem}
+
+\subsection{Dose is not the object; decision is the object}
+
+Clinical pharmacokinetics 常常从一句话开始：what the body does to the drug. 这句话没错，但它太静态。真正的课程主线应该是：
+\[
+  \text{dose}
+  \longrightarrow
+  \text{exposure}
+  \longrightarrow
+  \text{response}
+  \longrightarrow
+  \text{decision}
+  \longrightarrow
+  \text{next dose}.
+\]
+If dose were the object, the course would end after prescription. If exposure were the object, it would end after plotting concentration--time curves. But clinical PK/PD is a decision science: we ask how a dose should be chosen, adapted, delayed, held, escalated, de-escalated, or individualized under uncertainty.
+
+This is why PHC 607/608/609 naturally form one book. PHC 607 names the objects: concentration, amount, absorption, distribution, clearance, bioavailability, half-life, and exposure. PHC 608 turns those objects into dosing operations: loading dose, maintenance dose, infusion, accumulation, fluctuation, nonlinear elimination, special populations, therapeutic drug monitoring. PHC 609 then asks what happens when the simple objects are no longer sufficient: advanced PK/PD, PBPK, population models, biologics, target-mediated disposition, indirect response, and QSP.
+
+\subsection{The central equation}
+
+The most compact form of the whole course is
+\[
+  p_\theta(y_i,\psi_i,r_i\given u_i,c_i)
+  =
+  p_\theta(r_i\given y_i,\psi_i,u_i,c_i)\,
+  p_\theta(y_i\given \psi_i,u_i)\,
+  p_\theta(\psi_i\given c_i).
+\]
+Here \(u_i\) is the dosing and sampling design, \(c_i\) is covariate information, \(\psi_i\) is individual physiology and pharmacology, \(y_i\) is observed data, and \(r_i\) is response or clinical outcome.  The first semester asks how \(u_i\) becomes \(y_i\).  The second asks how to use \(y_i\) to choose the next \(u_i\).  The third asks how to learn \(p_\theta\) from many patients and then use it responsibly.
+
+\figureDecisionLoop
+
+\begin{remark}
+  Classical PK looks deterministic because many textbook equations are deterministic. Clinical PK is not deterministic. The deterministic equation is the forward map inside a larger uncertain system: uncertain patient, uncertain adherence, uncertain sampling time, uncertain assay, uncertain response, uncertain future.
+\end{remark}
+
+\subsection{What makes a clinical PK/PD mind}
+
+A clinical PK/PD mind learns to ask five questions before touching software:
+\begin{enumerate}[leftmargin=2em]
+  \item What is the decision? Dose, schedule, label, trial design, mechanism, or prediction?
+  \item What is observed? Concentration, urine amount, biomarker, response, toxicity, survival, or only sparse clinical data?
+  \item What is latent? Individual \(\pkCL\), \(\pkV\), target expression, enzyme activity, adherence, effect-site concentration, or disease state?
+  \item What is shared across patients? Typical values, variability, covariate effects, residual error, physiological constants, or mechanistic pathways?
+  \item What would falsify the working model? Wrong slope, wrong peak, wrong trough, wrong variability, wrong delay, wrong dose-response, or wrong special-population prediction?
+\end{enumerate}
+
+The answer to these questions decides whether a one-compartment model is enough, whether NCA is the right summary, whether a well-stirred liver model is appropriate, whether a biologic needs TMDD, whether NONMEM is necessary, and whether a QSP model is credible.
+
+\section{Notation and Symbol Discipline}
+
+\subsection{Random variables and realized values}
+
+We adopt the inference notation used in the earlier Bayesian PopPK note. A random concentration before observation is \(\rv{C}(t)\); an observed concentration is \(C(t)\). A random individual clearance is \(\rv{CL}_i\); a realized or candidate value is \(\pkCL_i\). Greek random quantities use bold Greek:
+\[
+  \reta_i \sim \Normal(0,\Omega),
+  \qquad
+  \repsilon_{ij}\sim\Normal(0,\sigma^2).
+\]
+This visual discipline matters because clinical PK constantly moves between population, individual, and observation.
+
+\begin{center}
+\begin{tabularx}{0.95\textwidth}{@{}lX@{}}
+\toprule
+Symbol & Meaning \\
+\midrule
+\(\rv{Y}_{ij}\) & random observation, for example a future concentration. \\
+\(y_{ij}\) & observed value after the assay reports a number. \\
+\(\rpsi_i\) & random individual parameter vector. \\
+\(\psi_i\) & candidate or realized individual parameter value. \\
+\(\theta\) & population parameter when treated as an unknown fixed quantity. \\
+\(\rtheta\) & population parameter when treated as random in full Bayes. \\
+\(\pkCL,\pkV,\pkAUC,\pkAUMC,\pkPK,\pkPD\) & fixed multi-letter PK/PD labels in equations. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\subsection{Primary and secondary parameters}
+
+The course becomes clearer if we distinguish primary from secondary quantities. Primary parameters are closer to the system's mechanisms: \(\pkCL\), \(\pkV\), \(k_a\), bioavailability \(\pkF\), distribution clearance \(\pkQ\), binding fractions, intrinsic clearance, organ blood flow. Secondary quantities are derived from them:
+\[
+  t_{1/2}=\frac{\log 2}{\pkke},
+  \qquad
+  \pkke=\frac{\pkCL}{\pkV},
+  \qquad
+  \pkAUC=\frac{\pkF\,\pksym{Dose}}{\pkCL}.
+\]
+Half-life is not a knob in the body. It is the visible consequence of clearance and volume. The same half-life can arise from high \(\pkCL\) and high \(\pkV\), or from low \(\pkCL\) and low \(\pkV\). This is why dose adjustment by half-life alone is often crude.
+
+\subsection{The four layers of a formula}
+
+Every formula has four layers:
+\begin{enumerate}[leftmargin=2em]
+  \item algebraic layer: the symbols balance;
+  \item unit layer: amount, volume, time, and concentration are consistent;
+  \item physiological layer: the signs and dependencies make biological sense;
+  \item decision layer: the equation answers the current clinical question.
+\end{enumerate}
+For example, \(\pkAUC=\pksym{Dose}/\pkCL\) is algebraically simple. But if the route is oral, the formula becomes \(\pkAUC=\pkF\pksym{Dose}/\pkCL\). If \(\pkCL\) is plasma clearance, organ extraction arguments require blood-to-plasma correction. If protein binding changes, total and unbound \(\pkAUC\) may tell different clinical stories. A beautiful formula can still be the wrong formula for the decision.
+
+\section{PHC 607: The Concentration-Time Grammar}
+
+\subsection{Amount, concentration, and compartments}
+
+The first conceptual split is amount versus concentration. Amount \(A(t)\) is how much drug is in a compartment. Concentration \(C(t)\) is amount divided by a volume-like scaling:
+\[
+  C(t)=\frac{A(t)}{\pkV}.
+\]
+The volume is not necessarily an anatomic bucket. It is a proportionality that turns amount into the measured concentration in the sampled matrix. A large apparent volume of distribution does not mean the body has a giant physical container. It means plasma concentration is small relative to total amount.
+
+Compartment models are bookkeeping devices for mass balance. A compartment is a region that is assumed to be kinetically homogeneous for the question at hand. It can represent plasma, central extracellular fluid, tissue, effect site, gut, liver, target binding, or a mathematical delay. The model is judged by whether its compartments create the right predictions, not by whether every compartment has a literal wall.
+
+\figureCompartmentFamily
+
+\subsection{The first mass-balance equation}
+
+The one-compartment IV bolus model starts with
+\[
+  \frac{\dd A(t)}{\dd t}=-\pkke A(t),
+  \qquad
+  A(0)=\pksym{Dose}.
+\]
+The solution is
+\[
+  A(t)=\pksym{Dose}\,e^{-\pkke t},
+  \qquad
+  C(t)=C_0e^{-\pkke t},
+  \qquad
+  C_0=\frac{\pksym{Dose}}{\pkV}.
+\]
+This is the first clinical grammar: the intercept names distribution scale, the slope names elimination speed. But the intercept and slope are not independent mechanisms:
+\[
+  \pkCL=\pkke\pkV.
+\]
+The slope is not simply ``renal function'' or ``metabolism.'' It is clearance divided by volume.
+
+\subsection{Zero-order and first-order as questions about rate}
+
+First-order elimination says the rate is proportional to amount:
+\[
+  \frac{\dd A}{\dd t}=-kA.
+\]
+Zero-order elimination says the rate is approximately constant:
+\[
+  \frac{\dd A}{\dd t}=-R.
+\]
+The clinical meaning is not ``one is easy and one is hard.'' The clinical meaning is capacity. First-order kinetics is what a low-concentration approximation often looks like when elimination capacity is not stressed. Zero-order kinetics appears when the system is locally saturated or when input is controlled at a constant rate. PHC 609 will later reframe this using Michaelis--Menten elimination:
+\[
+  \frac{\dd A}{\dd t}
+  =
+  -\frac{\pkVmax C}{\pkKm+C}.
+\]
+When \(C\ll \pkKm\), the expression is approximately first-order; when \(C\gg \pkKm\), it is approximately zero-order.
+
+\section{Clearance as the Main Invariant}
+
+\subsection{Clearance is a proportionality, not a cleaned volume}
+
+Clearance is defined by
+\[
+  \text{rate of elimination}=\pkCL\,C.
+\]
+The phrase ``volume cleared per time'' is useful but dangerous. No physical volume of plasma is necessarily scrubbed clean. Clearance is a proportionality between concentration and elimination rate. It is the parameter that lets exposure connect to dose:
+\[
+  \pkAUC_{0-\infty}=\frac{\pksym{Dose}}{\pkCL}
+  \quad \text{for IV bolus with linear elimination}.
+\]
+If the drug is extravascular,
+\[
+  \pkAUC_{0-\infty}=\frac{\pkF\,\pksym{Dose}}{\pkCL}.
+\]
+Thus, for linear PK, exposure is mostly a clearance story. Volume shapes the time profile, but clearance controls total exposure.
+
+\subsection{Systemic, organ, blood, plasma, and unbound clearance}
+
+The first subtlety is reference concentration. A hepatic extraction model uses blood concentration entering and leaving the liver. Many clinical assays report plasma concentration. If \(C_b\) is blood concentration and \(C_p\) is plasma concentration, then
+\[
+  \pkCL_b = \pkCL_p\frac{C_p}{C_b}.
+\]
+Confusing plasma clearance with blood clearance can make a drug seem to exceed organ blood flow, not because physiology is impossible, but because the denominator changed.
+
+The second subtlety is binding. For many mechanistic arguments, unbound concentration is closer to the concentration available for transport, metabolism, receptor binding, and filtration. Total concentration is what we often measure, but unbound concentration is often what the enzyme or target sees:
+\[
+  C_u=f_u C.
+\]
+The art is not to worship \(C_u\) blindly. The art is to ask which concentration the model equation is using.
+
+\subsection{Extraction ratio}
+
+Organ clearance can be written
+\[
+  \pkCL_{\pklab{organ}}=\pkQ\,E,
+\]
+where \(\pkQ\) is organ blood flow and \(E\) is extraction ratio. For liver,
+\[
+  E_H=\frac{C_{\pklab{in}}-C_{\pklab{out}}}{C_{\pklab{in}}},
+  \qquad
+  \pkCL_H=Q_H E_H.
+\]
+High-extraction drugs are flow sensitive: changing \(Q_H\) changes clearance strongly. Low-extraction drugs are capacity and binding sensitive: changing \(f_u\) or intrinsic clearance matters more. This is not a memorized classification; it follows from the well-stirred model,
+\[
+  \pkCL_H=\frac{Q_H f_u \pkCL_{\pklab{int}}}{Q_H+f_u \pkCL_{\pklab{int}}}.
+\]
+If \(f_u\pkCL_{\pklab{int}}\gg Q_H\), then \(\pkCL_H\approx Q_H\). If \(f_u\pkCL_{\pklab{int}}\ll Q_H\), then \(\pkCL_H\approx f_u\pkCL_{\pklab{int}}\).
+
+\section{Volume of Distribution and the Geography of Amount}
+
+\subsection{Volume is a scaling}
+
+The apparent volume of distribution is
+\[
+  \pkV=\frac{A}{C}.
+\]
+The denominator is usually plasma or blood concentration. If a drug leaves plasma and partitions into tissues, plasma concentration can be small while total amount remains large, so \(\pkV\) becomes large. This makes \(\pkV\) a map of where amount hides relative to the sampled compartment.
+
+The clinical use of \(\pkV\) is immediate:
+\[
+  \pksym{Loading\ Dose}
+  =
+  \frac{C_{\pklab{target}}\pkV}{\pkF}.
+\]
+Loading dose is a distribution problem. Maintenance dose is a clearance problem. This single distinction prevents a lot of clinical confusion.
+
+\subsection{Protein binding does not have one universal consequence}
+
+Suppose plasma protein binding decreases, so \(f_u\) increases. What happens? It depends. The unbound concentration may initially rise, but clearance and distribution may also change. For a low-extraction hepatically cleared drug, total clearance may increase roughly with \(f_u\). For a high-extraction drug, hepatic clearance may be flow limited and less sensitive to \(f_u\). For a drug with a narrow therapeutic index where unbound concentration drives toxicity, a change in total concentration may be misleading.
+
+The correct question is therefore not ``does protein binding matter?'' but
+\[
+  \text{which concentration drives elimination, distribution, response, and measurement?}
+\]
+When these differ, total concentration becomes a shadow of several mechanisms.
+
+\subsection{Distribution rate versus distribution extent}
+
+Extent of distribution is about how much drug lives outside the sampled space at equilibrium. Rate of distribution is about how fast it gets there. A two-compartment model separates these:
+\[
+  \begin{aligned}
+  \frac{\dd A_c}{\dd t}
+  &=
+  -(\pkCL+\pkQ)\frac{A_c}{\pkVc}
+  +
+  \pkQ\frac{A_p}{V_p},\\
+  \frac{\dd A_p}{\dd t}
+  &=
+  \pkQ\frac{A_c}{\pkVc}
+  -
+  \pkQ\frac{A_p}{V_p}.
+  \end{aligned}
+\]
+Here \(\pkQ\) is distribution clearance. It controls exchange rate, not systemic elimination. A drug can have a large peripheral volume but slow equilibration, creating early high plasma concentrations followed by a long distribution tail.
+
+\section{Absorption and Bioavailability}
+
+\subsection{Extent and rate are different questions}
+
+Absorption asks two questions:
+\[
+  \text{how much gets in?}
+  \qquad
+  \text{how fast does it get in?}
+\]
+The first is extent, often summarized by bioavailability \(\pkF\). The second is rate, often summarized by \(k_a\), \(\pkTmax\), and \(\pkCmax\). A formulation can preserve \(\pkAUC\) while lowering \(\pkCmax\). Another can increase \(\pkCmax\) without changing total exposure. These are not cosmetic differences: toxicity, efficacy, and tolerability may depend on peak, trough, duration, or total exposure.
+
+For first-order absorption into a one-compartment model,
+\[
+  C(t)=
+  \frac{\pkF\,\pksym{Dose}\,k_a}{\pkV(k_a-k_e)}
+  \left(e^{-k_e t}-e^{-k_a t}\right).
+\]
+The curve rises because input initially exceeds elimination. It peaks when input and output balance. It falls when absorption has mostly finished and elimination dominates.
+
+\subsection{Bioavailability is a product of barriers}
+
+For oral dosing,
+\[
+  \pkF = F_a F_G F_H,
+\]
+where \(F_a\) is fraction absorbed across the gut wall, \(F_G\) is fraction escaping gut metabolism or efflux loss, and \(F_H\) is fraction escaping hepatic first pass. This factorization is a conceptual map, not always a directly identifiable statistical model. A low oral \(\pkF\) could reflect solubility, permeability, degradation, transporter efflux, intestinal metabolism, hepatic extraction, or several together.
+
+\figureAbsorptionBarriers
+
+\subsection{Flip-flop kinetics}
+
+Normally \(k_a>k_e\), so terminal decline reflects elimination. In flip-flop kinetics, \(k_a<k_e\), so terminal decline reflects absorption. The terminal slope is then not the elimination slope. This is a beautiful cautionary example: the same visual straight line on a semi-log plot can mean different mechanisms depending on model structure.
+
+The clinical consequence is serious. If the observed terminal half-life after an oral depot formulation is actually absorption-limited, using it to infer elimination half-life may overestimate how long drug remains once input stops.
+
+\section{Noncompartmental Analysis as Geometry}
+
+\subsection{NCA describes the curve before explaining it}
+
+Noncompartmental analysis is often introduced as model-free. Better: NCA is low-model geometry plus a terminal exponential assumption. It reads the concentration-time curve by area, peak, time of peak, terminal slope, and moments:
+\[
+  \pkAUC=\int_0^\infty C(t)\,\dd t,
+  \qquad
+  \pkAUMC=\int_0^\infty tC(t)\,\dd t,
+  \qquad
+  \pkMRT=\frac{\pkAUMC}{\pkAUC}.
+\]
+The observed portion uses trapezoids. The unobserved tail uses \(\lambda_z\):
+\[
+  \pkAUC_{0-\infty}
+  =
+  \pkAUC_{0-t_{\pklab{last}}}
+  +
+  \frac{C_{\pklab{last}}}{\lambda_z}.
+\]
+Thus, NCA is not free of assumptions. It assumes the terminal portion chosen for \(\lambda_z\) is meaningful.
+
+\figureAucTrapezoids
+
+\subsection{AUC, Cmax, Tmax answer different questions}
+
+\(\pkAUC\) is total exposure. \(\pkCmax\) is peak intensity. \(\pkTmax\) is a rough timing summary. For bioequivalence, \(\pkAUC\) and \(\pkCmax\) often carry the central evidence because they summarize extent and peak. For clinical toxicity, trough may matter more than peak. For concentration-dependent antibiotics, peak-to-MIC or AUC-to-MIC may be decisive. For time-dependent antibiotics, time above MIC matters.
+
+The same curve contains many summaries. NCA is useful because it gives neutral summaries before committing to a structural explanation.
+
+\subsection{When NCA is enough and when it is not}
+
+NCA is often enough for single-dose exposure comparison, bioavailability, bioequivalence, and descriptive Phase 1 summaries. It is not enough when we need to predict unobserved regimens, covariate effects, sparse clinical sampling, nonlinear kinetics, delayed response, or patient-specific Bayesian updating. The transition from PHC 607 to PHC 608 is exactly this transition: from describing a curve to designing a regimen.
+
+\section{From Single Dose to Repeated Dosing}
+
+\subsection{Superposition}
+
+For linear systems, multiple dosing can be built by superposition. If \(C_1(t)\) is the concentration after one dose, then dosing every \(\tau\) hours gives
+\[
+  C_n(t)=\sum_{m=0}^{n-1} C_1(t-m\tau)
+  \quad \text{for terms with }t-m\tau\ge 0.
+\]
+This is the mathematical reason why the first one-compartment curve is not a toy. Once linearity holds, it becomes a reusable impulse response.
+
+\subsection{Accumulation and steady state}
+
+For one-compartment IV bolus with first-order elimination, the accumulation factor is
+\[
+  R=\frac{1}{1-e^{-k_e\tau}}.
+\]
+Steady state is not a static concentration; it is a periodic pattern where each dosing interval repeats. Peaks, troughs, and average concentration stabilize:
+\[
+  \pkCavg=\frac{\pkF\,\pksym{Dose}}{\pkCL\,\tau}.
+\]
+Average steady-state concentration is a clearance result. Fluctuation is a half-life and dosing-interval result. This lets us separate two questions: how high is the average exposure, and how rough is the ride?
+
+\figureMultipleDosing
+
+\subsection{Time to steady state}
+
+Time to steady state is governed by \(k_e\), not by dose. It takes about four to five half-lives to get close to steady state for linear first-order kinetics. Raising the maintenance dose raises the plateau; it does not make the system approach the plateau faster. A loading dose can jump the system near the desired amount because loading is a volume problem:
+\[
+  \pksym{LD}=\frac{C_{\pklab{target}}\pkV}{\pkF}.
+\]
+Maintenance is then a clearance problem:
+\[
+  \pksym{MD}/\tau=\frac{C_{\pklab{target}}\pkCL}{\pkF}.
+\]
+
+\section{Infusion as Controlled Input}
+
+\subsection{Zero-order input with first-order elimination}
+
+For constant infusion rate \(R_0\),
+\[
+  \frac{\dd A}{\dd t}=R_0-\pkke A.
+\]
+The solution during infusion is
+\[
+  C(t)=\frac{R_0}{\pkCL}\left(1-e^{-\pkke t}\right).
+\]
+The steady-state concentration is
+\[
+  \pkCss=\frac{R_0}{\pkCL}.
+\]
+This is one of the cleanest clinical equations in PK. If target concentration is known and clearance is known, rate follows directly:
+\[
+  R_0=\pkCss\pkCL.
+\]
+
+\subsection{Stopping the infusion}
+
+If infusion stops at time \(T\), concentration declines from whatever level was reached:
+\[
+  C(t)=C(T)e^{-\pkke(t-T)},\qquad t\ge T.
+\]
+This simple piecewise thinking is a major clinical skill. During infusion, input and elimination both act. After infusion, elimination acts alone. The equation you use depends on where the patient is in the regimen.
+
+\subsection{Short infusions}
+
+Many clinical regimens are neither bolus nor continuous infusion. A short infusion is a controlled input over a finite duration, repeated every \(\tau\). It combines the infusion rise and post-infusion decline. The important habit is to label the clock: time since start of infusion, time since end of infusion, and time within the dosing interval are not the same.
+
+\section{Two-Compartment Thinking}
+
+\subsection{Why biexponential curves happen}
+
+After IV bolus, many drugs show a fast early decline and slower later decline:
+\[
+  C(t)=Ae^{-\alpha t}+Be^{-\beta t}.
+\]
+The fast phase is not necessarily rapid elimination. It may be distribution out of central compartment. The slow phase is not necessarily a separate depot. It is the terminal eigenmode of the coupled system.
+
+This is where linear algebra quietly enters clinical PK. The exponents \(\alpha,\beta\) are macro-rate constants arising from the eigenvalues of the compartment system. The micro-rate constants \(k_{12},k_{21},k_{10}\) describe exchange and elimination. The observed curve is a mixture of modes.
+
+\subsection{Volumes in a two-compartment world}
+
+Several volumes appear:
+\[
+  \pkVc,\qquad
+  \pkVss,\qquad
+  V_\beta.
+\]
+\(\pkVc\) is the central volume relevant to initial concentration after IV bolus. \(\pkVss\) is the steady-state extent of distribution. \(V_\beta\) connects clearance to terminal slope:
+\[
+  V_\beta=\frac{\pkCL}{\beta}.
+\]
+These volumes answer different questions. Using the wrong one can distort loading dose, half-life interpretation, or tissue accumulation intuition.
+
+\subsection{Central versus peripheral site of action}
+
+If the site of action is central, early concentration matters. If the site of action is peripheral, effect may lag behind plasma concentration because peripheral equilibration is slow. This is one reason PK/PD cannot stop at plasma curves. A clinically relevant response may be driven by an effect-site concentration, receptor occupancy, cell turnover, or downstream biomarker.
+
+\section{Metabolites and Sequential Systems}
+
+\subsection{Parent to metabolite}
+
+For a parent drug \(A_p\) forming a metabolite \(A_m\),
+\[
+  \frac{\dd A_p}{\dd t}=-k_pA_p,
+  \qquad
+  \frac{\dd A_m}{\dd t}=f_mk_pA_p-k_mA_m.
+\]
+The metabolite curve rises while formation exceeds elimination and falls when formation can no longer sustain it. If \(k_m\gg k_p\), metabolite kinetics are formation-rate limited. If \(k_p\gg k_m\), they are metabolite-elimination limited.
+
+\subsection{Active metabolites}
+
+An active metabolite changes the dose-response story. The parent concentration may fall while pharmacological activity persists. A response model may need parent, metabolite, or both:
+\[
+  E(t)=E_0+
+  \frac{\Emax C_p(t)}{\pkECfifty+C_p(t)}
+  +
+  \frac{\Emax^m C_m(t)}{\pkECfifty^m+C_m(t)}.
+\]
+This is a simple formula, but it carries a clinical warning: measuring only parent may miss part of pharmacology.
+
+\section{Nonlinear Pharmacokinetics}
+
+\subsection{Symptoms of nonlinearity}
+
+Nonlinear PK appears when dose changes do not produce proportional exposure:
+\[
+  \frac{\pkAUC_2}{\pkAUC_1}\ne
+  \frac{\pksym{Dose}_2}{\pksym{Dose}_1}.
+\]
+Other symptoms include dose-dependent half-life, clearance changing with concentration, time-dependent kinetics, unexpected accumulation, and terminal slopes that change across doses.
+
+Nonlinearity is not a moral failure of a model. It is often a biological clue: saturable absorption, solubility limit, saturable first-pass metabolism, capacity-limited elimination, saturable plasma or tissue binding, transporter saturation, target-mediated disposition, autoinduction, autoinhibition, or disease-modulated physiology.
+
+\subsection{Michaelis--Menten elimination}
+
+For capacity-limited elimination,
+\[
+  \frac{\dd A}{\dd t}
+  =
+  -\frac{\pkVmax C}{\pkKm+C}.
+\]
+The apparent clearance is
+\[
+  \pkCL_{\pklab{app}}(C)=\frac{\pkVmax}{\pkKm+C}.
+\]
+As concentration increases, apparent clearance decreases. This is why a small dose increase can produce a large concentration increase near saturation.
+
+\subsection{Phenytoin as a clinical warning}
+
+Phenytoin is a standard teaching example because it makes the clinical danger visible. At steady state,
+\[
+  R_{\pklab{in}}=\frac{\pkVmax C_{ss}}{\pkKm+C_{ss}}.
+\]
+Solving for \(C_{ss}\),
+\[
+  C_{ss}
+  =
+  \frac{\pkKm R_{\pklab{in}}}{\pkVmax-R_{\pklab{in}}}.
+\]
+If \(R_{\pklab{in}}\) approaches \(\pkVmax\), concentration climbs sharply. The denominator is the danger. Linear dose adjustment fails because there is no constant clearance.
+
+\section{Therapeutic Drug Monitoring}
+
+\subsection{TDM as Bayesian updating before software}
+
+Therapeutic drug monitoring is often taught as plug-in equations. But the deeper logic is Bayesian:
+\[
+  \text{prior patient expectation}
+  +
+  \text{measured concentration}
+  \longrightarrow
+  \text{updated individual parameters}
+  \longrightarrow
+  \text{next dose}.
+\]
+Even a simple peak/trough aminoglycoside calculation implicitly combines prior model structure with observed data. Modern Bayesian TDM simply makes the hierarchy explicit.
+
+\subsection{Peak, trough, AUC, and target}
+
+Different drugs ask for different monitoring targets. Aminoglycosides may emphasize peak-to-MIC and trough safety. Vancomycin increasingly emphasizes AUC-guided dosing. Antiepileptics may use trough ranges, but interpretation depends on adherence, timing, protein binding, interacting drugs, and symptoms. Immunosuppressants require exposure control under substantial variability.
+
+The correct TDM question is not ``is the level in range?'' It is:
+\[
+  \text{given this level, timing, dose history, patient physiology, and target, what should happen next?}
+\]
+
+\subsection{Measurement is part of the model}
+
+Assay error, sampling time error, missed doses, infusion timing, and documentation errors can dominate the apparent PK story. A concentration drawn during distribution may not represent trough. A sample labeled as trough may have been drawn early. A patient may have missed a dose. The clinical model includes the hospital workflow.
+
+\section{Special Populations}
+
+\subsection{Pediatrics}
+
+Pediatric dosing is not adult dosing divided by body weight. Maturation changes renal function, hepatic enzymes, plasma proteins, body water, fat fraction, gastric pH, gastric emptying, and blood flow. Size matters, but maturation matters too. A common population model separates them:
+\[
+  \pkCL_i
+  =
+  \pkCL_{\pklab{adult}}
+  \left(\frac{\pksym{WT}_i}{70}\right)^{0.75}
+  \pksym{Mat}(\pksym{PMA}_i)
+  e^{\eta_{\pkCL,i}}.
+\]
+The allometric exponent captures size scaling; the maturation function captures developmental physiology.
+
+\subsection{Elderly patients}
+
+Elderly patients challenge single-parameter thinking. Renal function may decline, hepatic blood flow may change, body composition shifts, albumin may be lower, comedications increase, homeostatic reserve declines, and pharmacodynamic sensitivity may increase. A normal concentration can still be clinically excessive if response sensitivity changed.
+
+\subsection{Obesity}
+
+Obesity forces the distinction between loading and maintenance. Loading dose depends on distribution; maintenance dose depends on clearance. Total body weight, ideal body weight, adjusted body weight, lean body weight, and body surface area are not interchangeable. The right body-size descriptor depends on whether the drug distributes into adipose, lean tissue, extracellular water, or a mixture.
+
+\subsection{Renal and hepatic impairment}
+
+Renal impairment affects filtration, secretion, reabsorption, protein binding, metabolites, and sometimes nonrenal clearance through uremic effects on enzymes and transporters. Hepatic impairment affects blood flow, intrinsic clearance, protein binding, biliary excretion, shunting, and first-pass extraction. Dose adjustment cannot be reduced to one lab value, although creatinine clearance, eGFR, Child--Pugh, bilirubin, albumin, INR, and disease context are useful summaries.
+
+\section{Drug-Drug Interactions}
+
+\subsection{Enzymes, transporters, and exposure}
+
+A drug-drug interaction is a change in the system map. Inhibition decreases a pathway's capacity. Induction increases expression or activity over time. Transporter inhibition can alter absorption, hepatic uptake, renal secretion, brain entry, or biliary excretion. The exposure consequence depends on fraction affected:
+\[
+  \frac{\pkAUC_{\pklab{with}}}{\pkAUC_{\pklab{without}}}
+  \approx
+  \frac{1}{(1-f_m)+f_m/R},
+\]
+where \(f_m\) is fraction of clearance through the pathway and \(R\) is the residual activity ratio. If a pathway contributes little, even strong inhibition may have modest effect. If a pathway dominates, modest inhibition may matter.
+
+\subsection{Time course of interaction}
+
+Not all interactions appear immediately. Competitive inhibition can be rapid. Mechanism-based inhibition may develop as enzyme is inactivated. Induction requires synthesis and degradation dynamics. Thus, the time course of interaction can be a PK/PD model of enzyme activity:
+\[
+  \frac{\dd E_{\pklab{enz}}}{\dd t}
+  =
+  k_{\pklab{syn}}(1+\pksym{Ind}(C))
+  -
+  k_{\pklab{deg}}E_{\pklab{enz}}.
+\]
+The observed drug concentration is downstream of this enzyme state.
+
+\section{Biologics: A Different PK Intuition}
+
+\subsection{Small molecules and biologics differ in scale}
+
+Biologics are not merely large small molecules. Size, structure, route, target binding, proteolysis, FcRn recycling, immunogenicity, and tissue access create different PK intuitions. Oral absorption is usually not the default. Distribution may be limited by convection, neonatal Fc receptor recycling, binding, and tissue penetration. Clearance may involve proteolysis, target-mediated elimination, immune complexes, or cellular processing rather than CYP metabolism.
+
+\subsection{Antibodies}
+
+Monoclonal antibodies often have small central volumes, slow distribution, long half-lives, and nonlinear clearance at low concentrations when target-mediated elimination is important. FcRn recycling protects IgG from lysosomal degradation and contributes to long persistence. But target binding can create nonlinear elimination:
+\[
+  D+R
+  \underset{k_{\pklab{off}}}{\overset{k_{\pklab{on}}}{\rightleftharpoons}}
+  DR
+  \xrightarrow{k_{\pklab{int}}}
+  \varnothing.
+\]
+At low doses, target-mediated clearance can dominate. At high doses, target pathways saturate and nonspecific clearance may dominate.
+
+\subsection{ADCs}
+
+Antibody-drug conjugates are systems, not single molecules. The measured analyte might be conjugated antibody, total antibody, free payload, released payload metabolite, or antigen-bound complex. Linker stability, drug-antibody ratio, antigen expression, internalization, payload permeability, bystander killing, and off-target toxicity all matter. A single concentration curve can hide multiple chemical and biological entities.
+
+\subsection{Oligonucleotides and cell therapies}
+
+ASOs, siRNAs, and cell therapies further stretch standard PK. Oligonucleotides involve tissue uptake, endosomal escape, chemical modification, protein binding, renal handling, and long tissue residence. CAR-T therapies expand, contract, persist, traffic, and respond to antigen. Their ``PK'' may be cell count or vector copies, and their ``dose'' may start a living dynamical system.
+
+\section{PHC 609: The Advanced Modeling Turn}
+
+\subsection{Model of system versus model of data}
+
+An advanced PK/PD course becomes easier when we separate model of system from model of data. A system model says how amounts, concentrations, receptors, biomarkers, cells, or disease states evolve. A data model says how observations are generated from those latent states:
+\[
+  \begin{aligned}
+  \frac{\dd x}{\dd t} &= f(x,u,\psi,t),\\
+  y_{ij} &= g(x(t_{ij}),\psi)+\epsilon_{ij}.
+  \end{aligned}
+\]
+The first line is biology and pharmacology. The second is measurement. Confusing them leads to poor model criticism.
+
+\subsection{Laplace transforms and SHAM}
+
+For linear time-invariant PK systems, Laplace transforms reveal how input becomes output:
+\[
+  X(s)=G(s)U(s).
+\]
+Poles determine slopes. Gains determine heights and areas. The SHAM mnemonic -- slope, height, area, moment -- is a way to inspect curves without forgetting the system behind them. A concentration profile is not only a graph; it is a compressed signature of rate constants, volumes, clearance, input, and observation.
+
+\subsection{Numerical solution is not a fallback}
+
+Closed forms are pedagogically beautiful, but numerical ODE solution is not second-class. PBPK, TMDD, QSP, nonlinear PD, disease progression, and complex dosing histories usually require numerical integration. The key is not whether the solution is analytical; the key is whether the model is verified, identifiable enough for the question, and numerically stable under the scenarios used for decision.
+
+\section{Fitting PK Models}
+
+\subsection{Objective functions}
+
+Fitting means choosing parameters whose predictions are close to data under a stated error model. Ordinary least squares assumes constant additive variance:
+\[
+  \min_\psi \sum_j (y_j-\hat y_j(\psi))^2.
+\]
+Weighted least squares accounts for changing variance:
+\[
+  \min_\psi \sum_j w_j(y_j-\hat y_j(\psi))^2.
+\]
+A likelihood-based approach writes the observation law explicitly:
+\[
+  y_j\given \psi\sim \Normal(\hat y_j(\psi),\sigma^2_j).
+\]
+The likelihood is not a technicality. It is the model of how assays, residual variability, and misspecification create discrepancies.
+
+\subsection{Residual error models}
+
+Common residual models include additive,
+\[
+  y=\hat y+\epsilon,
+\]
+proportional,
+\[
+  y=\hat y(1+\epsilon),
+\]
+and combined forms. On the log scale, multiplicative error becomes additive:
+\[
+  \log y=\log \hat y+\epsilon.
+\]
+Choosing the residual model changes which deviations are treated as surprising. This is why residual plots are not decorative; they are direct checks of the observation model.
+
+\subsection{Local minima and parameter correlation}
+
+PK model fitting often has correlated parameters. \(\pkCL\) and \(\pkV\) can compensate through half-life; \(k_a\) and \(k_e\) can trade off when absorption is poorly sampled; \(V_{\max}\) and \(K_m\) can be weakly identified outside the concentration range that tests saturation. A best fit can be numerically precise but scientifically fragile. Standard errors, profiles, bootstrap, posterior samples, and simulation checks all ask whether the fitted parameter is actually learned.
+
+\section{Population Pharmacokinetics}
+
+\subsection{The hierarchy}
+
+Population PK begins when individual parameters vary:
+\[
+  \psi_i = h(c_i,\theta,\eta_i),
+  \qquad
+  \eta_i\sim\Normal(0,\Omega).
+\]
+A typical lognormal clearance model is
+\[
+  \pkCL_i
+  =
+  \theta_{\pkCL}
+  \left(\frac{\pksym{WT}_i}{70}\right)^{\theta_{\pklab{WT}}}
+  e^{\eta_{\pkCL,i}}.
+\]
+The observation model might be
+\[
+  y_{ij}
+  =
+  \hat y(t_{ij};\psi_i,u_i)(1+\epsilon_{ij}).
+\]
+This is the same hierarchy from the earlier Bayesian PopPK note, now placed inside the clinical PK/PD course.
+
+\figurePopPKHierarchy
+
+\subsection{Fixed effects, random effects, residual effects}
+
+Fixed effects describe typical values and covariate relationships. Random effects describe unexplained interindividual variability. Residual effects describe observation-level mismatch. The three are not interchangeable. If a covariate is omitted, random variability may inflate. If a structural model is wrong, residual error may inflate. If data are sparse, individual random effects may shrink toward zero. Diagnostics must ask which layer is absorbing the mismatch.
+
+\subsection{NONMEM as an inference dialect}
+
+NONMEM's \(\pklab{THETA}\), \(\pklab{ETA}\), and \(\pklab{EPS}\) syntax is not a separate theory. It is a dialect for the hierarchy:
+\[
+  \begin{array}{lll}
+  \pklab{THETA} &\leftrightarrow& \text{population typical values and covariate effects},\\
+  \pklab{ETA} &\leftrightarrow& \text{individual deviations},\\
+  \pklab{EPS} &\leftrightarrow& \text{residual observation noise},\\
+  \Omega,\Sigma &\leftrightarrow& \text{variance components}.
+  \end{array}
+\]
+The objective function approximates a marginal likelihood where individual random effects have been integrated out. FO, FOCE, Laplacian, SAEM, and MCMC are different computational routes through the same conceptual problem.
+
+\section{Bayesian Dose Individualization}
+
+\subsection{Individual posterior}
+
+Given a population model and a patient's observed concentrations,
+\[
+  p(\psi_i\given y_i,c_i,u_i,\theta)
+  \propto
+  p(y_i\given \psi_i,u_i)
+  p(\psi_i\given c_i,\theta).
+\]
+This is the mathematical heart of Bayesian TDM. The prior-like term is the population model. The likelihood is the patient's measured data. The posterior is the updated individual PK state.
+
+\subsection{Decision rule}
+
+The dose is not chosen from a point estimate alone. In principle, the next regimen \(a\) should minimize expected loss:
+\[
+  a^*
+  =
+  \argmin_a
+  \E\left[
+    \loss(a,\tilde y,\tilde r)
+    \given y_i,c_i,u_i
+  \right].
+\]
+Here \(\tilde y\) and \(\tilde r\) are future exposure and response. A trough target, AUC target, toxicity constraint, or probability-of-target-attainment rule is a practical version of this expected-loss calculation.
+
+\subsection{Why posterior uncertainty matters}
+
+Two patients may have the same posterior mean \(\pkCL\) but different uncertainty. A robust dosing decision may differ if one posterior is tight and the other is broad. Sparse sampling, uncertain adherence, renal instability, rapidly changing disease, and nonlinear kinetics widen the posterior predictive distribution. A good Bayesian report should show not only the recommended dose but also the uncertainty in achieving the target.
+
+\section{PBPK: Physiology as Model Architecture}
+
+\subsection{Whole-body structure}
+
+PBPK models replace abstract compartments with physiological tissues connected by blood flow:
+\[
+  \frac{\dd A_j}{\dd t}
+  =
+  Q_j C_{\pklab{art}}
+  -
+  Q_j\frac{C_j}{K_{p,j}}
+  -
+  \pksym{Elim}_j.
+\]
+The parameters now include tissue volumes, blood flows, partition coefficients, permeability, enzyme abundances, transporter activities, plasma binding, and route-specific absorption physiology.
+
+\figurePBPK
+
+\subsection{What PBPK is good for}
+
+PBPK is especially useful when extrapolation depends on physiology: first-in-human translation, pediatric scaling, pregnancy, renal/hepatic impairment, drug-drug interactions, tissue exposure, transporter hypotheses, and virtual populations. Its power is not that it has many compartments. Its power is that those compartments are anchored to measurable physiological quantities.
+
+\subsection{What PBPK is not}
+
+PBPK is not automatically more true because it is more detailed. A complex model can hide uncertainty behind many parameters. The key questions are:
+\[
+  \text{which prediction is needed, which parameters control it, and what evidence supports those parameters?}
+\]
+This is the same discipline as simpler PK, only with more moving parts.
+
+\section{Target-Mediated Drug Disposition}
+
+\subsection{The basic mechanism}
+
+TMDD occurs when binding to a pharmacological target changes disposition. A minimal model is
+\[
+  \begin{aligned}
+  \frac{\dd D}{\dd t}
+  &=
+  -k_{\pklab{on}}DR+k_{\pklab{off}}DR_c-\pkCL_{\pklab{lin}}D,\\
+  \frac{\dd R}{\dd t}
+  &=
+  k_{\pklab{syn}}-k_{\pklab{deg}}R
+  -k_{\pklab{on}}DR+k_{\pklab{off}}DR_c,\\
+  \frac{\dd DR_c}{\dd t}
+  &=
+  k_{\pklab{on}}DR-(k_{\pklab{off}}+k_{\pklab{int}})DR_c.
+  \end{aligned}
+\]
+This model links PK and pharmacology because the target is both a sink and a mediator of effect.
+
+\figureTMDD
+
+\subsection{Small molecule versus large molecule TMDD}
+
+For biologics, TMDD often appears because target binding and internalization are important relative to nonspecific clearance. For small molecules, target binding may be rapid, tissue-localized, or not a major elimination route, so TMDD may be harder to see or mechanistically different. The visual symptom -- nonlinear exposure -- is not enough. We need mechanism, target biology, concentration range, and perturbation evidence.
+
+\subsection{Reduced TMDD models}
+
+Full TMDD models can be difficult to identify. Quasi-equilibrium and quasi-steady-state approximations reduce the system when binding dynamics are fast relative to disposition. These approximations are not shortcuts by laziness; they are scientific statements about time scales. If the time-scale statement is wrong, the reduced model can mislead.
+
+\section{Pharmacodynamics}
+
+\subsection{Direct effect}
+
+The simplest PD model maps concentration to effect immediately:
+\[
+  E(C)=E_0+\frac{\Emax C}{\pkECfifty+C}.
+\]
+The direct-effect model is appropriate when measured concentration equilibrates rapidly with the biophase and response is immediate. It teaches three ideas: baseline, maximum effect, and potency. But many clinical responses are not immediate.
+
+\subsection{Effect compartment}
+
+When plasma concentration and effect show hysteresis, an effect compartment can introduce equilibration delay:
+\[
+  \frac{\dd C_e}{\dd t}=k_{e0}(C_p-C_e),
+  \qquad
+  E(t)=E(C_e(t)).
+\]
+The effect compartment is not necessarily a physical compartment. It is a kinetic representation of delay between measured concentration and biophase concentration.
+
+\subsection{Indirect response}
+
+If drug changes production or loss of a response variable, an indirect response model is more natural:
+\[
+  \frac{\dd R}{\dd t}
+  =
+  k_{\pklab{in}}\,S(C)
+  -
+  k_{\pklab{out}}R
+\]
+or
+\[
+  \frac{\dd R}{\dd t}
+  =
+  k_{\pklab{in}}
+  -
+  k_{\pklab{out}}\,I(C)R.
+\]
+This class explains delayed onset, rebound, tolerance-like behavior, and biomarker turnover. The response time scale is now governed by \(k_{\pklab{out}}\), not only by drug half-life.
+
+\figurePDDelays
+
+\section{Exposure-Response and Clinical Development}
+
+\subsection{Learning versus confirming}
+
+Clinical development alternates between learning and confirming. Early studies learn tolerability, PK, dose range, and target engagement. Middle studies learn exposure-response and select dose. Pivotal studies confirm benefit-risk. Exposure-response analysis prevents dose selection from becoming a ritual of pairwise dose comparisons.
+
+\subsection{Dose selection}
+
+The dose should be justified by a chain:
+\[
+  \text{dose}
+  \to
+  \text{exposure}
+  \to
+  \text{target engagement}
+  \to
+  \text{biomarker}
+  \to
+  \text{clinical response}
+  \to
+  \text{safety}.
+\]
+Not every program has every link. But the missing links should be named. Model-informed drug development is disciplined storytelling with equations, not curve fitting for decoration.
+
+\subsection{Project Optimus and oncology}
+
+Oncology historically tolerated maximum tolerated dose logic, especially for cytotoxic agents. Targeted therapies and immunotherapies often require more nuanced dose optimization. If efficacy saturates before toxicity, the highest tolerated dose may not be the best dose. PK/PD and exposure-response become central to choosing a dose that balances activity, tolerability, adherence, and long-term benefit.
+
+\section{QSP and Systems Pharmacology}
+
+\subsection{When PK/PD becomes a system}
+
+QSP appears when the response cannot be represented by one turnover variable or one effect-site delay. Immune cells, cytokines, tumor burden, receptor trafficking, signaling networks, feedback loops, and disease progression may all interact. The state vector becomes
+\[
+  \frac{\dd x}{\dd t}=f(x,u,\theta,t),
+  \qquad
+  y=g(x,\theta,t)+\epsilon.
+\]
+PK is one part of the state system, not the whole model.
+
+\subsection{Platform models}
+
+Platform QSP models try to reuse a mechanistic scaffold across related drugs or targets: bispecific antibodies, ADCs, siRNAs, immuno-oncology combinations. The promise is learning across programs. The danger is carrying forward assumptions beyond their evidence. Reuse is powerful only when assumptions travel with uncertainty.
+
+\subsection{Credibility}
+
+A QSP model is credible relative to a question of interest. It is not globally credible. For dose selection, the model must be credible for exposure-response in the relevant population and dose range. For mechanism exploration, qualitative dynamics may suffice. For regulatory support, documentation, verification, validation, sensitivity analysis, and uncertainty quantification become part of the model itself.
+
+\section{A Three-Course Learning Route}
+
+\subsection{PHC 607: name the objects}
+
+Start by learning to read a concentration-time curve:
+\[
+  \pkCmax,\quad \pkTmax,\quad \pkAUC,\quad \lambda_z,\quad t_{1/2},\quad \pkCL,\quad \pkV,\quad \pkF.
+\]
+Then attach those summaries to LADME: liberation, absorption, distribution, metabolism, excretion. Do not rush to software. Learn what a slope means, what an intercept means, what area means, what a moment means, and what units reveal.
+
+\subsection{PHC 608: design the regimen}
+
+Next, learn to use the objects:
+\[
+  \pksym{LD}=\frac{C_{\pklab{target}}\pkV}{\pkF},
+  \qquad
+  \pksym{MD}/\tau=\frac{C_{\pklab{target}}\pkCL}{\pkF}.
+\]
+Study multiple dosing, infusion, oral absorption, two-compartment kinetics, nonlinear elimination, special populations, TDM, and drug interactions. The guiding question is always: what would I change in the next regimen, and why?
+
+\subsection{PHC 609: build and criticize models}
+
+Finally, learn model-based pharmacology:
+\[
+  \text{ODE}
+  \to
+  \text{likelihood}
+  \to
+  \text{population hierarchy}
+  \to
+  \text{prediction}
+  \to
+  \text{model criticism}.
+\]
+This includes numerical integration, fitting, nonlinear PK, PBPK, PopPK, NONMEM, Bayesian updating, TMDD, direct and indirect PD, exposure-response, and QSP. The goal is not complexity. The goal is choosing the simplest model that can support the decision without hiding the important uncertainty.
+
+\section{Worked Mini-Cases}
+
+\subsection{Case 1: loading and maintenance}
+
+A patient needs rapid achievement of a target concentration \(C^*\). The model suggests \(\pkV=40\ \pksym{L}\), \(\pkCL=5\ \pksym{L/h}\), and \(\pkF=1\). The loading dose is
+\[
+  \pksym{LD}=C^*\pkV.
+\]
+The maintenance infusion rate is
+\[
+  R_0=C^*\pkCL.
+\]
+If \(\pkV\) doubles but \(\pkCL\) is unchanged, the loading dose doubles while maintenance rate remains the same. If \(\pkCL\) doubles but \(\pkV\) is unchanged, maintenance rate doubles while loading dose remains the same. This is the cleanest way to separate distribution from elimination.
+
+\subsection{Case 2: oral exposure falls}
+
+Suppose oral \(\pkAUC\) falls after coadministration with another drug. The equation
+\[
+  \pkAUC=\frac{F_aF_GF_H\,\pksym{Dose}}{\pkCL}
+\]
+creates hypotheses: reduced dissolution, reduced permeability, increased efflux, induced gut metabolism, induced hepatic metabolism, increased systemic clearance, or adherence/timing error. The curve shape helps prioritize. Lower \(\pkCmax\) with similar terminal slope suggests absorption or bioavailability. Lower exposure with changed terminal slope may suggest systemic clearance.
+
+\subsection{Case 3: sparse TDM}
+
+A patient has one concentration after several doses. Alone, that concentration cannot identify \(\pkCL\), \(\pkV\), \(k_a\), adherence, and residual error. A Bayesian population model makes the problem solvable by borrowing information:
+\[
+  p(\psi_i\given y_i)\propto p(y_i\given\psi_i)p(\psi_i).
+\]
+The single concentration updates a prior distribution rather than creating physiology from nothing. This is why the population model is not optional decoration in sparse clinical dosing.
+
+\subsection{Case 4: biologic nonlinear clearance}
+
+A monoclonal antibody shows more-than-dose-proportional exposure as dose increases. One explanation is target-mediated clearance saturation. At low dose, target binding and internalization remove drug efficiently. At high dose, target pathways saturate, and linear nonspecific clearance dominates. The next experiment should not only fit a curve; it should ask whether target expression, receptor occupancy, knock-out data, or displacement evidence supports the mechanism.
+
+\section{Reading the Buffalo Notebooks Productively}
+
+\subsection{What to extract}
+
+When reading the Buffalo materials, do not copy the order mechanically. Extract four things from each topic:
+\begin{enumerate}[leftmargin=2em]
+  \item the clinical question,
+  \item the state variables and parameters,
+  \item the forward prediction equation,
+  \item the decision or diagnostic enabled by the model.
+\end{enumerate}
+For absorption, the clinical question is exposure after extravascular dosing. For two-compartment models, it is early versus late disposition and tissue equilibration. For nonlinear PK, it is dose adjustment under capacity. For TMDD, it is target binding as both mechanism and disposition. For QSP, it is system-level prediction under feedback.
+
+\subsection{What to avoid}
+
+Avoid treating headings as isolated facts. Absorption, distribution, elimination, and response are not chapters in nature. They are interfaces in the same dynamical system. A transporter can affect absorption, hepatic uptake, renal secretion, and tissue distribution. Protein binding can affect distribution, clearance, and measurement. A biomarker delay can masquerade as slow distribution. Clinical pharmacology is hard because the same observed curve can have several mechanistic explanations.
+
+\subsection{The mature reading loop}
+
+For each chapter, run this loop:
+\[
+  \text{story}
+  \to
+  \text{mass balance}
+  \to
+  \text{parameter meaning}
+  \to
+  \text{data model}
+  \to
+  \text{diagnostic}
+  \to
+  \text{decision}.
+\]
+If a topic cannot be placed on this loop, it is not yet understood.
+
+\input{ub-phc607608609-expanded}
+
+\section{Appendix: Formula Map}
+
+\subsection{Core PK}
+
+\[
+\begin{aligned}
+C(t)&=C_0e^{-k_et},\\
+t_{1/2}&=\frac{\log 2}{k_e},\\
+\pkCL&=k_e\pkV,\\
+\pkAUC&=\frac{\pkF\,\pksym{Dose}}{\pkCL},\\
+\pkCavg&=\frac{\pkF\,\pksym{Dose}}{\pkCL\tau},\\
+\pksym{LD}&=\frac{C_{\pklab{target}}\pkV}{\pkF},\\
+\pksym{MD}/\tau&=\frac{C_{\pklab{target}}\pkCL}{\pkF}.
+\end{aligned}
+\]
+
+\subsection{Absorption and infusion}
+
+\[
+\begin{aligned}
+C_{\pklab{oral}}(t)
+&=
+\frac{\pkF\,\pksym{Dose}\,k_a}{\pkV(k_a-k_e)}
+\left(e^{-k_et}-e^{-k_at}\right),\\
+C_{\pklab{inf}}(t)
+&=
+\frac{R_0}{\pkCL}(1-e^{-k_et}),\\
+\pkCss&=\frac{R_0}{\pkCL}.
+\end{aligned}
+\]
+
+\subsection{Organ clearance}
+
+\[
+\begin{aligned}
+\pkCL_{\pklab{organ}}&=\pkQ E,\\
+\pkCL_H&=\frac{Q_Hf_u\pkCL_{\pklab{int}}}{Q_H+f_u\pkCL_{\pklab{int}}},\\
+\pkF&=F_aF_GF_H.
+\end{aligned}
+\]
+
+\subsection{Nonlinear and PD}
+
+\[
+\begin{aligned}
+\frac{\dd A}{\dd t}
+&=
+-\frac{\pkVmax C}{\pkKm+C},\\
+E(C)&=E_0+\frac{\Emax C}{\pkECfifty+C},\\
+\frac{\dd C_e}{\dd t}&=k_{e0}(C_p-C_e),\\
+\frac{\dd R}{\dd t}&=k_{\pklab{in}}S(C)-k_{\pklab{out}}R.
+\end{aligned}
+\]
+
+\subsection{Population model}
+
+\[
+\begin{aligned}
+\psi_i&=h(c_i,\theta,\eta_i),\qquad \eta_i\sim\Normal(0,\Omega),\\
+y_{ij}&=g(t_{ij},u_i,\psi_i)+\epsilon_{ij},\\
+p(\psi_i\given y_i,c_i,u_i,\theta)
+&\propto
+p(y_i\given\psi_i,u_i)p(\psi_i\given c_i,\theta).
+\end{aligned}
+\]
+
+\section{Closing Synthesis}
+
+The three-course sequence is one intellectual arc. PHC 607 teaches the grammar of concentration-time data. PHC 608 teaches how that grammar becomes dosing. PHC 609 teaches how dosing becomes inference under biological variability, nonlinear mechanisms, sparse data, delayed response, and population-level learning.
+
+The deepest unification is this:
+\[
+  \text{clinical pharmacology}
+  =
+  \text{mechanistic forward model}
+  +
+  \text{statistical observation model}
+  +
+  \text{decision under uncertainty}.
+\]
+Once this sentence is internalized, the topics stop feeling like a catalog. Clearance, volume, bioavailability, NCA, compartment models, TDM, special populations, biologics, TMDD, PBPK, PopPK, PD, and QSP become different ways of answering the same humane question: given what we know about this drug, this patient, this disease, and this evidence, what should we do next?
+
+\bibliographystyle{plain}
+\bibliography{../refs/pharmacology}
+
+\end{document}

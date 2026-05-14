@@ -1,0 +1,188 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UB PHC 607/608/609: Clinical PK/PD as Dose Individualization</title><style>html,body{margin:0;padding:0;background:#f7f7f5;color:#141414}body{font-family:Georgia,"Times New Roman",serif;line-height:1.48}#main{max-width:900px;margin:0 auto;padding:48px 28px 72px;background:#fff;min-height:100vh;box-sizing:border-box}a{color:#064f83;text-decoration:none}a:hover{text-decoration:underline}h1{font-weight:normal;border-bottom:1px solid #d6d6d2;padding-bottom:.35rem;margin-top:0}.toc-note{color:#4d4d4d;max-width:680px}.disp-toc{padding-left:1.15rem}.disp-toc li{margin:.18rem 0}.subsection{margin-left:1.45rem}.math-title{white-space:nowrap}</style></head>
+<body><div id="main"><h1>UB PHC 607/608/609: Clinical PK/PD as Dose Individualization</h1><p>2026, Guohua An Buffalo notebook exports: Essentials in Clinical Pharmacokinetics; Advanced Pharmacokinetics and Pharmacodynamics</p><p class="toc-note">This is an HTML version of the notes generated with pdf2htmlEX. You can either view all sections in a single page, or access individual sections below.</p><h2>Contents</h2><ul class="disp-toc"><li><a href="full.html">V Full version</a></li><li><a href="1.html">1 The Unifying Problem</a></li>
+<li class="subsection"><a href="1_1.html">1.1 Dose is not the object; decision is the object</a></li>
+<li class="subsection"><a href="1_2.html">1.2 The central equation</a></li>
+<li class="subsection"><a href="1_3.html">1.3 What makes a clinical PK/PD mind</a></li>
+<li><a href="2.html">2 Notation and Symbol Discipline</a></li>
+<li class="subsection"><a href="2_1.html">2.1 Random variables and realized values</a></li>
+<li class="subsection"><a href="2_2.html">2.2 Primary and secondary parameters</a></li>
+<li class="subsection"><a href="2_3.html">2.3 The four layers of a formula</a></li>
+<li><a href="3.html">3 PHC 607: The Concentration-Time Grammar</a></li>
+<li class="subsection"><a href="3_1.html">3.1 Amount, concentration, and compartments</a></li>
+<li class="subsection"><a href="3_2.html">3.2 The first mass-balance equation</a></li>
+<li class="subsection"><a href="3_3.html">3.3 Zero-order and first-order as questions about rate</a></li>
+<li><a href="4.html">4 Clearance as the Main Invariant</a></li>
+<li class="subsection"><a href="4_1.html">4.1 Clearance is a proportionality, not a cleaned volume</a></li>
+<li class="subsection"><a href="4_2.html">4.2 Systemic, organ, blood, plasma, and unbound clearance</a></li>
+<li class="subsection"><a href="4_3.html">4.3 Extraction ratio</a></li>
+<li><a href="5.html">5 Volume of Distribution and the Geography of Amount</a></li>
+<li class="subsection"><a href="5_1.html">5.1 Volume is a scaling</a></li>
+<li class="subsection"><a href="5_2.html">5.2 Protein binding does not have one universal consequence</a></li>
+<li class="subsection"><a href="5_3.html">5.3 Distribution rate versus distribution extent</a></li>
+<li><a href="6.html">6 Absorption and Bioavailability</a></li>
+<li class="subsection"><a href="6_1.html">6.1 Extent and rate are different questions</a></li>
+<li class="subsection"><a href="6_2.html">6.2 Bioavailability is a product of barriers</a></li>
+<li class="subsection"><a href="6_3.html">6.3 Flip-flop kinetics</a></li>
+<li><a href="7.html">7 Noncompartmental Analysis as Geometry</a></li>
+<li class="subsection"><a href="7_1.html">7.1 NCA describes the curve before explaining it</a></li>
+<li class="subsection"><a href="7_2.html">7.2 AUC, Cmax, Tmax answer different questions</a></li>
+<li class="subsection"><a href="7_3.html">7.3 When NCA is enough and when it is not</a></li>
+<li><a href="8.html">8 From Single Dose to Repeated Dosing</a></li>
+<li class="subsection"><a href="8_1.html">8.1 Superposition</a></li>
+<li class="subsection"><a href="8_2.html">8.2 Accumulation and steady state</a></li>
+<li class="subsection"><a href="8_3.html">8.3 Time to steady state</a></li>
+<li><a href="9.html">9 Infusion as Controlled Input</a></li>
+<li class="subsection"><a href="9_1.html">9.1 Zero-order input with first-order elimination</a></li>
+<li class="subsection"><a href="9_2.html">9.2 Stopping the infusion</a></li>
+<li class="subsection"><a href="9_3.html">9.3 Short infusions</a></li>
+<li><a href="10.html">10 Two-Compartment Thinking</a></li>
+<li class="subsection"><a href="10_1.html">10.1 Why biexponential curves happen</a></li>
+<li class="subsection"><a href="10_2.html">10.2 Volumes in a two-compartment world</a></li>
+<li class="subsection"><a href="10_3.html">10.3 Central versus peripheral site of action</a></li>
+<li><a href="11.html">11 Metabolites and Sequential Systems</a></li>
+<li class="subsection"><a href="11_1.html">11.1 Parent to metabolite</a></li>
+<li class="subsection"><a href="11_2.html">11.2 Active metabolites</a></li>
+<li><a href="12.html">12 Nonlinear Pharmacokinetics</a></li>
+<li class="subsection"><a href="12_1.html">12.1 Symptoms of nonlinearity</a></li>
+<li class="subsection"><a href="12_2.html">12.2 Michaelis–Menten elimination</a></li>
+<li class="subsection"><a href="12_3.html">12.3 Phenytoin as a clinical warning</a></li>
+<li><a href="13.html">13 Therapeutic Drug Monitoring</a></li>
+<li class="subsection"><a href="13_1.html">13.1 TDM as Bayesian updating before software</a></li>
+<li class="subsection"><a href="13_2.html">13.2 Peak, trough, AUC, and target</a></li>
+<li class="subsection"><a href="13_3.html">13.3 Measurement is part of the model</a></li>
+<li><a href="14.html">14 Special Populations</a></li>
+<li class="subsection"><a href="14_1.html">14.1 Pediatrics</a></li>
+<li class="subsection"><a href="14_2.html">14.2 Elderly patients</a></li>
+<li class="subsection"><a href="14_3.html">14.3 Obesity</a></li>
+<li class="subsection"><a href="14_4.html">14.4 Renal and hepatic impairment</a></li>
+<li><a href="15.html">15 Drug-Drug Interactions</a></li>
+<li class="subsection"><a href="15_1.html">15.1 Enzymes, transporters, and exposure</a></li>
+<li class="subsection"><a href="15_2.html">15.2 Time course of interaction</a></li>
+<li><a href="16.html">16 Biologics: A Different PK Intuition</a></li>
+<li class="subsection"><a href="16_1.html">16.1 Small molecules and biologics differ in scale</a></li>
+<li class="subsection"><a href="16_2.html">16.2 Antibodies</a></li>
+<li class="subsection"><a href="16_3.html">16.3 ADCs</a></li>
+<li class="subsection"><a href="16_4.html">16.4 Oligonucleotides and cell therapies</a></li>
+<li><a href="17.html">17 PHC 609: The Advanced Modeling Turn</a></li>
+<li class="subsection"><a href="17_1.html">17.1 Model of system versus model of data</a></li>
+<li class="subsection"><a href="17_2.html">17.2 Laplace transforms and SHAM</a></li>
+<li class="subsection"><a href="17_3.html">17.3 Numerical solution is not a fallback</a></li>
+<li><a href="18.html">18 Fitting PK Models</a></li>
+<li class="subsection"><a href="18_1.html">18.1 Objective functions</a></li>
+<li class="subsection"><a href="18_2.html">18.2 Residual error models</a></li>
+<li class="subsection"><a href="18_3.html">18.3 Local minima and parameter correlation</a></li>
+<li><a href="19.html">19 Population Pharmacokinetics</a></li>
+<li class="subsection"><a href="19_1.html">19.1 The hierarchy</a></li>
+<li class="subsection"><a href="19_2.html">19.2 Fixed effects, random effects, residual effects</a></li>
+<li class="subsection"><a href="19_3.html">19.3 NONMEM as an inference dialect</a></li>
+<li><a href="20.html">20 Bayesian Dose Individualization</a></li>
+<li class="subsection"><a href="20_1.html">20.1 Individual posterior</a></li>
+<li class="subsection"><a href="20_2.html">20.2 Decision rule</a></li>
+<li class="subsection"><a href="20_3.html">20.3 Why posterior uncertainty matters</a></li>
+<li><a href="21.html">21 PBPK: Physiology as Model Architecture</a></li>
+<li class="subsection"><a href="21_1.html">21.1 Whole-body structure</a></li>
+<li class="subsection"><a href="21_2.html">21.2 What PBPK is good for</a></li>
+<li class="subsection"><a href="21_3.html">21.3 What PBPK is not</a></li>
+<li><a href="22.html">22 Target-Mediated Drug Disposition</a></li>
+<li class="subsection"><a href="22_1.html">22.1 The basic mechanism</a></li>
+<li class="subsection"><a href="22_2.html">22.2 Small molecule versus large molecule TMDD</a></li>
+<li class="subsection"><a href="22_3.html">22.3 Reduced TMDD models</a></li>
+<li><a href="23.html">23 Pharmacodynamics</a></li>
+<li class="subsection"><a href="23_1.html">23.1 Direct effect</a></li>
+<li class="subsection"><a href="23_2.html">23.2 Effect compartment</a></li>
+<li class="subsection"><a href="23_3.html">23.3 Indirect response</a></li>
+<li><a href="24.html">24 Exposure-Response and Clinical Development</a></li>
+<li class="subsection"><a href="24_1.html">24.1 Learning versus confirming</a></li>
+<li class="subsection"><a href="24_2.html">24.2 Dose selection</a></li>
+<li class="subsection"><a href="24_3.html">24.3 Project Optimus and oncology</a></li>
+<li><a href="25.html">25 QSP and Systems Pharmacology</a></li>
+<li class="subsection"><a href="25_1.html">25.1 When PK/PD becomes a system</a></li>
+<li class="subsection"><a href="25_2.html">25.2 Platform models</a></li>
+<li class="subsection"><a href="25_3.html">25.3 Credibility</a></li>
+<li><a href="26.html">26 A Three-Course Learning Route</a></li>
+<li class="subsection"><a href="26_1.html">26.1 PHC 607: name the objects</a></li>
+<li class="subsection"><a href="26_2.html">26.2 PHC 608: design the regimen</a></li>
+<li class="subsection"><a href="26_3.html">26.3 PHC 609: build and criticize models</a></li>
+<li><a href="27.html">27 Worked Mini-Cases</a></li>
+<li class="subsection"><a href="27_1.html">27.1 Case 1: loading and maintenance</a></li>
+<li class="subsection"><a href="27_2.html">27.2 Case 2: oral exposure falls</a></li>
+<li class="subsection"><a href="27_3.html">27.3 Case 3: sparse TDM</a></li>
+<li class="subsection"><a href="27_4.html">27.4 Case 4: biologic nonlinear clearance</a></li>
+<li><a href="28.html">28 Reading the Buffalo Notebooks Productively</a></li>
+<li class="subsection"><a href="28_1.html">28.1 What to extract</a></li>
+<li class="subsection"><a href="28_2.html">28.2 What to avoid</a></li>
+<li class="subsection"><a href="28_3.html">28.3 The mature reading loop</a></li>
+<li><a href="29.html">29 Expanded Atlas I: Reading a PK Curve</a></li>
+<li class="subsection"><a href="29_1.html">29.1 The first pass: draw before calculating</a></li>
+<li class="subsection"><a href="29_2.html">29.2 Slope, height, area, moment</a></li>
+<li class="subsection"><a href="29_3.html">29.3 A minimal curve reading protocol</a></li>
+<li><a href="30.html">30 Expanded Atlas II: Units, Signs, and Sanity Checks</a></li>
+<li class="subsection"><a href="30_1.html">30.1 Units are part of the equation</a></li>
+<li class="subsection"><a href="30_2.html">30.2 Signs reveal mass balance</a></li>
+<li class="subsection"><a href="30_3.html">30.3 Numerical sanity before inference</a></li>
+<li><a href="31.html">31 Expanded Atlas III: Absorption as a Sequence of Losses</a></li>
+<li class="subsection"><a href="31_1.html">31.1 The oral dose is a chain</a></li>
+<li class="subsection"><a href="31_2.html">31.2 Food, milk, tea, and transporters</a></li>
+<li class="subsection"><a href="31_3.html">31.3 A diagnostic table</a></li>
+<li><a href="32.html">32 Expanded Atlas IV: Distribution, Binding, and Free Drug</a></li>
+<li class="subsection"><a href="32_1.html">32.1 Three concentrations</a></li>
+<li class="subsection"><a href="32_2.html">32.2 The free drug principle and its limits</a></li>
+<li class="subsection"><a href="32_3.html">32.3 Distribution is often the hidden delay</a></li>
+<li><a href="33.html">33 Expanded Atlas V: Hepatic Clearance and First Pass</a></li>
+<li class="subsection"><a href="33_1.html">33.1 The liver as a flow-capacity-binding system</a></li>
+<li class="subsection"><a href="33_2.html">33.2 First pass and route dependence</a></li>
+<li class="subsection"><a href="33_3.html">33.3 DDI logic</a></li>
+<li><a href="34.html">34 Expanded Atlas VI: Renal Clearance and Urine Data</a></li>
+<li class="subsection"><a href="34_1.html">34.1 Filtration, secretion, reabsorption</a></li>
+<li class="subsection"><a href="34_2.html">34.2 Amount excreted unchanged</a></li>
+<li class="subsection"><a href="34_3.html">34.3 Urine collection as an experiment</a></li>
+<li><a href="35.html">35 Expanded Atlas VII: Dose Regimen Design</a></li>
+<li class="subsection"><a href="35_1.html">35.1 A regimen is a control policy</a></li>
+<li class="subsection"><a href="35_2.html">35.2 Average, peak, trough, and fluctuation</a></li>
+<li class="subsection"><a href="35_3.html">35.3 A practical design sequence</a></li>
+<li><a href="36.html">36 Expanded Atlas VIII: Nonlinear Dose Adjustment</a></li>
+<li class="subsection"><a href="36_1.html">36.1 Why linear intuition breaks</a></li>
+<li class="subsection"><a href="36_2.html">36.2 The phenytoin denominator</a></li>
+<li class="subsection"><a href="36_3.html">36.3 Nonlinearity versus time dependence</a></li>
+<li><a href="37.html">37 Expanded Atlas IX: Special Populations as Mechanistic Perturbations</a></li>
+<li class="subsection"><a href="37_1.html">37.1 Do not adjust by labels alone</a></li>
+<li class="subsection"><a href="37_2.html">37.2 The dose question changes by parameter</a></li>
+<li class="subsection"><a href="37_3.html">37.3 Clinical covariates as imperfect measurements</a></li>
+<li><a href="38.html">38 Expanded Atlas X: Biologics and Modality-Specific PK</a></li>
+<li class="subsection"><a href="38_1.html">38.1 Antibodies</a></li>
+<li class="subsection"><a href="38_2.html">38.2 ADCs</a></li>
+<li class="subsection"><a href="38_3.html">38.3 Oligonucleotides</a></li>
+<li class="subsection"><a href="38_4.html">38.4 CAR-T and living drugs</a></li>
+<li><a href="39.html">39 Expanded Atlas XI: Building a Population Model</a></li>
+<li class="subsection"><a href="39_1.html">39.1 The structural model</a></li>
+<li class="subsection"><a href="39_2.html">39.2 The statistical model</a></li>
+<li class="subsection"><a href="39_3.html">39.3 Covariate modeling</a></li>
+<li class="subsection"><a href="39_4.html">39.4 Evaluation</a></li>
+<li><a href="40.html">40 Expanded Atlas XII: NONMEM Reading Notes</a></li>
+<li class="subsection"><a href="40_1.html">40.1 Reading control streams</a></li>
+<li class="subsection"><a href="40_2.html">40.2 Shrinkage</a></li>
+<li class="subsection"><a href="40_3.html">40.3 VPC and PPC</a></li>
+<li><a href="41.html">41 Expanded Atlas XIII: PBPK Credibility</a></li>
+<li class="subsection"><a href="41_1.html">41.1 System and drug parameters</a></li>
+<li class="subsection"><a href="41_2.html">41.2 Sensitivity</a></li>
+<li class="subsection"><a href="41_3.html">41.3 Credibility statement</a></li>
+<li><a href="42.html">42 Expanded Atlas XIV: PD, Delays, and Turnover</a></li>
+<li class="subsection"><a href="42_1.html">42.1 Choosing among direct, effect-site, and turnover models</a></li>
+<li class="subsection"><a href="42_2.html">42.2 Hysteresis</a></li>
+<li class="subsection"><a href="42_3.html">42.3 Indirect response time scale</a></li>
+<li><a href="43.html">43 Expanded Atlas XV: QSP as Organized Ambition</a></li>
+<li class="subsection"><a href="43_1.html">43.1 When to escalate</a></li>
+<li class="subsection"><a href="43_2.html">43.2 State, parameter, observation, decision</a></li>
+<li class="subsection"><a href="43_3.html">43.3 Model reduction</a></li>
+<li><a href="44.html">44 Expanded Atlas XVI: Study Problems</a></li>
+<li class="subsection"><a href="44_1.html">44.1 Core problems</a></li>
+<li class="subsection"><a href="44_2.html">44.2 Modeling problems</a></li>
+<li class="subsection"><a href="44_3.html">44.3 Mechanistic problems</a></li>
+<li><a href="45.html">45 Appendix: Formula Map</a></li>
+<li class="subsection"><a href="45_1.html">45.1 Core PK</a></li>
+<li class="subsection"><a href="45_2.html">45.2 Absorption and infusion</a></li>
+<li class="subsection"><a href="45_3.html">45.3 Organ clearance</a></li>
+<li class="subsection"><a href="45_4.html">45.4 Nonlinear and PD</a></li>
+<li class="subsection"><a href="45_5.html">45.5 Population model</a></li>
+<li><a href="46.html">46 Closing Synthesis</a></li></ul></div></body></html>
