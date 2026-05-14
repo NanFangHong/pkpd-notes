@@ -1,5 +1,32 @@
 [
   {
+    "slug": "uf-pha6125-module-2-adme-clearance-distribution-absorption",
+    "date": "2026-05-15",
+    "title": "UF PHA 6125 Module 2: Clearance, Distribution, and Absorption",
+    "category": "PK/PD Foundations",
+    "year": "2026",
+    "paper": "UF PHA 6125 Module 2A/2B/2C slides and transcripts; Rowland/Tozer chapter 5; Jeong and Jusko clearance updates; FDA/ICH guidance",
+    "citationKey": "ufPha6125Module2A2020",
+    "tex": "2026-05-15-uf-pha6125-module-2-adme-clearance-distribution-absorption.tex",
+    "pdf": "2026-05-15-uf-pha6125-module-2-adme-clearance-distribution-absorption.pdf",
+    "tags": ["PHA 6125", "ADME", "clearance", "renal clearance", "hepatic clearance", "protein binding", "drug distribution", "drug absorption", "bioavailability", "PBPK"],
+    "summary": "UF PHA 6125 Module 2 的中英混排长笔记：把 renal/hepatic clearance、first-order/zero-order elimination、high/low extraction、protein binding、volume of distribution、oral absorption、food effect、transporters、first-pass metabolism 和 Jeong/Jusko 的 fractional distribution parameter 接成一张 ADME 系统图。",
+    "questions": [
+      "为什么 clearance 是 concentration 和 elimination rate 的比例，而不是一个真实被清空的体积？",
+      "如何用 fu*GFR 判断 renal clearance 中 filtration、secretion、reabsorption 的相对贡献？",
+      "high extraction 和 low extraction 药物为什么对 blood flow、intrinsic clearance、protein binding、induction/inhibition 有不同敏感性？",
+      "F = Fa*FG*FH 如何把 oral absorption、gut metabolism 和 hepatic first pass 接到 systemic exposure？",
+      "Jeong/Jusko 的 fd 为什么提示我们不要把 classical clearance equations 当成无条件真理？"
+    ],
+    "model": "F = F_a F_G F_H, CL_B = Q E, CL_H = Q_H f_u CL_int / (Q_H + f_u CL_int)",
+    "takeaways": [
+      "同一个 CL 数值必须说明 reference concentration：plasma、blood、unbound、organ-specific 或 systemic。",
+      "Renal clearance 不是 filtration 的同义词；secretion 与 reabsorption 可让 CLR 高于或低于 fu*GFR。",
+      "Protein binding 改变总浓度、unbound concentration、clearance 和 distribution 的方式取决于 extraction class 与给药途径。",
+      "Oral AUC/Cmax/Tmax 是 dissolution、permeability、transit、transporters、gut/hepatic first pass 和 systemic clearance 共同留下的指纹。"
+    ]
+  },
+  {
     "slug": "uf-pha6125-lesson-1-drug-development-pkpd",
     "date": "2026-05-14",
     "title": "UF PHA 6125 Module 1: Drug Development and Fundamental PK/PD",
