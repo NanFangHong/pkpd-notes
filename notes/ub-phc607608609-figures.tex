@@ -60,12 +60,12 @@
   \node at (0,-2.1) {1-compartment};
 
   \node[pkcomp] (c2) at (4.0,0) {central};
-  \node[pkcomp] (p2) at (6.05,0) {peripheral};
+  \node[pkcomp] (p2) at (6.35,0) {peripheral};
   \draw[pkarrred] (2.85,1.0) node[left] {IV dose} to[bend left=20] (c2);
   \draw[pkarr] (c2) -- ++(0,-1.25) node[below] {\(\pkCL\)};
-  \draw[pkarr] (c2) -- node[above] {\(\pkQ\)} (p2);
-  \draw[pkarr] (p2) -- ++(0,-.62) -| node[pos=.25,below] {\(\pkQ\)} (c2);
-  \node at (5.0,-2.1) {2-compartment};
+  \draw[pkarr] (c2.north east) -- node[above,font=\scriptsize,inner sep=1pt] {\(\pkQ\,C_c\)} (p2.north west);
+  \draw[pkarr] (p2.south west) -- node[below,font=\scriptsize,inner sep=1pt] {\(\pkQ\,C_p\)} (c2.south east);
+  \node at (5.18,-2.1) {2-compartment};
 
   \node[pkcomp] (c3) at (9.9,0) {central};
   \node[pkcomp] (p31) at (8.75,1.65) {periph.\\1};
@@ -79,7 +79,7 @@
   \node at (9.9,-2.1) {3-compartment};
 \end{tikzpicture}%
 }
-\captionof{figure}{Compartmental models as mass-balance diagrams. The central compartment receives input and elimination; peripheral compartments add distribution time scales without adding systemic clearance unless explicitly modeled.}
+\captionof{figure}{Compartmental models as mass-balance diagrams. The central compartment receives input and elimination; peripheral compartments add distribution time scales without adding systemic clearance unless explicitly modeled. In the two-compartment panel, \(\pkQ\,C_c\) and \(\pkQ\,C_p\) are opposing distribution fluxes; the corresponding first-order rate constants are \(Q/V_c\) and \(Q/V_p\), not generally equal.}
 \end{center}
 }
 
