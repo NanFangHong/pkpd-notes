@@ -1,0 +1,623 @@
+\documentclass[a4paper]{article}
+
+\def\npart{ADAPT Short Course}
+\def\nterm{Transcript-based study notes}
+\def\nyear{2026}
+\def\nlecturer{David Z. D'Argenio}
+\def\nauthor{NanFangHong}
+\def\ncourse{D'Argenio ADAPT Training Notes}
+\def\ncoursehead{ADAPT Training}
+\input{header}
+
+\usepackage{fvextra}
+\usepackage{float}
+
+\graphicspath{{adapt-short-course-figures/}}
+
+\DefineVerbatimEnvironment{code}{Verbatim}{
+  fontsize=\small,
+  breaklines=true,
+  breakanywhere=true,
+  frame=single,
+  rulecolor=\color{black!25},
+  xleftmargin=0.5em,
+  commandchars=\\\{\}
+}
+
+\newcommand{\tstamp}[1]{\texttt{[#1]}}
+\newcommand{\concept}[1]{\textbf{#1}}
+\newcommand{\lecturefigure}[2]{%
+  \begin{center}
+    \includegraphics[width=0.94\textwidth]{#1}
+    \captionof{figure}{#2}
+  \end{center}
+}
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+\section{ADAPT 的来处与 D'Argenio 的建模哲学}
+
+\subsection{公开资料中的 ADAPT 背景}
+
+ADAPT 是 USC Biomedical Simulations Resource（BMSR）长期维护的
+pharmacokinetic/pharmacodynamic systems analysis software。官方页面把它定位为
+面向 basic and clinical research scientists 的 computational modeling platform，
+用于发现、探索和应用药物的 PK/PD properties。ADAPT 5 的用户手册作者为
+David Z. D'Argenio、Alan Schumitzky 与 Xiaoning Wang。
+
+BMSR 下载页对 ADAPT 的描述很准确：它是一组 high-level programs，用于
+simulation、data analysis 和 design of experiments，主要服务于
+pharmacokinetic and pharmacodynamic systems。ADAPT 5 的功能也沿着这条线展开：
+
+\begin{itemize}
+  \item \concept{SIM}: individual and multisubject simulation.
+  \item \concept{ID}: individual estimation, including weighted least squares,
+  maximum likelihood, generalized least squares, and MAP Bayesian estimation.
+  \item \concept{SAMPLE}: optimal sampling schedule design.
+  \item \concept{Population analysis}: MLEM, ITS, STS, naive pooled data and related
+  nonlinear mixed-effects workflows.
+\end{itemize}
+
+1979 年 D'Argenio 与 Schumitzky 的早期论文已经把问题说得很清楚：软件要能处理
+linear and nonlinear models、multiple inputs、multiple outputs、differential
+equation models、non-uniform repetitive dosage regimens，并用 weighted least squares
+完成 parameter estimation。今天的 ADAPT 5 只是把这一条系统建模路线继续扩展到
+Bayesian estimation、population analysis、PBPK 和更复杂的 PK/PD 结构。
+
+参考：
+\begin{itemize}
+  \item USC BMSR ADAPT: \url{https://bmsr.usc.edu/software/adapt/}
+  \item USC BMSR downloads: \url{https://bmsr.usc.edu/downloads/}
+  \item ADAPT citations: \url{https://bmsr.usc.edu/software/adapt/citations/}
+  \item ADAPT 5 User's Guide: \url{https://customsitesmedia.usc.edu/wp-content/uploads/sites/106/2013/02/17062320/ADAPT5-User-Guide.pdf}
+  \item D'Argenio DZ, Schumitzky A. \emph{A program package for simulation and parameter estimation in pharmacokinetic systems}. \url{https://doi.org/10.1016/0010-468X(79)90025-4}
+\end{itemize}
+
+\subsection{D'Argenio 在培训中给出的软件哲学 \tstamp{1: 00:18:13--00:21:34}}
+
+D'Argenio 说 ADAPT 的开发原则是：尽量不给研究者的模型想象力设边界。这句话要认真听。
+早期 ADAPT 诞生时，PK 仍是主场，PD 建模还在早期，indirect response model、TMDD、
+systems pharmacology 这些今天看起来理所当然的模型类别尚未成熟。如果软件只是把当时
+已有模型做成菜单，它很快会过时。
+
+\lecturefigure{adapt-background.jpg}{\tstamp{1: 00:18:58} ADAPT 背景与 BMSR 传统。}
+
+因此 ADAPT 不是一个 ``choose a model from a library'' 的工具。它更像一个
+dynamic systems laboratory：用户要自己写方程、自己组织 data file、自己维护 parameter
+file。这个负担换来一种自由：新的 PK/PD 机制出现时，只要它能写成 state equation 和
+output equation，就能进入同一套 simulation/estimation/design workflow。
+
+\section{两天课程的主线}
+
+\subsection{课程目标 \tstamp{1: 00:05:50--00:15:28}}
+
+Day 1 的开场很重要。D'Argenio 明确说，虽然这是 ADAPT short course，但真正要学的不是
+某个菜单在哪里，而是 general modeling concepts：dynamic systems、simulation、
+estimation、statistical error model、debugging、population uncertainty。这些概念会
+超越任何一个具体软件。
+
+\lecturefigure{day1-agenda.jpg}{\tstamp{1: 00:11:16} Day 1 agenda: modeling background, simulation, estimation, debugging.}
+
+Day 1 的路线是：
+
+\begin{enumerate}
+  \item ADAPT 的 systems modeling framework.
+  \item Direct/indirect response simulation.
+  \item TMDD simulation.
+  \item Least squares, maximum likelihood, Bayesian estimation.
+  \item Indirect response model 的 individual estimation.
+  \item Debugging and advanced coding.
+\end{enumerate}
+
+Day 2 的路线是：
+
+\begin{enumerate}
+  \item Simple PBPK/circulatory model simulation.
+  \item Minimal PBPK with naive pooled data estimation.
+  \item ACI/background batch mode.
+  \item Population simulation.
+  \item 午休后才进入 hierarchical/population modeling；目前这两份 transcript 没有包含下午部分。
+\end{enumerate}
+
+\subsection{一句话总纲}
+
+整套课可以压成一句话：
+
+\begin{quote}
+先把 pharmacology 问题写成 state equation + output equation + measurement model +
+parameter model；然后根据已知和未知，选择 simulation、deconvolution、identification、
+Bayesian estimation、population simulation 或 population modeling。
+\end{quote}
+
+这句话也是以后读 ADAPT、NONMEM、Monolix、SimBiology、Stan、mrgsolve 时的通用底层语言。
+
+\section{Systems framework: input, system, output}
+
+\subsection{三个基本问题 \tstamp{1: 00:23:46--00:29:33}}
+
+D'Argenio 从工程系统讲起：飞机是 system，pilot controls 是 inputs，trajectory 是 output。
+药理学也一样：dose 是 input；plasma concentration、effect-site concentration、biomarker、
+clinical endpoint 是 output；中间的 absorption、distribution、metabolism、binding、
+turnover、signal transduction、disease process 是 system state。
+
+在这个框架中有三类基本问题：
+
+\begin{enumerate}
+  \item \concept{Simulation problem}: 已知 system 和 input，求 output。给定模型、参数和给药方案，预测 concentration-time profile。
+  \item \concept{Deconvolution problem}: 已知 system 和 output，反推 input。典型例子是 IV 数据已刻画 PK system，口服后测得浓度曲线，想反推 absorption/input profile。
+  \item \concept{Identification problem}: 已知 input 和 output，反推 system structure and parameters。在 pharmacometrics 里这就是 estimation and model selection。
+\end{enumerate}
+
+这里的 identification 比 parameter estimation 更大。真实建模不是只在一个固定结构里找
+参数，而是在同时问：几个 compartments？是否需要 effect compartment？是否需要 receptor
+binding？是否有 saturation？是否有 delay？是否需要 covariate 或 population hierarchy？
+
+\subsection{ADAPT 的核心模型形式 \tstamp{1: 00:43:33--00:51:25}}
+
+ADAPT 接受的基本对象是 dynamic system：
+
+\[
+  \frac{\dd x(t)}{\dd t} = f\{x(t),\theta,u(t),t\}, \qquad
+  y(t) = g\{x(t),\theta,u(t),t\}.
+\]
+
+其中：
+
+\begin{itemize}
+  \item \(x(t)\) 是 states: compartment amounts, tissue concentrations, receptor occupancy, signaling proteins, disease states.
+  \item \(\theta\) 是 system parameters: rate constants, \pksym{CL}, \(V\), \(IC_{50}\), \(E_{\max}\), binding constants, turnover rates.
+  \item \(u(t)\) 是 inputs: bolus, infusion, covariates, measured forcing functions.
+  \item \(y(t)\) 是 outputs: 真正要预测或与数据比较的量。
+\end{itemize}
+
+\lecturefigure{state-output-equations.jpg}{\tstamp{1: 00:43:14} State equation 与 output equation 是 ADAPT 的核心语法。}
+
+最简单的一室 IV bolus 模型可以写成：
+
+\[
+  \frac{\dd X}{\dd t}=-kX,\qquad C=\frac{X}{V}.
+\]
+
+如果有 closed-form solution，也可以不写 ODE，而直接写 output equation：
+
+\[
+  C(t)=\frac{\mathrm{Dose}}{V}\exp(-kt).
+\]
+
+但 ADAPT 的边界也要记住。它不能直接处理 differential delay equations，也不处理真正的
+PDE/spatial distribution model。如果 \(\dot{x}(t)\) 依赖 \(x(t-\tau)\)，或者状态是
+\(x(t,r)\)，那就超出这套 ODE state-space framework。
+
+\section{ADAPT 文件与模型层次}
+
+\subsection{ODE 之外还有 measurement model \tstamp{1: 00:56:45--00:58:47}}
+
+初学者容易以为写完 ODE 就写完了模型。D'Argenio 特别提醒：estimation 时至少还有
+measurement model：
+
+\[
+  z_{ij}=y_i(t_j;\theta)+\epsilon_{ij}.
+\]
+
+\(z\) 是实际观测，\(y\) 是模型预测，\(\epsilon\) 是 additive output error。这个 error
+不只是 assay error，也可能包括 dose time error、sample time error、sample handling error、
+model misspecification。你越了解 error structure，estimation 越可靠。
+
+\subsection{参数本身也可以有模型 \tstamp{1: 00:57:50--00:59:52}}
+
+在 individual simulation 中，parameters 可以只是固定常数。但在 population 情境里，
+parameters 是 random variables：
+
+\[
+  \theta_i \sim \mathcal{D}(\mu,\Omega).
+\]
+
+这里的 \(\mu\) 是 population mean，\(\Omega\) 是 covariance matrix。Bayesian individual
+estimation 会把这个 distribution 当作 prior；population simulation 会从它抽样生成 virtual
+subjects；population modeling 则试图从数据中反推 \(\mu\)、\(\Omega\) 和 covariate effects。
+
+\subsection{Model file, data file, parameter file \tstamp{1: 01:05:20--01:30:00}}
+
+ADAPT 工作流围绕三类文件：
+
+\begin{itemize}
+  \item \concept{Model file}: differential equations, output equations, initial conditions, variance model, secondary parameters.
+  \item \concept{Data file}: dose/input history, observation times, measurements, missing values, multiple subjects or experiments.
+  \item \concept{Parameter file}: simulation values, estimation initial guesses, prior mean/covariance, covariate relationships.
+\end{itemize}
+
+ADAPT 内部只认识 \(X_1,X_2,\ldots\)、\(P_1,P_2,\ldots\)、\(XP_1,XP_2,\ldots\)、\(T\)。
+可读性来自显式映射：
+
+\begin{code}
+CL = P1
+V  = P2
+CENT = X1
+CP = CENT / V
+
+DX(1) = RIN(1) - (CL/V)*CENT
+Y(1)  = CP
+\end{code}
+
+这不是装饰。大型 PBPK 或 QSP 模型里，如果不做这样的符号映射，模型很快变成不可审计的
+下标泥潭。
+
+\section{Simulation case studies}
+
+\subsection{Indirect response simulation \tstamp{1: 01:53:20--02:18:40}}
+
+第一类例子是二室 PK 加 indirect response PD。PK 可以用 clearance parameterization：
+
+\[
+\begin{aligned}
+  \frac{\dd X_1}{\dd t}
+  &= R_{in}(t)-\frac{\pksym{CL}}{V_c}X_1
+     -Q\left(\frac{X_1}{V_c}-\frac{X_2}{V_p}\right),\\
+  \frac{\dd X_2}{\dd t}
+  &= Q\left(\frac{X_1}{V_c}-\frac{X_2}{V_p}\right).
+\end{aligned}
+\]
+
+PD response 是一个 endogenous process。没有药时：
+
+\[
+  \frac{\dd R}{\dd t}=k_{in}-k_{out}R.
+\]
+
+若药物抑制 production，则可写成：
+
+\[
+  \frac{\dd R}{\dd t}
+  = k_{in}\left(1-\frac{I_{\max}C}{IC_{50}+C}\right)-k_{out}R.
+\]
+
+\lecturefigure{indirect-response.jpg}{\tstamp{1: 01:52:56} 二室 PK 与 indirect response PD 的 simulation case study。}
+
+关键不是背公式，而是理解 baseline consistency。若 \(R_0\) 是 baseline response，并且无药时系统在 steady state，则：
+
+\[
+  k_{in}=k_{out}R_0.
+\]
+
+如果 initial condition 与 turnover parameters 不匹配，模型会在没有 drug effect 的情况下自己漂移。
+后面任何药效解释都会被污染。
+
+\subsection{TMDD simulation \tstamp{1: 02:50:49--03:17:10}}
+
+TMDD 的核心思想是：drug binding to target/receptor 不只是 PD 事件，也会改变 PK。Full TMDD
+model 至少包含 free drug、free receptor、drug-receptor complex、receptor synthesis、
+receptor degradation、binding/unbinding、complex internalization、ordinary elimination。
+
+\lecturefigure{tmdd.jpg}{\tstamp{1: 02:50:30} Full TMDD model 的 simulation 入口。}
+
+D'Argenio 用 simulation 训练学生读模型：
+
+\begin{itemize}
+  \item 如果 \(k_{on}=0\)，没有 binding，drug curve 应接近普通 compartmental elimination。
+  \item 曲线偏离简单指数下降的部分，来自 binding、receptor turnover 或 internalization。
+  \item 改变 elimination rate 主要影响整体下降。
+  \item 改变 internalization rate 往往影响 terminal phase。
+  \item 只看 total drug 可能掩盖 free drug 的 TMDD 特征。
+\end{itemize}
+
+因此复杂模型不应该先拿去 estimation。先 simulation，用 controlled parameter changes 看清楚
+每个参数在曲线上的手指纹。
+
+\section{Estimation: WLS, ML, Bayesian}
+
+\subsection{Estimation 是 inverse problem \tstamp{1: 03:34:06--03:59:37}}
+
+D'Argenio 把 estimation 称为 inverse problem：我们有 data，要反推 ``state of nature''，
+也就是 system properties 或 parameters。
+
+Weighted least squares 的目标函数是：
+
+\[
+  \hat{\theta}_{WLS}
+  =
+  \arg\min_{\theta}
+  \sum_j w_j\{z_j-y(t_j;\theta)\}^2.
+\]
+
+若 \(w_j=1\)，就是 ordinary least squares。若知道 measurement variance，应该让 uncertainty
+大的 observation 权重小，例如 \(w_j\propto 1/\sigma_j^2\)。
+
+\subsection{Maximum likelihood 的统计含义 \tstamp{1: 04:00:00--04:13:12}}
+
+Maximum likelihood 不再手动选择权重，而是写出 error distribution。若：
+
+\[
+  z_j\mid\theta \sim
+  \mathcal{N}\{y(t_j;\theta),\sigma_j^2(\theta,\beta)\},
+\]
+
+则 likelihood 是所有 observation density 的乘积：
+
+\[
+  L(\theta,\beta)=\prod_j p(z_j\mid\theta,\beta).
+\]
+
+估计目标是：
+
+\[
+  (\hat{\theta},\hat{\beta})
+  =
+  \arg\min_{\theta,\beta} -\log L(\theta,\beta).
+\]
+
+这里 \(\beta\) 是 error variance model 的参数。D'Argenio 的关键判断是：population modeling
+必须建立在 likelihood 上。因为 population modeling 要同时描述 residual error 和
+between-subject variability，只靠 least squares 很难形成正确的概率结构。
+
+\subsection{Bayesian/MAP estimation \tstamp{1: 04:13:39--04:36:56}}
+
+Bayesian estimation 的不同之处在于它不只使用当前个体的数据，也使用 prior information。
+典型场景是：你已经从某个 patient population 知道 clearance 的 population mean 与 variance；
+现在来了一个新病人，只有一两个浓度点。只用这个人的 sparse data 会很不稳定；Bayesian
+estimation 把 prior 与 likelihood 合并。
+
+\lecturefigure{bayesian-map.jpg}{\tstamp{1: 04:13:39} Prior, likelihood, posterior 与 MAP estimation 的图示。}
+
+Bayes rule 的结构是：
+
+\[
+  p(\theta\mid z)\propto p(z\mid\theta)p(\theta).
+\]
+
+如果只取 posterior distribution 的最大点，就是 MAP estimate：
+
+\[
+  \hat{\theta}_{MAP}
+  =
+  \arg\max_{\theta} p(z\mid\theta)p(\theta).
+\]
+
+直觉上，MAP objective = data mismatch penalty + prior deviation penalty。数据足够多时，
+likelihood 主导；数据稀疏或不含某些参数信息时，estimate 会回到 prior mean 附近。
+
+\section{Individual estimation 的输出如何读}
+
+\subsection{Indirect response ML estimation \tstamp{1: 04:37:23--05:14:20}}
+
+回到 indirect response model，D'Argenio 用 maximum likelihood 同时估计 PK 与 PD 参数，
+并为不同 outputs 设置 variance model。结果文件里最重要的不是单个 estimate，而是一组诊断：
+
+\begin{itemize}
+  \item final parameter estimates;
+  \item standard errors;
+  \item negative log-likelihood;
+  \item number of function or ODE evaluations;
+  \item secondary parameters;
+  \item parameter covariance/correlation matrix;
+  \item residuals;
+  \item fitted versus observed profiles.
+\end{itemize}
+
+参数相关性尤其重要。如果两个 estimates 高度相关，说明数据不能把它们区分开。模型可能
+过度参数化，或者实验设计没有激发足够多的 dynamics。Initial guesses 也不是小事：
+非线性模型的 likelihood surface 可能有多个局部区域，optimizer 会受初值影响。
+
+\subsection{一个实用的 estimation checklist}
+
+\begin{enumerate}
+  \item 先 simulation，再 estimation。
+  \item 检查 initial condition 是否与 baseline steady state 一致。
+  \item 检查 error variance model 是否符合 assay/data mechanism。
+  \item 检查 initial guesses 是否在合理量级。
+  \item 检查 parameter scaling 是否极端，例如 \(10^{-6}\) 和 \(10^3\) 同时出现。
+  \item 用多个 initial guesses 重复估计，排除局部最优。
+  \item 看 correlation matrix，而不是只看 estimates。
+\end{enumerate}
+
+\section{Debugging and advanced coding}
+
+\subsection{Always simulate first \tstamp{1: 05:18:12--05:34:11}}
+
+D'Argenio 的 debugging 哲学非常朴素：always simulate first。不要一上来就跑 individual
+或 population estimation。先确认模型在 nominal parameters 下能正常 simulation。
+
+\lecturefigure{debugging.jpg}{\tstamp{1: 05:18:11} Debugging and advanced programming 的开场。}
+
+ADAPT 可以把 intermediate results 写到 screen 或 run file。复杂模型的 ODE 会被求解成百上千次；
+一个中间步骤出现 not a number，就可能表现成很难理解的 solver error。因此要主动检查：
+
+\begin{itemize}
+  \item square root 里的表达式是否可能因数值误差变成负数；
+  \item denominator 是否可能为零；
+  \item conditional branch 是否覆盖 \(T=0\)；
+  \item parameter values 是否越界；
+  \item dose/input 是否真的进入了预期 compartment。
+\end{itemize}
+
+\subsection{Inverse Gaussian absorption 的调试教训 \tstamp{1: 05:35:21--05:55:47}}
+
+在 inverse Gaussian absorption 例子中，输入函数在 \(T=0\) 时会除以零。模型理论上没有错，
+但数值实现必须对 \(T=0\) 单独处理：
+
+\begin{code}
+IF (T .EQ. 0) THEN
+  INPUT = 0
+ELSE
+  INPUT = formula_that_is_defined_only_for_positive_time
+ENDIF
+\end{code}
+
+这个例子的意义是：debugging 不是“把错误消息消掉”，而是让模型的数学定义与数值实现一致。
+
+\subsection{把 AUC 和 time above threshold 写成 state \tstamp{1: 06:03:07--06:10:37}}
+
+ADAPT 擅长解 ODE。因此有些看起来不是 ODE 的 quantity，可以转成 state。AUC 可以写成：
+
+\[
+  \frac{\dd \pksym{AUC}(t)}{\dd t}=C(t),\qquad \pksym{AUC}(0)=0.
+\]
+
+Time above threshold 可以写成：
+
+\[
+  \frac{\dd T_{above}}{\dd t}
+  =
+  \begin{cases}
+    1, & C(t)>C^\ast,\\
+    0, & C(t)\le C^\ast.
+  \end{cases}
+\]
+
+这是一种重要的建模手感：把 summary quantity 变成 state，ADAPT 就可以在同一个 simulation
+框架里追踪它。
+
+\section{PBPK and circulatory thinking}
+
+\subsection{PBPK 更准确地说是 circulatory model \tstamp{2: 00:15:39--00:23:06}}
+
+D'Argenio 说 PBPK 当然是 physiologically based，但更准确地说是 circulatory model。它用
+circulatory system 和 anatomy 指导模型结构。血中浓度曲线不是一个抽象 compartment 的曲线，
+而是 blood flow 与所有 tissues/organs 交换后的结果。
+
+最基本的 perfusion-limited organ mass balance 是：
+
+\[
+  \frac{\dd A_o}{\dd t}=Q_oC_{art}-Q_oC_{ven,o}.
+\]
+
+若 \(A_o=V_oC_o\)，并用 partition coefficient \(R_o\) 连接 tissue concentration 与 venous
+effluent concentration：
+
+\[
+  C_{ven,o}=\frac{C_o}{R_o},
+\]
+
+则：
+
+\[
+  \frac{\dd C_o}{\dd t}
+  =
+  \frac{Q_o}{V_o}\left(C_{art}-\frac{C_o}{R_o}\right).
+\]
+
+\lecturefigure{pbpk-mass-balance.jpg}{\tstamp{2: 00:24:01} PBPK organ mass balance 与 perfusion-limited assumption。}
+
+这个公式说明 PBPK 的骨架：flow、volume、partition coefficient。liver 更复杂，因为它有
+hepatic artery 和 portal circulation；venous blood 是各组织流出的汇总；lung、arterial blood、
+venous blood 共同闭合循环。
+
+\subsection{PBPK 在 ADAPT 里的实现 \tstamp{2: 00:36:03--00:53:06}}
+
+PBPK 模型通常一个 model file 搭配多个 data/parameter files。例如 mouse、rat、dog、human
+四个 species 使用同一套结构，但 body weight、hematocrit、flows、volumes、partition
+coefficients、clearance、fraction bound 不同。
+
+ADAPT 默认安装有 maximum limits，例如 differential equations 数量、system parameters 数量、
+inputs、dose events、observation times。PBPK/QSP 模型容易碰到这些上限。遇到奇怪 parser
+或 solver 限制时，不一定是方程错了，也可能是 installation settings 太小。
+
+\section{Naive pooled data and batch mode}
+
+\subsection{Minimal PBPK with naive pooled data \tstamp{2: 01:24:32--01:45:01}}
+
+Minimal PBPK case study 的目标是从多个 dose levels 的数据同时估计关键参数，例如两个
+reflection coefficients 和 clearance。Naive pooled data 的假设很强：不同 dose level、
+不同 replicate animals 被当作同一个 pooled system 来估计同一组参数。它忽略个体差异，
+所以不是 population modeling。
+
+\lecturefigure{naive-pooled-data.jpg}{\tstamp{2: 01:24:32} Minimal PBPK 的 naive pooled data estimation。}
+
+但 naive pooled data 很有用，因为复杂模型的某些参数只有在多个 dose ranges 下才可辨识：
+
+\begin{itemize}
+  \item 低剂量可能只落在线性范围，无法识别 \(IC_{50}\) 或 nonlinear binding。
+  \item 高剂量可能已经饱和，反而不利于识别低浓度区的 affinity。
+  \item 把多个 dose levels 放在一起，可以让数据覆盖模型的多个 dynamic regimes。
+\end{itemize}
+
+\subsection{ACI and background mode \tstamp{2: 01:45:12--02:00:57}}
+
+ADAPT 可以交互式运行，也可以 background/batch mode 运行。ACI（ADAPT command input）
+文件把交互过程中需要回答的问题都写进文件：
+
+\begin{code}
+run_file_name
+data_file_name
+parameter_file_name
+bolus_compartment
+estimation_or_simulation_option
+which_parameters_to_estimate
+which_initial_conditions_to_estimate
+which_error_parameters_to_estimate
+\end{code}
+
+当模型开发进入 production stage，尤其是同一个 executable 要重复跑多个 data files 或多个
+parameter files 时，batch mode 比 GUI 点击更可靠、更可复现。
+
+\section{Population simulation}
+
+\subsection{Forward Monte Carlo \tstamp{2: 02:02:40--02:24:42}}
+
+Population simulation 不是 estimation，而是 forward Monte Carlo。假设你已经知道 population
+distribution：
+
+\[
+  \theta_i\sim\mathrm{LogNormal}(\mu,\Omega),
+\]
+
+并知道 covariates 与 PK parameters 的关系，例如：
+
+\[
+  V_i=v_sWT_i,\qquad \pksym{CL}_i=cl_sCrCL_i.
+\]
+
+ADAPT 在 \texttt{PRIOR} function 中输入 population mean、variance、covariance。这里的
+\texttt{prior} 名字来自 MAP Bayesian estimation，但同一批 mean/covariance 也可用于
+population simulation。
+
+运行时要选择 normal or lognormal distribution，决定哪些 parameters random，设定 virtual
+subjects 数量和 random seed。固定 seed 的意义是：如果比较两个 dosing regimens，最好用同一批
+virtual subjects，减少 Monte Carlo noise。
+
+\subsection{Mean response is not response at mean parameter \tstamp{2: 02:31:17--02:33:45}}
+
+D'Argenio 最精彩的提醒是：
+
+\[
+  \mathbb{E}\{y(t;\theta)\}\ne y(t;\mathbb{E}\{\theta\}).
+\]
+
+\lecturefigure{population-nonlinearity.jpg}{\tstamp{2: 02:31:05} Population mean response 与 mean-parameter response 的非线性差异。}
+
+原因是 PK/PD dynamic models 对参数通常是非线性的。即使一室模型
+\[
+  C(t)=C_0e^{-kt}
+\]
+里，\(k\) 翻倍也不会让每个时间点的浓度简单减半。到 PD、receptor binding、saturation、
+TMDD 时，这个非线性更强。
+
+这就是 population simulation 的必要性：不能只把 population mean parameters 放进模型，
+然后把那条曲线当作 population mean response。
+
+\section{复习总结}
+
+\subsection{ADAPT 视角下的 pharmacometrics 统一语法}
+
+两天课程真正教的是一套 pharmacometrics grammar：
+
+\begin{enumerate}
+  \item \concept{Mechanistic dynamics}: states 如何交换、结合、合成、降解、清除。
+  \item \concept{Observation}: 实验测到的是 output equation 加 measurement error。
+  \item \concept{Parameter uncertainty}: individual parameters 在 population 中有 distribution。
+  \item \concept{Computation}: model file, data file, parameter file, SIM/ID/NPD/POP application, run file, residual file, ACI file。
+  \item \concept{Decision}: simulation 和 estimation 最终服务于 dose、sampling、model revision、study design。
+\end{enumerate}
+
+\subsection{五个必须带走的句子}
+
+\begin{enumerate}
+  \item ADAPT 的灵魂是 dynamic systems，不是内置模型菜单。
+  \item Simulation、estimation、deconvolution 是同一个 input-system-output 框架下的三类问题。
+  \item ODE model、measurement model、parameter model 是三个不同层次，不能混为一谈。
+  \item Maximum likelihood 是 individual estimation 与 population modeling 的共同地基。
+  \item 对 nonlinear PK/PD 模型，\(\mathbb{E}\{y(\theta)\}\) 通常不等于 \(y\{\mathbb{E}(\theta)\}\)，所以 population simulation 不是装饰，而是理解 variability 的必要工具。
+\end{enumerate}
+
+\end{document}

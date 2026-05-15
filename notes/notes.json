@@ -1,5 +1,35 @@
 [
   {
+    "slug": "dargenio-adapt-short-course",
+    "date": "2026-05-15",
+    "title": "D'Argenio ADAPT Short Course: Dynamic Systems, Estimation, PBPK, and Population Simulation",
+    "category": "ADAPT Short Course",
+    "year": "2026",
+    "paper": "David Z. D'Argenio ADAPT training transcripts; USC BMSR ADAPT documentation; selected timestamp-matched workshop frames",
+    "citationKey": "dargenio2009adapt5",
+    "tex": "2026-05-15-dargenio-adapt-short-course.tex",
+    "pdf": "2026-05-15-dargenio-adapt-short-course.pdf",
+    "tags": ["ADAPT", "D'Argenio", "PK/PD", "dynamic systems", "simulation", "maximum likelihood", "Bayesian estimation", "PBPK", "naive pooled data", "population simulation"],
+    "summary": "基于 D'Argenio ADAPT short course 两段 transcript 的中文学习笔记：先联网整理 ADAPT/BMSR 背景，再沿着 input-system-output、state/output equation、measurement model、parameter model、simulation、WLS/ML/Bayesian estimation、debugging、PBPK、naive pooled data 和 population simulation 梳理 ADAPT 的系统建模哲学。",
+    "questions": [
+      "ADAPT 为什么不是一个固定模型库，而是一套 dynamic systems modeling workflow?",
+      "Simulation、deconvolution、identification/estimation 在 input-system-output 框架中分别对应什么问题?",
+      "ODE model、measurement model 和 parameter model 为什么必须分开思考?",
+      "Weighted least squares、maximum likelihood 和 MAP Bayesian estimation 的统计差异在哪里?",
+      "PBPK/circulatory model 如何在 ADAPT 的 state/output equation 语言中实现?",
+      "Population simulation 为什么不能用 mean parameter curve 代替 mean response?"
+    ],
+    "model": "\\dot{x}=f(x,\\theta,u,t),\\quad y=g(x,\\theta,u,t),\\quad z=y+\\epsilon,\\quad \\theta_i\\sim \\mathcal D(\\mu,\\Omega)",
+    "takeaways": [
+      "ADAPT 的核心是用户自定义 dynamic system，而不是从菜单选择固定 PK/PD 模型。",
+      "Model file、data file、parameter file 分别承载机制假设、实验输入观测和参数/先验信息。",
+      "Maximum likelihood 把 error model 写进 objective function，是 individual estimation 和 population modeling 的共同地基。",
+      "Debugging 的第一步永远是 simulation first，再用 intermediate output 找 numerical pathology。",
+      "PBPK 是 circulatory thinking：flow、volume、partition coefficient 和 organ mass balance 共同决定浓度曲线。",
+      "非线性 PK/PD 中 mean response 通常不等于 response at mean parameters，因此 population simulation 有独立科学价值。"
+    ]
+  },
+  {
     "slug": "ub-phc607608609-clinical-pkpd",
     "date": "2026-05-15",
     "title": "UB PHC 607/608/609: Clinical PK/PD as Dose Individualization",
