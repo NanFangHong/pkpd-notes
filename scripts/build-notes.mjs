@@ -599,7 +599,11 @@ function topIndex(results) {
   const groups = [...byCategory.entries()]
     .map(([category, items]) => {
       const body = items
-        .sort((a, b) => String(b.note.date || "").localeCompare(String(a.note.date || "")))
+        .sort((a, b) => {
+          const byDate = String(b.note.date || "").localeCompare(String(a.note.date || ""));
+          if (byDate) return byDate;
+          return String(b.note.title || b.note.slug || "").localeCompare(String(a.note.title || a.note.slug || ""));
+        })
         .map((item) => {
           const extra = item.note.additional ? ` <span class="note-additional">(${escapeHtml(item.note.additional)})</span>` : "";
           const links = item.ok
