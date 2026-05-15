@@ -101,7 +101,10 @@ A low \(\pkF\) therefore has many possible explanations. A formulation problem m
 
 Classic teaching examples are valuable because they show mechanisms rather than names. Milk can reduce absorption of certain drugs by chelation. Food can delay or enhance absorption depending on dissolution, gastric emptying, bile secretion, and transporter effects. Green tea reducing nadolol exposure points toward transporter-mediated absorption. The general lesson is:
 \[
-  \text{extravascular PK is formulation + physiology + transport + first pass + systemic clearance}.
+  \begin{gathered}
+  \text{extravascular PK is formulation + physiology + transport}\\
+  \text{+ first pass + systemic clearance}.
+  \end{gathered}
 \]
 If the terminal slope is unchanged but \(\pkCmax\) and \(\pkAUC\) fall, absorption or bioavailability is suspicious. If terminal slope changes too, systemic clearance or distribution may also be involved.
 
@@ -431,7 +434,61 @@ The state equation is not enough. Observations and decisions complete the model.
 
 Large systems often contain directions that barely affect the prediction of interest. Sensitivity analysis, sloppiness, MBAM-like thinking, and modular reduction ask which mechanisms are essential for the question. Reduction is not anti-mechanistic. It is the discipline of retaining the mechanisms that matter for the decision.
 
-\section{Expanded Atlas XVI: Study Problems}
+\section{Expanded Atlas XVI: PHC 608/609 Course-Packet Addendum}
+
+\subsection{What the incomplete PHC 608 packet adds}
+
+The PHC 608 syllabus and representative lecture slides make the advanced-PK bridge more explicit. The bridge is:
+\[
+  \begin{aligned}
+  \text{molecule and formulation}
+  &\to
+  \text{ADME mechanism}\\
+  &\to
+  \text{physiological or semi-mechanistic model}\\
+  &\to
+  \text{regimen consequence}.
+  \end{aligned}
+\]
+Structure-PK and QSPR should therefore be read before PBPK, not after it. They teach which drug properties might drive solubility, permeability, transporter interaction, binding, tissue partitioning, and metabolic route. Complex absorption teaches that oral input is not necessarily one \(k_a\). Hepatic clearance, biliary excretion, EHC, reversible metabolism, and minimal PBPK teach that an apparent clearance pathway may be blood-flow limited, capacity-limited, transporter-limited, reversible, or part of a loop.
+
+\subsection{What the incomplete PHC 609 packet adds}
+
+The PHC 609 syllabus clarifies the PD staircase:
+\[
+  \begin{aligned}
+  \text{direct effect}
+  &\to
+  \text{biophase}
+  \to
+  \text{indirect response}
+  \to
+  \text{transduction}\\
+  &\to
+  \text{tolerance / lifespan / disease}
+  \to
+  \text{systems pharmacology}.
+  \end{aligned}
+\]
+This is not a list of fashionable model names. It is a ladder of clocks. The drug has a PK clock, the effect site has an equilibration clock, the biomarker has a turnover clock, cells have a lifespan clock, circadian physiology has an external clock, and disease has a progression clock. A mature model states which clock explains the observed delay.
+
+\subsection{QSP as executable pharmacology}
+
+The Gallo QSP materials add a reproducibility habit. A pathway diagram should eventually become an executable artifact: an ODE system or stochastic process, a parameter table, a simulation script, and an output map. SBML/Tellurium examples are useful because they force the modeler to name species, reactions, kinetic laws, initial conditions, and outputs. The course project framing is especially healthy: choose a model, explain why it matters, run the original simulation, then perturb parameters with a scientific rationale.
+
+\subsection{How this changes the reading strategy}
+
+When reading the Buffalo packet, classify each topic by what it changes:
+\begin{enumerate}[leftmargin=2em]
+  \item \textbf{Input grammar}: absorption, formulation, transit, depot, protein absorption.
+  \item \textbf{Disposition grammar}: hepatic clearance, transport, EHC, reversible metabolism, PBPK, mAb physiology.
+  \item \textbf{Response grammar}: direct effect, biophase, IRM, transduction, tolerance, lifespan, categorical response.
+  \item \textbf{Translation grammar}: animal scaling, special populations, PBPK virtual populations.
+  \item \textbf{Systems grammar}: reaction networks, stochastic simulation, SBML and Tellurium, sensitivity analysis.
+\end{enumerate}
+This classification keeps the materials from becoming a folder of isolated PDFs.
+
+\section{Expanded Atlas XVII: Study Problems}
 
 \subsection{Core problems}
 

@@ -61,14 +61,19 @@
 \newcommand{\pkPBPK}{\pksym{PBPK}}
 \newcommand{\pkQSP}{\pksym{QSP}}
 \newcommand{\pkNONMEM}{\pksym{NONMEM}}
+\newcommand{\pkQSPR}{\pksym{QSPR}}
+\newcommand{\pkEHC}{\pksym{EHC}}
+\newcommand{\pkSBML}{\pksym{SBML}}
 
 \title{UB PHC 607/608/609 - Clinical PK/PD as Dose Individualization}
 
 \begin{document}
 \maketitle
-{\small
+{\small\sloppy
   \noindent\textbf{Reading motive}\\
-  这份笔记把 Buffalo PHC 607/608/609 相关材料重写成一卷完整的自学文本。Guohua An 的两本 notebook 给出课程的覆盖面：clinical pharmacokinetics, dose optimization, biologics, advanced PK/PD, PBPK, population PK, NONMEM, pharmacodynamics, indirect response, and QSP \cite{an2025essentialsClinicalPK,an2025advancedPKPD}. 这里不做逐句改写，也不做替代教材式复制；我把它们当作 topic map，然后用我们前面形成的 dec41/pdf2htmlEX 风格写成一条原创推理线。\hspace*{\fill}[source map]
+  这份笔记把 Buffalo PHC 607/608/609 相关材料重写成一卷完整的自学文本。Guohua An 的两本 notebook 给出课程的覆盖面：clinical pharmacokinetics, dose optimization, biologics, advanced PK/PD, PBPK, population PK, NONMEM, pharmacodynamics, indirect response, and QSP \cite{an2025essentialsClinicalPK,an2025advancedPKPD}.
+
+  后续又补读了不完整的 PHC 608/609 course packet：608 的 syllabus 和代表性讲义补上 structure-PK, complex absorption, CNS distribution, hepatic clearance, EHC, reversible systems, protein/mAb PBPK；609 的 syllabus 和讲义补上 circadian IRM, nonlinear/time-dependent transduction, tolerance, lifespan, disease progression, categorical response, animal scaling, SBML and Tellurium, and stochastic QSP。这里不做逐句改写，也不做替代教材式复制；我把它们当作 topic map 和 missing-module check，然后用我们前面形成的 dec41/pdf2htmlEX 风格写成一条原创推理线。\par\hfill[source map]
 
   \vspace{5pt}
   \noindent\textbf{Audience}\\
@@ -312,7 +317,10 @@ Suppose plasma protein binding decreases, so \(f_u\) increases. What happens? It
 
 The correct question is therefore not ``does protein binding matter?'' but
 \[
-  \text{which concentration drives elimination, distribution, response, and measurement?}
+  \begin{gathered}
+  \text{which concentration drives elimination, distribution,}\\
+  \text{response, and measurement?}
+  \end{gathered}
 \]
 When these differ, total concentration becomes a shadow of several mechanisms.
 
@@ -370,6 +378,51 @@ where \(F_a\) is fraction absorbed across the gut wall, \(F_G\) is fraction esca
 Normally \(k_a>k_e\), so terminal decline reflects elimination. In flip-flop kinetics, \(k_a<k_e\), so terminal decline reflects absorption. The terminal slope is then not the elimination slope. This is a beautiful cautionary example: the same visual straight line on a semi-log plot can mean different mechanisms depending on model structure.
 
 The clinical consequence is serious. If the observed terminal half-life after an oral depot formulation is actually absorption-limited, using it to infer elimination half-life may overestimate how long drug remains once input stops.
+
+\section{Structure-PK and Complex Absorption}
+
+\subsection{Molecular structure as an early prior}
+
+The PHC 608 structure-PK material adds a useful upstream layer. Before the first human profile exists, medicinal chemists and pharmacologists already have molecular clues: \(pK_a\), \(\log P\), molecular weight, polar surface area, hydrogen bonding, ionization, protein binding, solubility, permeability, efflux liability, and metabolic soft spots. These do not determine human PK. They act like weak mechanistic priors:
+\[
+  \begin{aligned}
+  \text{structure}
+  &\to
+  \{\text{solubility, permeability, binding, metabolism, transport}\}\\
+  &\to
+  \{F_a,F_G,F_H,\pkCL,\pkV,K_p\}
+  \to C(t).
+  \end{aligned}
+\]
+This is why \(\pkQSPR\) should be read as hypothesis generation rather than prophecy. It says which ADME process deserves attention, not what the final dose should be.
+
+\figureStructureAbsorptionMap
+
+\subsection{Complex absorption is not only a smaller \(F\)}
+
+The absorption lecture makes an important point: oral absorption can fail by extent, rate, timing, site, or formulation behavior. A single \(k_a\) may be enough for a clean immediate-release profile, but it can be too thin for delayed gastric emptying, dissolution limits, transporter-mediated uptake, efflux, gut metabolism, gastro-retentive dosage forms, or saturable absorption.
+
+Transit models express distributed delay without pretending the gut has one magic lag time:
+\[
+  \begin{aligned}
+  \frac{\dd A_1}{\dd t} &= k_{\pklab{tr}}(D-A_1),\\
+  \frac{\dd A_m}{\dd t} &= k_{\pklab{tr}}(A_{m-1}-A_m),\qquad m=2,\ldots,n,\\
+  \frac{\dd A_c}{\dd t} &= F\,k_{\pklab{tr}}A_n-\frac{\pkCL}{\pkV}A_c.
+  \end{aligned}
+\]
+The decision consequence is concrete: if the late terminal slope is absorption-limited, changing formulation can change apparent half-life without changing systemic clearance.
+
+\subsection{CNS and tissue access}
+
+The course packet also flags CNS distribution and tissue exposure. Brain exposure is not simply plasma exposure scaled by a volume. Blood-brain barrier permeability, efflux transporters such as P-gp, unbound fraction, tissue binding, and active uptake can separate plasma concentration from pharmacological site concentration. A clinical curve can therefore look adequate while site exposure is inadequate, or look high while target tissue is protected.
+
+For a target-site question, the observation model should be stated honestly:
+\[
+  y_{\pklab{plasma}}(t)=g_{\pklab{plasma}}(x(t))+\epsilon,
+  \qquad
+  C_{\pklab{site}}(t)=g_{\pklab{site}}(x(t)).
+\]
+Only the first may be measured. The second is often inferred, and that inference deserves uncertainty.
 
 \section{Noncompartmental Analysis as Geometry}
 
@@ -527,6 +580,38 @@ An active metabolite changes the dose-response story. The parent concentration m
 \]
 This is a simple formula, but it carries a clinical warning: measuring only parent may miss part of pharmacology.
 
+\section{Reversible Systems and Enterohepatic Cycling}
+
+\subsection{When elimination becomes a loop}
+
+The PHC 608 material on biliary excretion, \(\pkEHC\), and reversible systems fills a conceptual gap between ordinary clearance and whole-body PBPK. Textbook elimination arrows often point out of the body. Real systems sometimes return drug or metabolite to the central pool. Biliary secretion can send drug into the gut; gut enzymes can regenerate parent from conjugate; reabsorption can create a second rise in plasma concentration. Metabolism can also be reversible when parent and metabolite interconvert.
+
+\figureReversibleEhc
+
+The modeling lesson is that a secondary peak is not automatically assay noise. It could be meal-triggered gallbladder emptying, enterohepatic cycling, delayed absorption, formulation release, posture, sampling artifact, or sparse data. The curve alone does not choose the mechanism. The model should make testable predictions: timing with meals, fecal recovery, bile diversion, metabolite profile, or change after transporter/enzyme perturbation.
+
+\subsection{Biliary excretion versus enterohepatic recirculation}
+
+Biliary clearance can be true elimination if material leaves in feces. \(\pkEHC\) is different: it is a distribution-like loop until the drug or metabolite finally exits. That distinction matters for \(\pkAUC\), terminal slope, and accumulation. A minimal mass-balance sketch is
+\[
+  \begin{aligned}
+  \dot A_c &= \text{input}-\pkCL_{\pklab{sys}}C-k_{\pklab{bile}}A_c+k_{\pklab{reabs}}A_g,\\
+  \dot A_g &= k_{\pklab{bile}}A_c-k_{\pklab{reabs}}A_g-k_{\pklab{feces}}A_g.
+  \end{aligned}
+\]
+The same biliary arrow can therefore be elimination, storage, or delayed input depending on what happens downstream.
+
+\subsection{Maternal-fetal and other reversible exchange systems}
+
+Reversible systems are not limited to metabolism. Maternal-fetal transfer, dialysis, tissue binding, intracellular trapping, and protein binding can all behave like coupled reservoirs. The general question is:
+\[
+  \begin{gathered}
+  \text{does material leave the decision-relevant system,}\\
+  \text{or does it return on a clinically relevant time scale?}
+  \end{gathered}
+\]
+If it returns, a one-way clearance interpretation may be too blunt. If it does not return, a loop model may overcomplicate the decision.
+
 \section{Nonlinear Pharmacokinetics}
 
 \subsection{Symptoms of nonlinearity}
@@ -574,13 +659,14 @@ If \(R_{\pklab{in}}\) approaches \(\pkVmax\), concentration climbs sharply. The 
 
 Therapeutic drug monitoring is often taught as plug-in equations. But the deeper logic is Bayesian:
 \[
-  \text{prior patient expectation}
-  +
-  \text{measured concentration}
-  \longrightarrow
+  \begin{aligned}
+  &\text{prior patient expectation}
+  +\text{measured concentration}\\
+  &\hspace{2em}\longrightarrow
   \text{updated individual parameters}
   \longrightarrow
   \text{next dose}.
+  \end{aligned}
 \]
 Even a simple peak/trough aminoglycoside calculation implicitly combines prior model structure with observed data. Modern Bayesian TDM simply makes the hierarchy explicit.
 
@@ -590,7 +676,10 @@ Different drugs ask for different monitoring targets. Aminoglycosides may emphas
 
 The correct TDM question is not ``is the level in range?'' It is:
 \[
-  \text{given this level, timing, dose history, patient physiology, and target, what should happen next?}
+  \begin{gathered}
+  \text{given this level, timing, dose history, patient physiology, and target,}\\
+  \text{what should happen next?}
+  \end{gathered}
 \]
 
 \subsection{Measurement is part of the model}
@@ -619,6 +708,16 @@ Elderly patients challenge single-parameter thinking. Renal function may decline
 \subsection{Obesity}
 
 Obesity forces the distinction between loading and maintenance. Loading dose depends on distribution; maintenance dose depends on clearance. Total body weight, ideal body weight, adjusted body weight, lean body weight, and body surface area are not interchangeable. The right body-size descriptor depends on whether the drug distributes into adipose, lean tissue, extracellular water, or a mixture.
+
+\subsection{Animal scaling and species translation}
+
+The PHC 609 animal-scaling lecture belongs here because species differences are a special-population problem before they are a modeling trick. Allometry is useful:
+\[
+  \pkCL = a\,\pksym{WT}^{\,b},
+  \qquad
+  \pkV = c\,\pksym{WT}^{\,d}.
+\]
+But the exponents are priors, not laws of nature. Enzyme abundance, plasma binding, target expression, receptor turnover, immune handling, lifespan, maturation, diet, and disease model can break naive scaling. Interspecies translation is strongest when size scaling is paired with mechanism: what is conserved, what is species-specific, and which endpoint is being translated?
 
 \subsection{Renal and hepatic impairment}
 
@@ -665,6 +764,26 @@ Monoclonal antibodies often have small central volumes, slow distribution, long 
   \varnothing.
 \]
 At low doses, target-mediated clearance can dominate. At high doses, target pathways saturate and nonspecific clearance may dominate.
+
+\subsection{Minimal PBPK for proteins and antibodies}
+
+The protein and mAb PK lectures sharpen one point: large molecules often need physiological distribution language even when the model is intentionally minimal. Vascular reflection, convection, lymph return, endosomal uptake, FcRn rescue, and tissue-specific permeability can matter more than CYP-style intrinsic clearance. A minimal PBPK model for mAbs is not a giant anatomical atlas; it is a controlled way to separate plasma, tissue interstitial space, lymph, and catabolic protection.
+
+The translation question is therefore different from small molecules:
+\[
+  \begin{aligned}
+  \text{dose}
+  &\to
+  \text{vascular exposure}
+  \to
+  \text{tissue access}\\
+  &\to
+  \text{target binding}
+  \to
+  \text{catabolism or recycling}.
+  \end{aligned}
+\]
+If tissue access or FcRn rescue drives the decision, a two-compartment empirical fit may describe the curve but hide the mechanism needed for extrapolation.
 
 \subsection{ADCs}
 
@@ -839,7 +958,10 @@ PBPK is especially useful when extrapolation depends on physiology: first-in-hum
 
 PBPK is not automatically more true because it is more detailed. A complex model can hide uncertainty behind many parameters. The key questions are:
 \[
-  \text{which prediction is needed, which parameters control it, and what evidence supports those parameters?}
+  \begin{gathered}
+  \text{which prediction is needed, which parameters control it,}\\
+  \text{and what evidence supports those parameters?}
+  \end{gathered}
 \]
 This is the same discipline as simpler PK, only with more moving parts.
 
@@ -916,6 +1038,68 @@ This class explains delayed onset, rebound, tolerance-like behavior, and biomark
 
 \figurePDDelays
 
+\section{Advanced PD Delay Grammar}
+
+\subsection{The PHC 609 delay ladder}
+
+The 609 course packet makes the PD side much richer than the three introductory patterns above. Direct effect, biophase delay, indirect response, transduction, tolerance, lifespan, circadian baseline, disease progression, and categorical outcomes are not disconnected lecture topics. They are an escalation ladder: add state variables only when the pharmacology, the diagnostic plot, or the clinical decision requires them.
+
+\figureAdvancedPdDelayLadder
+
+\subsection{Transduction and signal chains}
+
+Transduction models represent a response that moves through mediator states before becoming observable. A simple linear chain is
+\[
+  \begin{aligned}
+  \dot R_1 &= k_{\pklab{tr}}\{S(C)-R_1\},\\
+  \dot R_m &= k_{\pklab{tr}}(R_{m-1}-R_m),\qquad m=2,\ldots,n,\\
+  E(t) &= R_n(t).
+  \end{aligned}
+\]
+Nonlinear transduction replaces the linear signal with receptor occupancy, operational agonism, saturable mediator production, feedback, or pathway-level mechanisms. The key question is not how many boxes can be drawn. The key question is which delay distribution and which nonlinear sensitivity are visible in the data.
+
+\subsection{Tolerance, rebound, and slow irreversible effects}
+
+Clockwise hysteresis, rebound, and waning response suggest that sensitivity itself may change. Tolerance can be modeled as a moderator state, a precursor depletion process, receptor downregulation, enzyme induction, or feedback compensation:
+\[
+  E(t)=
+  \frac{E_{\max}C(t)}{\pkECfifty\{1+T(t)\}+C(t)},
+  \qquad
+  \dot T = k_{\pklab{tol}}C(t)-k_{\pklab{rec}}T.
+\]
+Slow receptor dissociation and irreversible target modification add another possibility: drug concentration may decline quickly while target occupancy or functional impairment persists. For duration of action, the relevant clock may be target recovery rather than plasma half-life.
+
+\subsection{Circadian baselines and disease progression}
+
+Many biomarkers are not flat baselines waiting for a drug. Cortisol, blood pressure, inflammatory mediators, cell counts, and activity markers can have circadian or disease-driven motion. A drug effect model that ignores baseline motion may misread biology as pharmacology:
+\[
+  k_{\pklab{in}}(t)
+  =
+  \bar k_{\pklab{in}}
+  \left\{1+a\cos\left(\frac{2\pi(t-\phi)}{24}\right)\right\}.
+\]
+Disease progression makes the baseline itself a state:
+\[
+  y(t)=D(t)+E_{\pklab{drug}}(t)+\epsilon(t),
+  \qquad
+  \dot D=f_{\pklab{disease}}(D,t,\theta).
+\]
+This distinction is clinically important. A treatment can slow progression, produce symptomatic offset, both, or neither. A short trial can confuse these unless the model separates disease trajectory from drug effect.
+
+\subsection{Lifespan, hematopoiesis, and odd-type outcomes}
+
+Cell lifespan models are natural when the observed response is a population of cells that must age through compartments before appearing or disappearing. Hematopoietic toxicity, neutrophil suppression, tumor growth inhibition, and delayed recovery often need this language. The response is not delayed because the assay is slow; it is delayed because biology has a production pipeline.
+
+Not every PD endpoint is continuous. Categorical response, ordered toxicity grade, count data, and time-to-event outcomes need observation models matched to the data type:
+\[
+  \Pr(Y\le m\given z)
+  =
+  \operatorname{logit}^{-1}(\alpha_m-z),
+  \qquad
+  z=h(x(t),\theta).
+\]
+This keeps the mechanistic state \(x(t)\) separate from the clinical scoring rule. That separation is one of the main habits of mature pharmacometrics.
+
 \section{Exposure-Response and Clinical Development}
 
 \subsection{Learning versus confirming}
@@ -926,17 +1110,19 @@ Clinical development alternates between learning and confirming. Early studies l
 
 The dose should be justified by a chain:
 \[
+  \begin{aligned}
   \text{dose}
-  \to
+  &\to
   \text{exposure}
   \to
   \text{target engagement}
   \to
-  \text{biomarker}
-  \to
+  \text{biomarker}\\
+  &\to
   \text{clinical response}
   \to
   \text{safety}.
+  \end{aligned}
 \]
 Not every program has every link. But the missing links should be named. Model-informed drug development is disciplined storytelling with equations, not curve fitting for decoration.
 
@@ -960,6 +1146,26 @@ PK is one part of the state system, not the whole model.
 
 Platform QSP models try to reuse a mechanistic scaffold across related drugs or targets: bispecific antibodies, ADCs, siRNAs, immuno-oncology combinations. The promise is learning across programs. The danger is carrying forward assumptions beyond their evidence. Reuse is powerful only when assumptions travel with uncertainty.
 
+\subsection{Reaction-network implementation}
+
+The Gallo systems-pharmacology materials add a practical implementation grammar. Receptors, enzymes, inhibitors, signaling proteins, and feedback motifs become reaction networks. A compact deterministic representation is
+\[
+  \dot x = S\,v(x,\theta,u),
+\]
+where \(S\) is the stoichiometric matrix and \(v\) contains kinetic rates. The same diagram can be encoded in \(\pkSBML\), imported into Tellurium/RoadRunner, simulated, perturbed, and compared across parameter settings.
+
+\figureQSPWorkflow
+
+\subsection{Deterministic and stochastic readings}
+
+ODEs are appropriate when concentrations or molecule numbers are high enough that averaged rates are meaningful. Stochastic simulation becomes important when copy numbers are low, switching events matter, or cell-to-cell variability is part of the biological question. The stochastic model is not a decorative version of the ODE; it answers a different question:
+\[
+  \text{mean trajectory}
+  \quad \text{versus} \quad
+  \text{distribution of possible trajectories}.
+\]
+For QSP, the implementation standard should therefore include the model file, units, initial conditions, parameter provenance, simulation settings, and the precise outputs used for decision.
+
 \subsection{Credibility}
 
 A QSP model is credible relative to a question of interest. It is not globally credible. For dose selection, the model must be credible for exposure-response in the relevant population and dose range. For mechanism exploration, qualitative dynamics may suffice. For regulatory support, documentation, verification, validation, sensitivity analysis, and uncertainty quantification become part of the model itself.
@@ -982,7 +1188,7 @@ Next, learn to use the objects:
   \qquad
   \pksym{MD}/\tau=\frac{C_{\pklab{target}}\pkCL}{\pkF}.
 \]
-Study multiple dosing, infusion, oral absorption, two-compartment kinetics, nonlinear elimination, special populations, TDM, and drug interactions. The guiding question is always: what would I change in the next regimen, and why?
+Study multiple dosing, infusion, oral absorption, two-compartment kinetics, nonlinear elimination, special populations, TDM, and drug interactions. The added PHC 608 packet makes this stage more mechanistic: structure-PK, complex absorption, CNS distribution, hepatic clearance, biliary excretion, \(\pkEHC\), reversible metabolism, PBPK, and protein/mAb PK all ask how the regimen should change when physiology or formulation is not adequately represented by a simple empirical curve. The guiding question is always: what would I change in the next regimen, and why?
 
 \subsection{PHC 609: build and criticize models}
 
@@ -998,7 +1204,7 @@ Finally, learn model-based pharmacology:
   \to
   \text{model criticism}.
 \]
-This includes numerical integration, fitting, nonlinear PK, PBPK, PopPK, NONMEM, Bayesian updating, TMDD, direct and indirect PD, exposure-response, and QSP. The goal is not complexity. The goal is choosing the simplest model that can support the decision without hiding the important uncertainty.
+This includes numerical integration, fitting, nonlinear PK, PBPK, PopPK, NONMEM, Bayesian updating, TMDD, direct and indirect PD, exposure-response, transduction, tolerance, circadian baselines, lifespan models, disease progression, categorical outcomes, animal scaling, and QSP. The goal is not complexity. The goal is choosing the simplest model that can support the decision without hiding the important uncertainty.
 
 \section{Worked Mini-Cases}
 
@@ -1045,7 +1251,7 @@ When reading the Buffalo materials, do not copy the order mechanically. Extract 
   \item the forward prediction equation,
   \item the decision or diagnostic enabled by the model.
 \end{enumerate}
-For absorption, the clinical question is exposure after extravascular dosing. For two-compartment models, it is early versus late disposition and tissue equilibration. For nonlinear PK, it is dose adjustment under capacity. For TMDD, it is target binding as both mechanism and disposition. For QSP, it is system-level prediction under feedback.
+For absorption, the clinical question is exposure after extravascular dosing. For two-compartment models, it is early versus late disposition and tissue equilibration. For \(\pkEHC\), it is whether an apparent elimination pathway returns drug on a clinically relevant time scale. For nonlinear PK, it is dose adjustment under capacity. For TMDD, it is target binding as both mechanism and disposition. For lifespan and disease-progression PD, it is whether the clock belongs to drug, biomarker turnover, cell turnover, or disease. For QSP, it is system-level prediction under feedback.
 
 \subsection{What to avoid}
 
@@ -1055,17 +1261,19 @@ Avoid treating headings as isolated facts. Absorption, distribution, elimination
 
 For each chapter, run this loop:
 \[
+  \begin{aligned}
   \text{story}
-  \to
+  &\to
   \text{mass balance}
   \to
-  \text{parameter meaning}
-  \to
+  \text{parameter meaning}\\
+  &\to
   \text{data model}
   \to
   \text{diagnostic}
   \to
   \text{decision}.
+  \end{aligned}
 \]
 If a topic cannot be placed on this loop, it is not yet understood.
 
@@ -1102,6 +1310,16 @@ C_{\pklab{inf}}(t)
 \end{aligned}
 \]
 
+\subsection{Complex absorption and reversible loops}
+
+\[
+\begin{aligned}
+\dot A_m&=k_{\pklab{tr}}(A_{m-1}-A_m),\\
+\dot A_c&=F\,k_{\pklab{tr}}A_n-\frac{\pkCL}{\pkV}A_c,\\
+\dot A_g&=k_{\pklab{bile}}A_c-k_{\pklab{reabs}}A_g-k_{\pklab{feces}}A_g.
+\end{aligned}
+\]
+
 \subsection{Organ clearance}
 
 \[
@@ -1121,7 +1339,9 @@ C_{\pklab{inf}}(t)
 -\frac{\pkVmax C}{\pkKm+C},\\
 E(C)&=E_0+\frac{\Emax C}{\pkECfifty+C},\\
 \frac{\dd C_e}{\dd t}&=k_{e0}(C_p-C_e),\\
-\frac{\dd R}{\dd t}&=k_{\pklab{in}}S(C)-k_{\pklab{out}}R.
+\frac{\dd R}{\dd t}&=k_{\pklab{in}}S(C)-k_{\pklab{out}}R,\\
+\dot R_m&=k_{\pklab{tr}}(R_{m-1}-R_m),\\
+k_{\pklab{in}}(t)&=\bar k_{\pklab{in}}\{1+a\cos(2\pi(t-\phi)/24)\}.
 \end{aligned}
 \]
 
@@ -1143,13 +1363,15 @@ The three-course sequence is one intellectual arc. PHC 607 teaches the grammar o
 
 The deepest unification is this:
 \[
+  \begin{aligned}
   \text{clinical pharmacology}
-  =
-  \text{mechanistic forward model}
-  +
-  \text{statistical observation model}
-  +
+  &=
+  \text{mechanistic forward model}\\
+  &\quad+
+  \text{statistical observation model}\\
+  &\quad+
   \text{decision under uncertainty}.
+  \end{aligned}
 \]
 Once this sentence is internalized, the topics stop feeling like a catalog. Clearance, volume, bioavailability, NCA, compartment models, TDM, special populations, biologics, TMDD, PBPK, PopPK, PD, and QSP become different ways of answering the same humane question: given what we know about this drug, this patient, this disease, and this evidence, what should we do next?
 

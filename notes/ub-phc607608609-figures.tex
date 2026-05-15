@@ -278,3 +278,86 @@
 \captionof{figure}{Three PD delay grammars. Direct effect, effect compartment, and turnover models answer different reasons why response and plasma concentration may disconnect.}
 \end{center}
 }
+
+\newcommand{\figureStructureAbsorptionMap}{
+\begin{center}
+\pkfitfigure{%
+\begin{tikzpicture}[font=\small, node distance=.85cm and 1.0cm]
+  \node[pkboxamber, minimum width=2.3cm] (mol) {molecular\\structure};
+  \node[pkbox, right=of mol, minimum width=2.35cm] (desc) {descriptors\\\(pK_a,\log P\)\\PSA, MW};
+  \node[pkboxgreen, right=of desc, minimum width=2.5cm] (hyp) {ADME\\hypotheses};
+  \node[pkboxred, right=of hyp, minimum width=2.45cm] (model) {PK model\\components};
+  \node[pkboxgreen, right=of model, minimum width=2.3cm] (data) {curve and\\decision};
+  \draw[pkarr] (mol) -- (desc);
+  \draw[pkarr] (desc) -- (hyp);
+  \draw[pkarr] (hyp) -- (model);
+  \draw[pkarr] (model) -- (data);
+  \node[pkboxamber, below=of hyp, minimum width=6.6cm] (examples) {solubility / dissolution \quad permeability / efflux \quad first pass \quad tissue partitioning};
+  \draw[pkdash] (examples) -- (hyp);
+\end{tikzpicture}%
+}
+\captionof{figure}{Structure-PK as hypothesis generation. Molecular descriptors do not replace clinical data; they propose where to look in absorption, distribution, metabolism, excretion, and tissue exposure.}
+\end{center}
+}
+
+\newcommand{\figureReversibleEhc}{
+\begin{center}
+\pkfitfigure{%
+\begin{tikzpicture}[font=\small, node distance=.85cm and 1.05cm]
+  \node[pkboxgreen, minimum width=2.05cm] (central) {central\\plasma};
+  \node[pkboxred, right=of central, minimum width=2.05cm] (liver) {liver};
+  \node[pkboxamber, right=of liver, minimum width=2.15cm] (bilegut) {bile / gut\\loop};
+  \node[pkboxgreen, below=of central, minimum width=2.05cm] (met) {metabolite};
+  \draw[pkarr] (central) -- node[above] {\(Q_H\)} (liver);
+  \draw[pkarr] (liver) -- node[above] {biliary} (bilegut);
+  \draw[pkarrgreen] (bilegut.south) to[out=-90,in=-90,looseness=1.15] node[pos=.5,below] {reabsorption} (central.south);
+  \draw[pkarrred] (bilegut.east) -- ++(.9,0) node[right] {fecal loss};
+  \draw[pkarr] (central) -- (met);
+  \draw[pkarrgreen] (met.west) to[out=180,in=-90,looseness=1.05] node[pos=.55,left] {reversible} (central.west);
+\end{tikzpicture}%
+}
+\captionof{figure}{Reversible systems and enterohepatic cycling. A secondary peak may be a real loop in the system, not merely noisy concentration data.}
+\end{center}
+}
+
+\newcommand{\figureAdvancedPdDelayLadder}{
+\begin{center}
+\pkfitfigure{%
+\begin{tikzpicture}[font=\scriptsize, node distance=.52cm and .55cm]
+  \node[pkbox, minimum width=1.55cm] (direct) {direct\\effect};
+  \node[pkboxgreen, right=of direct, minimum width=1.55cm] (bio) {biophase\\delay};
+  \node[pkboxamber, right=of bio, minimum width=1.7cm] (turnover) {turnover\\IRM};
+  \node[pkboxred, right=of turnover, minimum width=1.75cm] (trans) {transduction\\chain};
+  \node[pkboxgreen, right=of trans, minimum width=1.75cm] (life) {cell\\lifespan};
+  \node[pkboxamber, right=of life, minimum width=1.75cm] (disease) {disease\\progression};
+  \draw[pkarr] (direct) -- (bio);
+  \draw[pkarr] (bio) -- (turnover);
+  \draw[pkarr] (turnover) -- (trans);
+  \draw[pkarr] (trans) -- (life);
+  \draw[pkarr] (life) -- (disease);
+  \node[below=.65cm of turnover, align=center] {add delay only when a mechanism, diagnostic pattern, or decision needs it};
+\end{tikzpicture}%
+}
+\captionof{figure}{The PHC 609 delay ladder. Advanced PD is not one model class; it is a disciplined escalation from immediate effect to biophase, turnover, transduction, cell lifespan, and disease dynamics.}
+\end{center}
+}
+
+\newcommand{\figureQSPWorkflow}{
+\begin{center}
+\pkfitfigure{%
+\begin{tikzpicture}[font=\small, node distance=.75cm and .9cm]
+  \node[pkboxamber, minimum width=2.2cm] (q) {question\\of interest};
+  \node[pkbox, right=of q, minimum width=2.2cm] (rxn) {reaction\\network};
+  \node[pkboxgreen, right=of rxn, minimum width=2.2cm] (ode) {\(\dot x=Sv(x)\)\\or stochastic};
+  \node[pkbox, right=of ode, minimum width=2.2cm] (sim) {SBML /\\Tellurium};
+  \node[pkboxred, right=of sim, minimum width=2.2cm] (check) {sensitivity\\and checks};
+  \draw[pkarr] (q) -- (rxn);
+  \draw[pkarr] (rxn) -- (ode);
+  \draw[pkarr] (ode) -- (sim);
+  \draw[pkarr] (sim) -- (check);
+  \draw[pkdash] (check.south) to[out=-90,in=-90,looseness=1.15] node[pos=.5,below] {revise mechanism or decision} (q.south);
+\end{tikzpicture}%
+}
+\captionof{figure}{QSP implementation loop. A pathway diagram becomes useful when it is turned into equations, simulated reproducibly, stress-tested, and tied back to a decision.}
+\end{center}
+}
