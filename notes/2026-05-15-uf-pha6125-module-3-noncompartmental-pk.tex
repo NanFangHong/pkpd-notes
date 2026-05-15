@@ -758,7 +758,7 @@ The discipline is to interpret downstream \NCA{} parameters through upstream phy
   \Cmax,\Tmax &\leftarrow& \text{absorption rate, distribution, clearance, sampling design};\\
   \halfLife &\leftarrow& \CL \text{ and terminal volume};\\
   \Vz &\leftarrow& \CL \text{ and terminal slope};\\
-  \MRT &\leftarrow& residence in body plus input delay when extravascular.
+  \MRT &\leftarrow& \text{residence in body, plus input delay when extravascular.}
 \end{array}
 \]
 
@@ -1137,18 +1137,89 @@ Module 3 turns a concentration--time table into decision-ready pharmacokinetics.
 
 \subsection{Questions I should be able to answer}
 
-\begin{itemize}[leftmargin=2em]
-  \item Why is \AUC{} equal to \(D/\CL\) after \IV{} bolus dosing under linear elimination?
-  \item Which part of \AUC{} is numerical interpolation and which part is model-based extrapolation?
-  \item When should log trapezoidal interpolation be preferred over linear trapezoidal interpolation?
-  \item Why is terminal slope selection not a purely automatic problem?
-  \item Why can oral \NCA{} estimate \(\CLF\) but not \CL{} alone?
-  \item Why are \Cmax{} and \Tmax{} rate-related but not pure absorption parameters?
-  \item What does \(\%\pksym{AUC}_{\pklab{extra}}\) warn us about?
-  \item Why does \BE{} use geometric mean ratios and 90\% confidence intervals?
-  \item What assumptions make non-parametric superposition reasonable?
-  \item When should I stop using \NCA{} alone and move to a compartmental or population model?
-\end{itemize}
+\begin{enumerate}[leftmargin=2em]
+  \item \textbf{Why is \AUC{} equal to \(D/\CL\) after \IV{} bolus dosing under linear elimination?}
+
+  For an \IV{} bolus, the whole dose reaches the systemic circulation at time zero. Under linear elimination, clearance is constant: the instantaneous elimination rate is \(\CL C(t)\). Mass balance says that the dose must eventually leave the body through elimination:
+  \[
+    D
+    =
+    \int_0^\infty \CL C(t)\,\dd t
+    =
+    \CL\int_0^\infty C(t)\,\dd t
+    =
+    \CL\cdot\AUCinf.
+  \]
+  Therefore
+  \[
+    \AUCinf=\frac{D}{\CL}.
+  \]
+  This argument is not limited to a one-compartment model. It needs complete systemic input, linear time-invariant clearance, and a concentration measure that is proportional to the elimination-driving concentration.
+
+  \item \textbf{Which part of \AUC{} is numerical interpolation and which part is model-based extrapolation?}
+
+  \(\AUClast\) is numerical interpolation between observed data points. We do not know the true curve between \(t_i\) and \(t_{i+1}\), so we approximate the area by linear trapezoids, log trapezoids, or linear-up/log-down rules. By contrast,
+  \[
+    \pksym{AUC}_{\Tlast-\infty}=\frac{\Clast}{\lambdaZ}
+  \]
+  is model-based extrapolation. It assumes that after \(\Tlast\), the concentration declines mono-exponentially with terminal slope \(\lambdaZ\). Thus \(\AUCinf\) is a hybrid:
+  \[
+    \AUCinf
+    =
+    \underbrace{\AUClast}_{\text{data-driven numerical geometry}}
+    +
+    \underbrace{\Clast/\lambdaZ}_{\text{terminal exponential assumption}}.
+  \]
+
+  \item \textbf{When should log trapezoidal interpolation be preferred over linear trapezoidal interpolation?}
+
+  Log trapezoidal interpolation is preferred over clearly declining positive concentration intervals when the decline is approximately exponential. In that setting, the curve is closer to a straight line on the log-concentration scale than on the concentration scale, and the linear trapezoid tends to overestimate area because the chord sits above a convex exponential decline. It should not be used across rising intervals, zero values, negative baseline-corrected concentrations, or \BLQ{} values treated as zero. This is why many workflows use linear-up/log-down: linear during absorption or rising portions, log during post-peak decline.
+
+  \item \textbf{Why is terminal slope selection not a purely automatic problem?}
+
+  \(\lambdaZ\) is estimated from a chosen set of late points, but the computer does not know whether those points are truly terminal. A high \(R^2\) can be obtained from distribution-phase points, sparse noisy points, flip-flop absorption, enterohepatic recycling, assay artifacts, or a short late segment that looks straight by accident. Terminal selection therefore requires visual inspection, adjusted \(R^2\), residuals, number of points, time span, consistency with prior physiology, and sensitivity analysis. The question is not only ``which line fits best?'' but ``which line represents the elimination-dominant terminal process?''
+
+  \item \textbf{Why can oral \NCA{} estimate \(\CLF\) but not \CL{} alone?}
+
+  After oral or other extravascular dosing,
+  \[
+    \AUC_{\PO}=\frac{F D}{\CL}.
+  \]
+  Rearranging gives
+  \[
+    \frac{\CL}{F}=\frac{D}{\AUC_{\PO}},
+  \]
+  which is \(\CLF\) in the common \NCA{} notation. The data identify the ratio \(\CL/F\), not its two components. Low exposure could mean high systemic clearance, low bioavailability, incomplete absorption, gut degradation, intestinal metabolism, hepatic first pass, or some mixture. An \IV{} reference, mass-balance evidence, or mechanistic absorption model is needed to separate \(F\) from \CL{}.
+
+  \item \textbf{Why are \Cmax{} and \Tmax{} rate-related but not pure absorption parameters?}
+
+  \Cmax{} and \Tmax{} are read from the observed systemic concentration curve. They are influenced by absorption rate, but they are also shaped by distribution, clearance, dose, formulation, sampling schedule, and assay variability. A faster absorption process often increases \Cmax{} and shortens \Tmax{}, but a change in clearance or distribution can move the peak too. Therefore \Cmax{} and \Tmax{} are useful rate-sensitive summaries, not isolated measurements of the absorption rate constant.
+
+  \item \textbf{What does \(\%\pksym{AUC}_{\pklab{extra}}\) warn us about?}
+
+  \(\%\pksym{AUC}_{\pklab{extra}}\) measures how much of total exposure is inferred beyond the last measurable concentration:
+  \[
+    \%\pksym{AUC}_{\pklab{extra}}
+    =
+    100\cdot
+    \frac{\Clast/\lambdaZ}{\AUCinf}.
+  \]
+  A large value warns that \(\AUCinf\) depends heavily on the terminal slope assumption rather than observed data. It may indicate insufficient late sampling, an uncertain \(\lambdaZ\), a long half-life, inappropriate terminal-point selection, or a study design that cannot support reliable total exposure. In that situation, \AUClast{} may be more defensible than \AUCinf{} for some comparisons.
+
+  \item \textbf{Why does \BE{} use geometric mean ratios and 90\% confidence intervals?}
+
+  \AUC{} and \Cmax{} are positive, multiplicative, often right-skewed quantities, so \BE{} analysis usually works on the log scale. On the log scale, treatment differences become differences in means; after exponentiation, they become ratios of geometric means. This matches the scientific question: not whether test and reference differ by a fixed concentration amount, but whether exposure is acceptably close in relative terms.
+
+  The 90\% confidence interval comes from the two one-sided tests logic. To show average \BE{}, we need enough evidence that the test/reference ratio is not too low and not too high. For many products, this means the 90\% \CI{} for the geometric mean ratio lies within \(0.80\) to \(1.25\). The interval is stricter than simply asking whether the point estimate is near 1: both uncertainty and bias matter.
+
+  \item \textbf{What assumptions make non-parametric superposition reasonable?}
+
+  Non-parametric superposition treats the single-dose concentration profile as a response kernel and stacks shifted copies of it across repeated doses. This is reasonable when \PK{} is linear and time-invariant: dose proportionality holds, clearance and distribution do not change over time, absorption behavior is reproducible, and one dose does not alter the disposition of the next dose except through additive residual concentrations. It becomes fragile with saturable metabolism, autoinduction, enzyme inhibition, time-varying disease, formulation changes, nonlinear protein binding, target-mediated disposition, or circadian/input changes that make each dose behave differently.
+
+  \item \textbf{When should I stop using \NCA{} alone and move to a compartmental or population model?}
+
+  Stop using \NCA{} alone when the question needs a mechanism, prediction, covariate explanation, sparse-data borrowing, or simulation. Examples include optimizing untested dosing regimens, estimating individual exposure from sparse clinical samples, separating absorption from elimination, explaining food or formulation effects, modeling accumulation under nonlinear clearance, linking exposure to response, handling time-varying covariates, studying special populations, or making pediatric/renal/hepatic-impairment predictions. \NCA{} is excellent for summarizing observed curves; compartmental and population models are needed when we must explain the curve, borrow information across subjects, and predict outside the observed design.
+\end{enumerate}
 
 \bibliographystyle{plain}
 \bibliography{../refs/pharmacology}
